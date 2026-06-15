@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes — Karams CRM{% endblock %}
+{% block nav_clientes %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Clientes</h1>
+  <a href="{% url 'clientes:novo' %}" class="btn btn-primary">+ Novo Cliente</a>
+</div>
+
+<div class="crm-layout">
+  <aside class="crm-sidebar">
+    <form class="crm-search" method="get"
+          hx-get="{% url 'clientes:lista' %}"
+          hx-target="#lista-clientes"
+          hx-trigger="keyup changed delay:300ms from:#busca-input, change from:select"
+          hx-push-url="true">
+      <input type="search" id="busca-input" name="q" value="{{ busca }}"
+             class="form-input" placeholder="Buscar nome, cidade, telefone...">
+      <div class="crm-filters">
+        {% for val, label in categorias %}
+        <a href="?categoria={{ val }}{% if busca %}&q={{ busca }}{% endif %}"
+           class="filter-chip {% if categoria_atual == val %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      {% if user_is_admin and vendedores %}
+      <div style="padding:0 0 0.75rem;">
+        <select name="vendedor" class="form-input" style="font-size:0.8125rem;">
+          <option value="">Todos vendedores</option>
+          {% for v in vendedores %}
+          <option value="{{ v.pk }}" {% if vendedor_atual == v.pk|stringformat:"s" %}selected{% endif %}>
+            {{ v.get_full_name|default:v.username }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--text-muted);padding:0 0 0.5rem;">
+        <input type="checkbox" name="inativos" value="1" {% if inativos %}checked{% endif %}>
+        Mostrar inativos
+      </label>
+    </form>
+
+    <div id="lista-clientes">
+      {% include 'clientes/partials/lista_clientes.html' %}
+    </div>
+  </aside>
+
+  <section class="crm-detail">
+    {% if cliente_selecionado %}
+    <div class="crm-detail-header">
+      <div>
+        <h2 class="crm-detail-title">{{ cliente_selecionado.nome }}</h2>
+        <p style="color:var(--text-muted);font-size:0.8125rem;margin-top:0.25rem;">
+          {{ cliente_selecionado.cidade|default:"—" }}{% if cliente_selecionado.estado %}, {{ cliente_selecionado.estado }}{% endif %}
+        </p>
+      </div>
+      <div class="crm-detail-actions">
+        <span class="badge badge-{{ cliente_selecionado.categoria }}">{{ cliente_selecionado.get_categoria_display }}</span>
+        {% if not cliente_selecionado.ativo_no_sistema %}
+        <span class="badge" style="background:rgba(248,113,113,0.15);color:var(--danger);">Inativo</span>
+        {% endif %}
+        <a href="{% url 'clientes:editar' cliente_selecionado.pk %}" class="btn btn-primary">Editar</a>
+        {% if cliente_selecionado.ativo_no_sistema %}
+        <form method="post" action="{% url 'clientes:inativar' cliente_selecionado.pk %}"
+              onsubmit="return confirm('Inativar este cliente?');" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Inativar</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="crm-detail-grid">
+      <div class="crm-field">
+        <label>Telefone</label>
+        <span>{{ cliente_selecionado.telefone|default:"—" }}</span>
+      </div>
+      <div class="crm-field">
+        <label>Responsável</label>
+        <span>{{ cliente_selecionado.responsavel|default:"—" }}</span>
+      </div>
+      <div class="crm-field">
+        <label>Instagram</label>
+        <span>
+          {% if cliente_selecionado.instagram %}
+          <a href="{{ cliente_selecionado.instagram }}" target="_blank" rel="noopener" style="color:var(--primary-glow);">{{ cliente_selecionado.instagram }}</a>
+          {% else %}—{% endif %}
+        </span>
+      </div>
+      <div class="crm-field">
+        <label>Vendedor</label>
+        <span>{{ cliente_selecionado.vendedor.get_full_name|default:cliente_selecionado.vendedor.username }}</span>
+      </div>
+      <div class="crm-field full-width" style="grid-column:1/-1;">
+        <label>Endereço</label>
+        <span>{{ cliente_selecionado.endereco|default:"—"|linebreaksbr }}</span>
+      </div>
+      {% if cliente_selecionado.data_primeiro_contato %}
+      <div class="crm-field">
+        <label>Primeiro contato</label>
+        <span>{{ cliente_selecionado.data_primeiro_contato|date:"d/m/Y" }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if cliente_selecionado.produtos_exclusivos.exists %}
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="section-title">Produtos exclusivos</div>
+      <div class="produtos-chips">
+        {% for produto in cliente_selecionado.produtos_exclusivos.all %}
+        <span class="produto-chip">{{ produto.nome }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if cliente_selecionado.feedback_original %}
+    <div class="card">
+      <div class="section-title">Histórico original</div>
+      <p style="font-size:0.875rem;line-height:1.6;color:var(--text-muted);">{{ cliente_selecionado.feedback_original }}</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <p style="font-size:1rem;margin-bottom:0.5rem;">Selecione um cliente</p>
+      <p style="font-size:0.8125rem;">Escolha na lista ao lado ou cadastre um novo.</p>
+      <a href="{% url 'clientes:novo' %}" class="btn btn-primary" style="margin-top:1rem;">+ Novo Cliente</a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

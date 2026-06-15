@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
 {% block title %}Configurações — Karams CRM{% endblock %}
+{% block nav_perfil %}active{% endblock %}
 
 {% block content %}
-<main class="main-content">
-  <h1 class="font-display" style="font-size:1.75rem; margin-bottom:2rem;">Configurações</h1>
+<div class="main-content">
+  <h1 class="page-title font-display">Configurações</h1>
+  <p class="page-subtitle">Gerencie seu perfil e preferências</p>
 
   <div class="card">
     <div class="section-title">Perfil</div>
@@ -14,7 +16,7 @@
       <div class="form-group">
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% if field.errors %}<span style="color:#8B3030; font-size:0.75rem;">{{ field.errors.0 }}</span>{% endif %}
+        {% if field.errors %}<span style="color:var(--danger); font-size:0.75rem;">{{ field.errors.0 }}</span>{% endif %}
       </div>
       {% endfor %}
       <button type="submit" class="btn btn-primary">Salvar perfil</button>
@@ -29,11 +31,11 @@
       <div class="form-group">
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% if field.errors %}<span style="color:#8B3030; font-size:0.75rem;">{{ field.errors.0 }}</span>{% endif %}
+        {% if field.errors %}<span style="color:var(--danger); font-size:0.75rem;">{{ field.errors.0 }}</span>{% endif %}
       </div>
       {% endfor %}
       <button type="submit" class="btn btn-primary">Alterar senha</button>
     </form>
   </div>
-</main>
+</div>
 {% endblock %}

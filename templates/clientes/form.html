@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente — Karams CRM{% endblock %}
+{% block nav_clientes %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">{% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}</h1>
+  <a href="{% url 'clientes:lista' %}{% if object %}?id={{ object.pk }}{% endif %}" class="btn btn-secondary">Cancelar</a>
+</div>
+
+<div class="form-card">
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <ul class="messages">
+        {% for error in form.non_field_errors %}
+        <li class="message message-error">{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <div class="form-grid">
+        {% if user_is_admin %}
+        <div class="form-group">
+          <label class="form-label" for="{{ form.vendedor.id_for_label }}">Vendedor</label>
+          {{ form.vendedor }}
+        </div>
+        {% else %}
+        {{ form.vendedor }}
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.nome.id_for_label }}">Nome *</label>
+          {{ form.nome }}
+          {% if form.nome.errors %}<span style="color:var(--danger);font-size:0.75rem;">{{ form.nome.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.categoria.id_for_label }}">Categoria</label>
+          {{ form.categoria }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.cidade.id_for_label }}">Cidade</label>
+          {{ form.cidade }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.estado.id_for_label }}">UF</label>
+          {{ form.estado }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.telefone.id_for_label }}">Telefone</label>
+          {{ form.telefone }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.responsavel.id_for_label }}">Responsável</label>
+          {{ form.responsavel }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.instagram.id_for_label }}">Instagram</label>
+          {{ form.instagram }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.data_primeiro_contato.id_for_label }}">Data primeiro contato</label>
+          {{ form.data_primeiro_contato }}
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label" for="{{ form.endereco.id_for_label }}">Endereço</label>
+          {{ form.endereco }}
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label" for="{{ form.feedback_original.id_for_label }}">Observações / feedback</label>
+          {{ form.feedback_original }}
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Produtos exclusivos</label>
+          <div class="checkbox-group">
+            {% for checkbox in form.produtos_exclusivos %}
+            <label>{{ checkbox.tag }} {{ checkbox.choice_label }}</label>
+            {% empty %}
+            <span style="color:var(--text-muted);font-size:0.8125rem;">Nenhum produto cadastrado.</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if object %}
+        <div class="form-group full-width">
+          <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;cursor:pointer;">
+            {{ form.ativo_no_sistema }} Cliente ativo no sistema
+          </label>
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="margin-top:1.5rem;display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'clientes:lista' %}{% if object %}?id={{ object.pk }}{% endif %}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% if clientes %}
+<div class="list-count">{{ clientes|length }} cliente{{ clientes|length|pluralize:"s" }}</div>
+<ul class="client-list">
+  {% for cliente in clientes %}
+  <li>
+    <a href="{% url 'clientes:lista' %}?id={{ cliente.pk }}{% if busca %}&q={{ busca }}{% endif %}{% if categoria_atual != 'todos' %}&categoria={{ categoria_atual }}{% endif %}{% if inativos %}&inativos=1{% endif %}"
+       class="client-list-item {% if cliente_selecionado and cliente_selecionado.pk == cliente.pk %}active{% endif %}">
+      <div class="client-list-name">{{ cliente.nome }}</div>
+      <div class="client-list-meta">
+        {{ cliente.cidade|default:"—" }}{% if cliente.estado %}, {{ cliente.estado }}{% endif %}
+        · <span class="badge badge-{{ cliente.categoria }}">{{ cliente.get_categoria_display }}</span>
+      </div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state" style="min-height:200px;padding:2rem 1rem;">
+  <p>Nenhum cliente encontrado.</p>
+</div>
+{% endif %}

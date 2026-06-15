@@ -1,63 +1,128 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard — Karams CRM{% endblock %}
 {% block nav_dashboard %}active{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
-<main class="main-content">
-  <h1 class="font-display" style="font-size:1.75rem; margin-bottom:0.25rem;">Dashboard</h1>
-  <p style="color:var(--muted); margin-bottom:2rem;">
-    Bem-vindo(a), {{ user.get_full_name|default:user.username }} · {{ papel }}
-  </p>
-
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-label">Total de clientes</div>
-      <div class="kpi-value">{{ total_clientes }}</div>
+<section class="hero-banner">
+  <div class="hero-inner">
+    <div>
+      <h1 class="hero-title">Dashboard Overview</h1>
+      <p class="hero-subtitle">Bem-vindo(a), {{ user.get_full_name|default:user.username }} · {{ mes_label }}</p>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Ativos</div>
-      <div class="kpi-value">{{ clientes_ativos }}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Adormecidos</div>
-      <div class="kpi-value">{{ clientes_adormecidos }}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Prospecção</div>
-      <div class="kpi-value">{{ clientes_prospeccao }}</div>
-    </div>
-  </div>
-
-  {% if meta_mensal %}
-  <div class="card">
-    <div class="section-title">Meta do mês ({{ meta_mensal.mes }}/{{ meta_mensal.ano }})</div>
-    <div class="grid-2">
-      <div>
-        <strong>{{ meta_mensal.meta_contatos }}</strong> contatos
-        <span style="color:var(--muted); font-size:0.8125rem;">
-          (semanal: {{ meta_mensal.meta_semanal_contatos }})
-        </span>
+    <div class="hero-actions">
+      <div class="glass-input-wrap">
+        <svg class="glass-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" class="glass-input" placeholder="Buscar clientes..." disabled title="Disponível na Fase 2">
       </div>
-      <div>
-        <strong>R$ {{ meta_mensal.meta_vendas|floatformat:0 }}</strong> em vendas
+      <button class="icon-btn" title="Notificações" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="icon-btn-dot"></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="page-body">
+  <div class="kpi-row">
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Total de Clientes</span>
+        <span class="kpi-badge">{{ pct_ativos }}% ativos</span>
+      </div>
+      <div class="kpi-sparkline"><canvas id="sparkClientes"></canvas></div>
+      <div class="kpi-value-lg">{{ total_clientes }}</div>
+      <div class="kpi-value-sub">{{ clientes_ativos }} ativos · {{ clientes_prospeccao }} prospecção</div>
+    </div>
+
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Meta Contatos — {{ mes_label }}</span>
+        <span class="kpi-badge neutral">mensal</span>
+      </div>
+      <div class="kpi-sparkline"><canvas id="sparkContatos"></canvas></div>
+      <div class="kpi-value-lg">{% if meta_mensal %}{{ meta_mensal.meta_contatos }}{% else %}60{% endif %}</div>
+      <div class="kpi-value-sub">semanal: {% if meta_mensal %}{{ meta_mensal.meta_semanal_contatos }}{% else %}15{% endif %} contatos</div>
+    </div>
+
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Meta Vendas — {{ mes_label }}</span>
+        <span class="kpi-badge neutral">R$</span>
+      </div>
+      <div class="kpi-sparkline"><canvas id="sparkVendas"></canvas></div>
+      <div class="kpi-value-lg">{% if meta_mensal %}R$ {{ meta_mensal.meta_vendas|floatformat:0 }}{% else %}R$ 80.000{% endif %}</div>
+      <div class="kpi-value-sub">objetivo mensal da equipe</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Carteira por Categoria</span>
+        <div class="chart-tabs">
+          <button class="chart-tab active" type="button">Distribuição</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chartCategorias"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Clientes por UF</span>
+      </div>
+      <div class="chart-container chart-container-sm">
+        <canvas id="chartEstados"></canvas>
       </div>
     </div>
   </div>
-  {% endif %}
 
-  <div class="card">
-    <div class="section-title">Próximas fases</div>
-    <p style="font-size:0.875rem; line-height:1.6; color:var(--muted);">
-      Fase 1 concluída: autenticação, modelos, admin e deploy Railway.
-      As abas Clientes, Atividade Diária, Relacionamento, Comissões e Relatórios
-      serão habilitadas nas próximas fases.
-    </p>
-    {% if user_is_admin %}
-    <p style="margin-top:1rem;">
-      <a href="{% url 'admin:index' %}" class="btn btn-primary">Abrir Django Admin</a>
-    </p>
-    {% endif %}
+  <div class="table-card">
+    <div class="table-card-header">
+      <span class="table-card-title">Principais Clientes Ativos</span>
+      <span style="font-size:0.75rem;color:var(--text-muted);">{{ top_clientes|length }} exibidos</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Cidade</th>
+          <th>UF</th>
+          <th>Categoria</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cliente in top_clientes %}
+        <tr>
+          <td>{{ cliente.nome }}</td>
+          <td>{{ cliente.cidade|default:"—" }}</td>
+          <td>{{ cliente.estado|default:"—" }}</td>
+          <td><span class="badge badge-ativo">{{ cliente.get_categoria_display }}</span></td>
+          <td><span class="badge badge-ativo">Ativo</span></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center;color:var(--text-muted);">Nenhum cliente cadastrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-</main>
+</div>
+
+{{ chart_categorias|json_script:"chart-categorias-data" }}
+{{ chart_estados|json_script:"chart-estados-data" }}
+{{ sparkline_clientes|json_script:"spark-clientes-data" }}
+{{ sparkline_contatos|json_script:"spark-contatos-data" }}
+{{ sparkline_vendas|json_script:"spark-vendas-data" }}
+
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
