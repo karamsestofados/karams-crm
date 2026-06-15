@@ -100,12 +100,11 @@ web: gunicorn karams_crm.wsgi --log-file -
 
 ### 5. Primeiro acesso
 
-Abra a URL do Railway. Na primeira visita, o CRM exibe a **configuração inicial**:
+A cada deploy, o comando `preparar_senha_admin` invalida a senha do usuário `admin`.
 
-- Crie o usuário **administrador** com a senha que você escolher
-- Defina metas mensais da equipe
+Abra a URL do Railway — em vez do login, aparece a tela **Senha** + **Confirmar senha**. Após salvar, você entra direto no CRM.
 
-### 6. Dados opcionais (shell)
+Login normal depois: usuário `admin` + senha definida por você.
 
 ```bash
 python manage.py seed_usuarios

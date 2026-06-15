@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Configuração inicial — Karams CRM{% endblock %}
+{% block title %}Definir senha — Karams CRM{% endblock %}
 
 {% block body %}
 <div class="login-page">
-  <div class="login-card login-card-wide">
+  <div class="login-card">
     <img src="{% static 'img/logo-karams-white.png' %}" alt="Karams Estofados" class="logo-img-lg">
-    <h1 class="setup-title">Configuração inicial</h1>
-    <p class="login-subtitle">Crie o usuário administrador e defina as metas da equipe.</p>
+    <h1 class="setup-title">Senha do administrador</h1>
+    <p class="login-subtitle">Usuário: <strong>admin</strong> · defina a senha para acessar o CRM.</p>
 
     {% if form.non_field_errors %}
     <ul class="messages">
@@ -20,39 +20,17 @@
 
     <form method="post">
       {% csrf_token %}
-
-      <fieldset class="setup-fieldset">
-        <legend>Administrador</legend>
-        {% for field in form %}
-          {% if field.name in 'username first_name last_name email password1 password2' %}
-          <div class="form-group">
-            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <p class="field-error">{{ field.errors.0 }}</p>
-            {% endif %}
-          </div>
-          {% endif %}
-        {% endfor %}
-      </fieldset>
-
-      <fieldset class="setup-fieldset">
-        <legend>Metas da equipe (mês atual)</legend>
-        {% for field in form %}
-          {% if field.name in 'meta_contatos meta_vendas' %}
-          <div class="form-group">
-            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <p class="field-error">{{ field.errors.0 }}</p>
-            {% endif %}
-          </div>
-          {% endif %}
-        {% endfor %}
-      </fieldset>
-
-      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.75rem;">
-        Concluir configuração
+      {% for field in form %}
+      <div class="form-group">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <p class="field-error">{{ field.errors.0 }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">
+        Salvar senha e entrar
       </button>
     </form>
   </div>

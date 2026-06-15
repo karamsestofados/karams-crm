@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm
 from django.contrib.auth.password_validation import validate_password
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from .models import Tema, Usuario
@@ -44,53 +43,21 @@ class SenhaForm(PasswordChangeForm):
 
 
 class ConfiguracaoInicialForm(forms.Form):
-    username = forms.CharField(
-        label='Usuário administrador',
-        initial='admin',
-        max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-input', 'autofocus': True}),
-    )
-    first_name = forms.CharField(
-        label='Nome',
-        max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-input'}),
-    )
-    last_name = forms.CharField(
-        label='Sobrenome',
-        max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-input'}),
-    )
-    email = forms.EmailField(
-        label='E-mail',
-        widget=forms.EmailInput(attrs={'class': 'form-input'}),
-    )
     password1 = forms.CharField(
         label='Senha',
-        widget=forms.PasswordInput(attrs={'class': 'form-input'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Nova senha',
+            'autofocus': True,
+        }),
     )
     password2 = forms.CharField(
         label='Confirmar senha',
-        widget=forms.PasswordInput(attrs={'class': 'form-input'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Repita a senha',
+        }),
     )
-    meta_contatos = forms.IntegerField(
-        label='Meta mensal de contatos (equipe)',
-        initial=settings.METAS_PADRAO_CONTATOS,
-        min_value=1,
-        widget=forms.NumberInput(attrs={'class': 'form-input'}),
-    )
-    meta_vendas = forms.DecimalField(
-        label='Meta mensal de vendas R$ (equipe)',
-        initial=settings.METAS_PADRAO_VENDAS,
-        min_value=0,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01'}),
-    )
-
-    def clean_username(self):
-        username = self.cleaned_data['username'].strip()
-        if Usuario.objects.filter(username__iexact=username).exists():
-            raise forms.ValidationError('Este usuário já existe.')
-        return username
 
     def clean_password1(self):
         password = self.cleaned_data.get('password1')

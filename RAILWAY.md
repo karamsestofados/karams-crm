@@ -40,16 +40,18 @@ release: python manage.py migrate && python manage.py collectstatic --noinput
 web: gunicorn karams_crm.wsgi --log-file -
 ```
 
-## 6. Primeiro acesso (configuração inicial)
+## 6. Primeiro acesso (senha do admin)
 
-Após o deploy, abra a URL pública (`*.railway.app`).
+Após cada deploy, o Railway executa `preparar_senha_admin`, que **invalida a senha** do usuário `admin`.
 
-Na **primeira visita**, o sistema redireciona para **Configuração inicial**, onde você:
+Na próxima visita ao CRM, em vez do login, aparece a tela:
 
-1. Define o **usuário administrador** e a **senha** manualmente
-2. Informa nome, e-mail e **metas da equipe** do mês
+- **Senha**
+- **Confirmar senha**
 
-Depois disso, faça login normalmente. Essa tela só aparece enquanto não existir administrador no banco.
+Defina a senha e você entra direto no dashboard. No login seguinte, use `admin` + a senha que definiu.
+
+> Cada novo deploy exige definir a senha novamente (comportamento intencional).
 
 ## 7. Dados opcionais (Railway Shell)
 

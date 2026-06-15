@@ -1,3 +1,4 @@
+from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.views import LoginView as AuthLoginView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
@@ -8,7 +9,7 @@ from django.views.generic import UpdateView
 from .forms import ConfiguracaoInicialForm, KaramsLoginForm, PerfilForm, SenhaForm
 from .mixins import VendedorRequiredMixin
 from .models import Usuario
-from .setup import criar_admin_inicial, precisa_configuracao_inicial
+from .setup import definir_senha_admin, precisa_configuracao_inicial
 
 
 class LoginView(AuthLoginView):
@@ -54,20 +55,10 @@ def configuracao_inicial(request):
 
     form = ConfiguracaoInicialForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        criar_admin_inicial(
-            username=form.cleaned_data['username'],
-            password=form.cleaned_data['password1'],
-            email=form.cleaned_data['email'],
-            first_name=form.cleaned_data['first_name'],
-            last_name=form.cleaned_data['last_name'],
-            meta_contatos=form.cleaned_data['meta_contatos'],
-            meta_vendas=form.cleaned_data['meta_vendas'],
-        )
-        messages.success(
-            request,
-            'Administrador criado. Faça login com o usuário e a senha que você definiu.',
-        )
-        return redirect('accounts:login')
+        admin = definir_senha_admin(password=form.cleaned_data['password1'])
+        login(request, admin)
+        messages.success(request, 'Senha definida. Bem-vindo ao Karams CRM.')
+        return redirect('core:dashboard')
 
     return render(request, 'accounts/configuracao_inicial.html', {'form': form})
 
