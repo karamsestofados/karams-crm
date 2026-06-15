@@ -613,6 +613,40 @@ body {
   z-index: 1;
 }
 
+.login-card-wide {
+  max-width: 480px;
+}
+
+.setup-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  text-align: center;
+  margin: 0 0 0.35rem;
+  color: var(--text-primary);
+}
+
+.setup-fieldset {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem 0.25rem;
+  margin: 0 0 1rem;
+}
+
+.setup-fieldset legend {
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+}
+
+.field-error {
+  color: #f87171;
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0;
+}
+
 .logo-img-lg {
   height: 48px;
   width: auto;

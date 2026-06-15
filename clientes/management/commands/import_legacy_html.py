@@ -35,7 +35,7 @@ class Command(BaseCommand):
             self.stderr.write(
                 self.style.ERROR(
                     f'Vendedor "{options["vendedor"]}" não encontrado. '
-                    'Execute seed_usuarios primeiro.'
+                    'Execute seed_usuarios para criar o vendedor demo.'
                 )
             )
             return

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuração inicial — Karams CRM{% endblock %}
+
+{% block body %}
+<div class="login-page">
+  <div class="login-card login-card-wide">
+    <img src="{% static 'img/logo-karams-white.png' %}" alt="Karams Estofados" class="logo-img-lg">
+    <h1 class="setup-title">Configuração inicial</h1>
+    <p class="login-subtitle">Crie o usuário administrador e defina as metas da equipe.</p>
+
+    {% if form.non_field_errors %}
+    <ul class="messages">
+      {% for error in form.non_field_errors %}
+      <li class="message message-error">{{ error }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <fieldset class="setup-fieldset">
+        <legend>Administrador</legend>
+        {% for field in form %}
+          {% if field.name in 'username first_name last_name email password1 password2' %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="field-error">{{ field.errors.0 }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </fieldset>
+
+      <fieldset class="setup-fieldset">
+        <legend>Metas da equipe (mês atual)</legend>
+        {% for field in form %}
+          {% if field.name in 'meta_contatos meta_vendas' %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="field-error">{{ field.errors.0 }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.75rem;">
+        Concluir configuração
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

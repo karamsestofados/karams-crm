@@ -5,15 +5,21 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 
-from .forms import KaramsLoginForm, PerfilForm, SenhaForm
+from .forms import ConfiguracaoInicialForm, KaramsLoginForm, PerfilForm, SenhaForm
 from .mixins import VendedorRequiredMixin
 from .models import Usuario
+from .setup import criar_admin_inicial, precisa_configuracao_inicial
 
 
 class LoginView(AuthLoginView):
     template_name = 'accounts/login.html'
     authentication_form = KaramsLoginForm
     redirect_authenticated_user = True
+
+    def dispatch(self, request, *args, **kwargs):
+        if precisa_configuracao_inicial():
+            return redirect('accounts:configuracao_inicial')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy('core:dashboard')
@@ -40,6 +46,30 @@ class PerfilView(VendedorRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Perfil atualizado com sucesso.')
         return super().form_valid(form)
+
+
+def configuracao_inicial(request):
+    if not precisa_configuracao_inicial():
+        return redirect('accounts:login')
+
+    form = ConfiguracaoInicialForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        criar_admin_inicial(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1'],
+            email=form.cleaned_data['email'],
+            first_name=form.cleaned_data['first_name'],
+            last_name=form.cleaned_data['last_name'],
+            meta_contatos=form.cleaned_data['meta_contatos'],
+            meta_vendas=form.cleaned_data['meta_vendas'],
+        )
+        messages.success(
+            request,
+            'Administrador criado. Faça login com o usuário e a senha que você definiu.',
+        )
+        return redirect('accounts:login')
+
+    return render(request, 'accounts/configuracao_inicial.html', {'form': form})
 
 
 def alterar_senha(request):

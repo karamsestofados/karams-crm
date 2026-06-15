@@ -6,27 +6,25 @@ from comissoes.models import MetaMensal
 
 
 class Command(BaseCommand):
-    help = 'Cria usuários demo: admin + vendedor'
+    help = 'Cria usuário vendedor demo e metas (admin via /accounts/configuracao-inicial/)'
 
     def add_arguments(self, parser):
-        parser.add_argument('--force', action='store_true', help='Atualiza senhas se usuários existirem')
+        parser.add_argument('--force', action='store_true', help='Atualiza senha do vendedor se existir')
+        parser.add_argument(
+            '--com-admin',
+            action='store_true',
+            help='Cria admin com senha demo (apenas desenvolvimento local)',
+        )
 
     def handle(self, *args, **options):
         hoje = timezone.localdate()
-        usuarios = [
-            {
-                'username': 'admin',
-                'password': 'admin123',
-                'email': 'admin@karams.com.br',
-                'first_name': 'Admin',
-                'last_name': 'Karams',
-                'papel': Papel.ADMIN,
-                'is_staff': True,
-                'is_superuser': True,
-            },
-            {
-                'username': 'vendedor',
-                'password': 'vendedor123',
+
+        if options['com_admin']:
+            self._criar_admin_demo()
+
+        vendedor, created = Usuario.objects.get_or_create(
+            username='vendedor',
+            defaults={
                 'email': 'vendedor@karams.com.br',
                 'first_name': 'Vendedora',
                 'last_name': 'Karams',
@@ -34,24 +32,15 @@ class Command(BaseCommand):
                 'is_staff': False,
                 'is_superuser': False,
             },
-        ]
-
-        for dados in usuarios:
-            password = dados.pop('password')
-            username = dados['username']
-            user, created = Usuario.objects.get_or_create(
-                username=username,
-                defaults=dados,
-            )
-            if created or options['force']:
-                user.set_password(password)
-                for key, val in dados.items():
-                    setattr(user, key, val)
-                user.save()
-                status = 'criado' if created else 'atualizado'
-                self.stdout.write(self.style.SUCCESS(f'Usuário {username} {status}.'))
-            else:
-                self.stdout.write(f'Usuário {username} já existe (use --force para resetar).')
+        )
+        if created or options['force']:
+            vendedor.set_password('vendedor123')
+            vendedor.papel = Papel.VENDEDOR
+            vendedor.save()
+            status = 'criado' if created else 'atualizado'
+            self.stdout.write(self.style.SUCCESS(f'Vendedor {vendedor.username} {status}.'))
+        else:
+            self.stdout.write(f'Vendedor {vendedor.username} já existe (use --force para resetar).')
 
         MetaMensal.objects.get_or_create(
             vendedor=None,
@@ -59,4 +48,24 @@ class Command(BaseCommand):
             ano=hoje.year,
             defaults={'meta_contatos': 60, 'meta_vendas': 80000},
         )
-        self.stdout.write(self.style.SUCCESS('Metas da equipe configuradas.'))
+        self.stdout.write(self.style.SUCCESS('Metas da equipe configuradas (se ainda não existirem).'))
+
+    def _criar_admin_demo(self):
+        admin, created = Usuario.objects.get_or_create(
+            username='admin',
+            defaults={
+                'email': 'admin@karams.com.br',
+                'first_name': 'Admin',
+                'last_name': 'Karams',
+                'papel': Papel.ADMIN,
+                'is_staff': True,
+                'is_superuser': True,
+            },
+        )
+        admin.set_password('admin123')
+        admin.papel = Papel.ADMIN
+        admin.is_staff = True
+        admin.is_superuser = True
+        admin.save()
+        status = 'criado' if created else 'atualizado'
+        self.stdout.write(self.style.WARNING(f'Admin demo {status} (admin / admin123). Use só em dev local.'))

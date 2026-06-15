@@ -42,19 +42,24 @@ copy .env.example .env
 # Migrar banco
 python manage.py migrate
 
-# Criar usuários demo (admin + vendedor)
-python manage.py seed_usuarios
+# Primeiro acesso: abra http://127.0.0.1:8000/ e conclua a configuração inicial
+# (usuário admin + senha definidos manualmente)
 
-# Importar clientes do HTML legado
+# Opcional — vendedor demo + import legado
+python manage.py seed_usuarios
 python manage.py import_legacy_html
 
 # Rodar servidor
 python manage.py runserver
 ```
 
-**Credenciais demo:**
-- Admin: `admin` / `admin123`
-- Vendedor: `vendedor` / `vendedor123`
+**Desenvolvimento local (opcional):** para pular a configuração inicial e usar admin demo:
+
+```bash
+python manage.py seed_usuarios --com-admin
+```
+
+Credenciais demo com `--com-admin`: `admin` / `admin123` · vendedor: `vendedor` / `vendedor123`
 
 ## Deploy no Railway — projeto "CRM Karams"
 
@@ -93,20 +98,21 @@ release: python manage.py migrate && python manage.py collectstatic --noinput
 web: gunicorn karams_crm.wsgi --log-file -
 ```
 
-### 5. Pós-deploy
+### 5. Primeiro acesso
 
-No shell do Railway:
+Abra a URL do Railway. Na primeira visita, o CRM exibe a **configuração inicial**:
+
+- Crie o usuário **administrador** com a senha que você escolher
+- Defina metas mensais da equipe
+
+### 6. Dados opcionais (shell)
 
 ```bash
 python manage.py seed_usuarios
 python manage.py import_legacy_html
 ```
 
-Ou crie superusuário manualmente:
-
-```bash
-python manage.py createsuperuser
-```
+O comando `seed_usuarios` cria apenas o vendedor demo. **Não** cria admin em produção.
 
 ## Estrutura de apps
 
