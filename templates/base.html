@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ user_tema|default:'claro' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Karams CRM{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/karams.css' %}">
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% block body %}
+  <header class="site-header">
+    <a href="{% url 'core:dashboard' %}" class="logo">
+      <img src="{% static 'img/logo-karams-branco.png' %}" alt="Karams Estofados" class="logo-img">
+    </a>
+    <div class="header-actions">
+      {% if user.is_authenticated %}
+        <span style="color: rgba(255,255,255,0.9); font-size: 0.8125rem;">
+          {{ user.get_full_name|default:user.username }}
+          {% if user_is_admin %}<span class="badge badge-admin">Admin</span>{% endif %}
+        </span>
+        <a href="{% url 'accounts:perfil' %}">Configurações</a>
+        {% if user_is_admin %}<a href="{% url 'admin:index' %}">Admin</a>{% endif %}
+        <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">Sair</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if user.is_authenticated %}
+  <nav class="nav-tabs">
+    <a href="{% url 'core:dashboard' %}" class="nav-tab {% block nav_dashboard %}{% endblock %}">Dashboard</a>
+    <a href="#" class="nav-tab disabled" title="Fase 2">Clientes</a>
+    <a href="#" class="nav-tab disabled" title="Fase 3">Atividade Diária</a>
+    <a href="#" class="nav-tab disabled" title="Fase 4">Relacionamento</a>
+    <a href="#" class="nav-tab disabled" title="Fase 5">Comissões</a>
+    <a href="#" class="nav-tab disabled" title="Fase 5">Relatórios</a>
+  </nav>
+  {% endif %}
+
+  {% if messages %}
+  <div class="main-content" style="padding-bottom: 0;">
+    <ul class="messages">
+      {% for message in messages %}
+      <li class="message message-{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+  {% endblock %}
+</body>
+</html>

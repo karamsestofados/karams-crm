@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karams · CRM de Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #4A6FA5; --gold-light: #A8C0D6; --dark: #1C2B3A; --dark2: #243447;
+    --dark3: #2E4057; --cream: #F4F6F8; --cream2: #E2E8EE; --text: #1E2D3D;
+    --muted: #6B7F96; --success: #4A7C59; --warning: #D4882A; --info: #2C6F9A;
+    --danger: #2E5D8A; --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--dark); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--gold); }
+  .logo { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 22px; letter-spacing: 3px; text-transform: uppercase; }
+  .logo span { color: var(--cream); font-size: 13px; font-family: 'DM Sans', sans-serif; display: block; letter-spacing: 2px; margin-top: -2px; font-weight: 300; }
+
+  /* NAV TABS */
+  .nav-tabs { background: var(--dark2); display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid var(--dark3); }
+  .nav-tab { padding: 14px 24px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.5px; }
+  .nav-tab:hover { color: var(--gold-light); }
+  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* STATS BAR */
+  .stats-bar { background: var(--dark2); display: flex; padding: 0 32px; border-bottom: 1px solid var(--dark3); }
+  .stat-item { padding: 14px 28px; border-right: 1px solid var(--dark3); cursor: pointer; transition: background 0.2s; }
+  .stat-item:hover, .stat-item.active { background: var(--dark3); }
+  .stat-item.active { border-bottom: 2px solid var(--gold); }
+  .stat-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { color: var(--gold); font-size: 22px; font-weight: 600; font-family: 'Playfair Display', serif; }
+  .stat-sub { color: #888; font-size: 11px; margin-top: 1px; }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: flex; height: calc(100vh - 104px); }
+  #page-dashboard { display: none; flex-direction: column; overflow-y: auto; padding: 28px 32px; gap: 20px; }
+  #page-dashboard.active { display: flex; height: calc(100vh - 104px); }
+
+  /* SIDEBAR */
+  .sidebar { width: 340px; min-width: 280px; background: white; border-right: 1px solid var(--cream2); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-search { padding: 16px; border-bottom: 1px solid var(--cream2); background: var(--cream); }
+  .sidebar-search input { width: 100%; padding: 10px 14px; border: 1px solid var(--cream2); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; background: white; outline: none; }
+  .sidebar-search input:focus { border-color: var(--gold); }
+  .client-list { flex: 1; overflow-y: auto; }
+  .client-list::-webkit-scrollbar { width: 4px; }
+  .client-list::-webkit-scrollbar-thumb { background: var(--cream2); border-radius: 4px; }
+  .client-item { padding: 14px 16px; border-bottom: 1px solid var(--cream2); cursor: pointer; transition: background 0.15s; position: relative; }
+  .client-item:hover { background: var(--cream); }
+  .client-item.active { background: #F0F5FA; border-left: 3px solid var(--gold); }
+  .client-name { font-weight: 600; font-size: 13px; color: var(--text); line-height: 1.3; padding-right: 70px; }
+  .client-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .client-badge { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+  .badge-ativo { background: #EAF4F0; color: var(--success); }
+  .badge-adormecido { background: #FFF4E6; color: var(--warning); }
+  .badge-prospecto { background: #EAF0FA; color: var(--info); }
+
+  /* DETAIL PANEL */
+  .detail-panel { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--cream); }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--cream2); border-radius: 4px; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); gap: 12px; }
+  .empty-state svg { opacity: 0.3; }
+
+  /* CARDS */
+  .section-card { background: white; border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; border: 1px solid var(--cream2); }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--cream2); }
+  .detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; }
+  .detail-title { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); line-height: 1.2; }
+  .detail-city { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* PRODUTOS */
+  .produtos-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .produto-chip { background: var(--dark); color: var(--gold-light); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .produto-chip.novo { background: var(--gold); color: var(--dark); }
+
+  /* INFO GRID */
+  .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .info-item label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .info-item value { display: block; font-size: 13px; color: var(--text); font-weight: 500; }
+
+  /* HISTÓRICO */
+  .historico-lista { display: flex; flex-direction: column; gap: 10px; }
+  .historico-item { display: flex; gap: 12px; align-items: flex-start; }
+  .historico-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 5px; flex-shrink: 0; }
+  .historico-texto { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .historico-data { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* FORM */
+  .form-nova-venda { background: #F8FAFC; border: 1px solid var(--gold-light); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
+  .form-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--gold); margin-bottom: 16px; }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+  .form-row input, .form-row textarea, .form-row select { width: 100%; padding: 10px 13px; border: 1px solid var(--cream2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: white; outline: none; color: var(--text); transition: border-color 0.2s; }
+  .form-row input:focus, .form-row textarea:focus, .form-row select:focus { border-color: var(--gold); }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .novo-produto-input { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  .novo-produto-input input { flex: 1; padding: 8px 12px; border: 1px solid var(--cream2); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+  .novo-produto-input input:focus { border-color: var(--gold); }
+  .novo-produto-input button { padding: 8px 14px; background: var(--gold); color: var(--dark); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; font-family: 'DM Sans', sans-serif; }
+
+  /* BUTTONS */
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+  .btn-primary { background: var(--gold); color: var(--dark); }
+  .btn-primary:hover { background: #3A5F95; }
+  .btn-secondary { background: var(--cream2); color: var(--text); margin-left: 8px; }
+  .btn-secondary:hover { background: #D8CDB8; }
+  .tag-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .no-results { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+  a.insta-link { color: var(--info); text-decoration: none; font-size: 13px; }
+  a.insta-link:hover { text-decoration: underline; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--dark); color: var(--gold-light); padding: 14px 24px; border-radius: var(--radius); font-size: 14px; border-left: 3px solid var(--gold); z-index: 999; animation: slideIn 0.3s ease; display: none; }
+  @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* ── DASHBOARD ── */
+  .dash-row { display: grid; gap: 16px; }
+  .dash-row-2 { grid-template-columns: 1fr 1fr; }
+  .dash-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .dash-row-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .dash-card { background: white; border-radius: var(--radius); padding: 22px 24px; border: 1px solid var(--cream2); }
+  .dash-card-dark { background: var(--dark); border-color: var(--dark3); }
+
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
+  .kpi-label-light { color: #5A7A96; }
+  .kpi-value { font-family: 'Playfair Display', serif; font-size: 36px; color: var(--text); line-height: 1; }
+  .kpi-value-gold { color: var(--gold); }
+  .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .kpi-sub-light { color: #4A6A86; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-top: 12px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .progress-track { height: 8px; background: var(--cream2); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; background: var(--gold); transition: width 0.6s ease; }
+  .progress-fill.green { background: var(--success); }
+  .progress-fill.over { background: #4A6FA5; }
+
+  /* SEMANA DIAS */
+  .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .day-box { background: var(--cream); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid var(--cream2); cursor: pointer; transition: all 0.2s; position: relative; }
+  .day-box:hover { border-color: var(--gold); }
+  .day-box.today { border-color: var(--gold); background: #F5F8FC; }
+  .day-box.has-data { background: #EBF5FF; border-color: #90BAD4; }
+  .day-name { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+  .day-num { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
+  .day-count { font-size: 11px; color: var(--success); font-weight: 600; margin-top: 4px; }
+  .day-count.zero { color: var(--muted); }
+
+  /* LISTA SEMANAL */
+  .weekly-contact-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream2); }
+  .weekly-contact-item:last-child { border-bottom: none; }
+  .wci-date { font-size: 11px; color: var(--muted); min-width: 70px; }
+  .wci-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .wci-type { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
+  .wci-result { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
+
+  /* RESULTADO BADGES */
+  .res-venda { background: #EAF4F0; color: var(--success); }
+  .res-contato { background: #EAF0FA; color: var(--info); }
+  .res-sem-resposta { background: #FFF4E6; color: var(--warning); }
+  .res-retorno { background: #EEF0FA; color: #7A3A9A; }
+  .res-proposta { background: #EDF4FF; color: #8A7020; }
+  .res-obs { background: var(--cream2); color: var(--muted); }
+
+  /* META ANEIS */
+  .ring-wrap { display: flex; align-items: center; gap: 20px; }
+  .ring-svg { flex-shrink: 0; }
+  .ring-info { flex: 1; }
+  .ring-pct { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); }
+  .ring-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* SEMANA NAV */
+  .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .week-nav button { background: var(--cream2); border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; }
+  .week-nav button:hover { background: var(--gold); color: var(--dark); }
+  .week-nav span { font-weight: 600; font-size: 14px; color: var(--text); }
+
+  /* RESULTADO SELECTOR */
+  .result-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .result-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; opacity: 0.6; }
+  .result-chip.selected { opacity: 1; border-color: var(--dark); }
+
+  /* METAS CONFIG */
+  .meta-config-btn { background: none; border: 1px dashed var(--gold); color: var(--gold); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; }
+  .meta-config-btn:hover { background: #F0F5FA; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 28px; width: 400px; border-top: 3px solid var(--gold); }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">KARAMS <span>Estofados de Alto Padrão · CRM de Vendas</span></div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <button class="meta-config-btn" onclick="abrirModalNovoCliente()" style="background:var(--gold);color:white;border:1px solid var(--gold);">+ Novo Cliente</button>
+    <button class="meta-config-btn" onclick="abrirModoVisualizacao()">👁 Compartilhar</button>
+    <button class="meta-config-btn" onclick="abrirModalMetas()">⚙ Metas</button>
+    <div style="color:var(--muted);font-size:12px;" id="headerDate"></div>
+  </div>
+</header>
+
+<!-- NAV -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="trocarPagina('crm',this)">📋 Clientes</div>
+  <div class="nav-tab" onclick="trocarPagina('dashboard',this)">📊 Dashboard Semanal</div>
+  <div class="nav-tab" onclick="trocarPagina('calendario',this)">📅 Relacionamento Mensal</div>
+  <div class="nav-tab" onclick="trocarPagina('comissoes',this)">💰 Comissões</div>
+</div>
+
+<!-- ═══════════════ PÁGINA CRM ═══════════════ -->
+<div id="page-crm" class="page active">
+  <div class="sidebar">
+    <div class="sidebar-search" style="display:flex;flex-direction:column;gap:8px;">
+      <input type="text" id="searchInput" placeholder="🔍  Buscar cliente ou cidade..." oninput="filtrarClientes()">
+      <div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--muted);align-self:center;">Filtro:</span>
+        <button onclick="setFiltro('todos',this)" class="fbtn active">Todos</button>
+        <button onclick="setFiltro('ativo',this)" class="fbtn">Ativos</button>
+        <button onclick="setFiltro('adormecido',this)" class="fbtn">Adorm.</button>
+        <button onclick="setFiltro('prospecto',this)" class="fbtn">Prosp.</button>
+      </div>
+    </div>
+    <div class="client-list" id="clientList"></div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="empty-state">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>Selecione um cliente para ver os detalhes</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PÁGINA DASHBOARD ═══════════════ -->
+<div id="page-dashboard" class="page">
+
+  <!-- ── BLOCO SUPERIOR: METAS DO MÊS ── -->
+  <div style="background:var(--dark);border-radius:var(--radius);padding:24px 28px;border:1px solid var(--dark3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:18px;">Metas do Mês — <span id="mes-label"></span></div>
+      <button class="meta-config-btn" onclick="abrirModalMetas()" style="font-size:12px;">⚙ Ajustar Metas</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px;">
+
+      <!-- KPI contatos -->
+      <div>
+        <div style="color:#5A7A96;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Contatos Realizados</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span style="font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);" id="kpi-contatos-mes">0</span>
+          <span style="color:#4A6A86;font-size:13px;" id="kpi-contatos-sub">/ 60</span>
+        </div>
+        <div style="height:6px;background:#2E4057;border-radius:3px;margin-top:8px;overflow:hidden;">
+          <div id="prog-contatos" style="height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width .6s;"></div>
+        </div>
+        <div style="color:#4A6A86;font-size:11px;margin-top:4px;" id="meta-c-rest"></div>
+      </div>
+
+      <!-- KPI vendas R$ -->
+      <div>
+        <div style="color:#5A7A96;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Vendas no Mês</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span style="font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);" id="kpi-vendas-mes">R$ 0</span>
+        </div>
+        <div style="color:#4A6A86;font-size:11px;margin-top:2px;" id="kpi-vendas-sub">meta: R$ 80.000</div>
+        <div style="height:6px;background:#2E4057;border-radius:3px;margin-top:8px;overflow:hidden;">
+          <div id="prog-vendas" style="height:100%;background:#3A8C6A;border-radius:3px;width:0%;transition:width .6s;"></div>
+        </div>
+        <div style="color:#4A6A86;font-size:11px;margin-top:4px;" id="meta-v-rest"></div>
+      </div>
+
+      <!-- KPI semana -->
+      <div>
+        <div style="color:#5A7A96;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Contatos Esta Semana</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span style="font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);" id="kpi-contatos-semana">0</span>
+          <span style="color:#4A6A86;font-size:13px;" id="prog-sem-label">/ 15</span>
+        </div>
+        <div style="height:6px;background:#2E4057;border-radius:3px;margin-top:8px;overflow:hidden;">
+          <div id="prog-semana" style="height:100%;background:var(--gold);border-radius:3px;width:0%;transition:width .6s;"></div>
+        </div>
+        <div style="color:#4A6A86;font-size:11px;margin-top:4px;" id="ritmo-necessario"></div>
+      </div>
+
+      <!-- KPI dias úteis -->
+      <div>
+        <div style="color:#5A7A96;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Dias Úteis Restantes</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);" id="dias-uteis">—</div>
+        <div style="color:#4A6A86;font-size:11px;margin-top:6px;">Vendas fechadas: <strong style="color:var(--gold-light);" id="kpi-vendas-count">0</strong> pedidos</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;" id="kpi-resultado-mini"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BLOCO CENTRAL: ABAS DOS DIAS DA SEMANA ── -->
+  <div style="background:white;border-radius:var(--radius);border:1px solid var(--cream2);overflow:hidden;">
+
+    <!-- Cabeçalho navegação semana -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--cream2);background:var(--cream);">
+      <div style="font-weight:600;font-size:14px;">📅 Agenda Semanal de Contatos</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="semanaAnterior()" style="background:white;border:1px solid var(--cream2);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;">◀</button>
+        <span style="font-size:13px;font-weight:600;color:var(--text);" id="week-label"></span>
+        <button onclick="proximaSemana()" style="background:white;border:1px solid var(--cream2);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;">▶</button>
+      </div>
+    </div>
+
+    <!-- Abas dos dias -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);border-bottom:2px solid var(--cream2);" id="dayTabs"></div>
+
+    <!-- Painel do dia selecionado -->
+    <div style="display:grid;grid-template-columns:1fr 340px;min-height:400px;">
+
+      <!-- Esquerda: lista de contatos do dia -->
+      <div style="padding:20px;border-right:1px solid var(--cream2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;" id="dia-titulo">Selecione um dia</div>
+          <select id="filtro-resultado" onchange="renderizarListaDia()" style="font-size:12px;padding:5px 8px;border:1px solid var(--cream2);border-radius:6px;font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="">Todos os resultados</option>
+            <option value="contato">📞 Contato</option>
+            <option value="venda">💰 Venda</option>
+            <option value="sem-resposta">🔕 Sem resposta</option>
+            <option value="retorno">🔄 Retorno</option>
+            <option value="proposta">📋 Proposta</option>
+          </select>
+        </div>
+        <div id="listaDia" style="max-height:340px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Direita: formulário de novo contato -->
+      <div style="padding:20px;background:#F8FAFC;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);margin-bottom:14px;">✦ Registrar Contato</div>
+
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:600;">Cliente</label>
+          <input type="text" id="rq-cliente" placeholder="Nome do cliente..." list="lista-clientes-rq"
+            style="width:100%;padding:9px 12px;border:1px solid var(--cream2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+          <datalist id="lista-clientes-rq"></datalist>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:600;">Data</label>
+          <input type="date" id="rq-data"
+            style="width:100%;padding:9px 12px;border:1px solid var(--cream2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;font-weight:600;">Resultado</label>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <span class="result-chip res-contato selected" data-val="contato" onclick="selecionarResultado(this)">📞 Contato realizado</span>
+            <span class="result-chip res-venda" data-val="venda" onclick="selecionarResultado(this)">💰 Venda fechada</span>
+            <span class="result-chip res-sem-resposta" data-val="sem-resposta" onclick="selecionarResultado(this)">🔕 Sem resposta</span>
+            <span class="result-chip res-retorno" data-val="retorno" onclick="selecionarResultado(this)">🔄 Retorno do cliente</span>
+            <span class="result-chip res-proposta" data-val="proposta" onclick="selecionarResultado(this)">📋 Proposta enviada</span>
+          </div>
+        </div>
+
+        <div id="campo-valor-wrap" style="display:none;margin-bottom:12px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:600;">Valor da Venda (R$)</label>
+          <input type="number" id="rq-valor" placeholder="0,00" min="0"
+            style="width:100%;padding:9px 12px;border:1px solid var(--cream2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;font-weight:600;">Observação</label>
+          <textarea id="rq-obs" placeholder="O que foi tratado..." rows="3"
+            style="width:100%;padding:9px 12px;border:1px solid var(--cream2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" style="width:100%;" onclick="salvarContatoRapido()">✦ Salvar Contato</button>
+          <button class="btn btn-secondary" style="width:100%;margin:0;" onclick="limparRapido()">Limpar</button>
+        </div>
+      </div><!-- /form direita -->
+
+    </div><!-- /grid dia -->
+  </div><!-- /bloco semana -->
+
+</div><!-- /page-dashboard -->
+
+<!-- MODAL METAS -->
+<div class="modal-overlay" id="modalMetas">
+  <div class="modal">
+    <h3>⚙ Configurar Metas</h3>
+    <div class="form-row">
+      <label>Meta de Contatos por Mês</label>
+      <input type="number" id="cfg-meta-contatos" value="60" min="1">
+    </div>
+    <div class="form-row">
+      <label>Meta de Vendas Mensais (R$)</label>
+      <input type="number" id="cfg-meta-vendas" value="80000" min="0">
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+      <button class="btn btn-secondary" onclick="fecharModalMetas()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarMetas()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<style>
+  .fbtn { font-size:11px; padding:4px 10px; border-radius:6px; border:1px solid var(--cream2); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; color:var(--muted); transition:all 0.15s; }
+  .fbtn.active { background:var(--dark); color:var(--gold); border-color:var(--dark); }
+  .fbtn:hover:not(.active) { background:var(--cream2); }
+</style>
+
+<script>
+// ══════════════════════════════════════════════
+// DADOS BASE
+// ══════════════════════════════════════════════
+const DADOS_INICIAIS = {
+  ativos: [
+    {id:'a1',cliente:'DUBAMBU COMERCIAL',cidade:'JUIZ DE FORA',estado:'MG',modelos:'YUMI-MALTA-VELVET-GROU-CAMALEÃO-MASIP-ALMA-GEMA-VUOTO-AFFAIR-MATSU-BOLD-GIOTTO-MORONE-DONCELLA-DAYBED-BEA-NEMO-BOJO-KATANA-EQUILIBRIO',endereco:'Av. Deusdedith Salgado, 1551 - Teixeiras, Juiz de Fora'},
+    {id:'a2',cliente:'ESSENCIAL DECORAÇÃO',cidade:'IPATINGA',estado:'MG',modelos:'YUMI-GEMA-AKIRA-MATSU-BOLD-KIMI-KATANA-GORDON-POL. NUBIA-LUZ-BEA-VOLO-PO.TORINO CAMA TORINO',endereco:'Av. Carlos Chagas, 625 - Cidade Nobre, Ipatinga'},
+    {id:'a3',cliente:'VITORIA MOVEIS',cidade:'IGARAPÉ',estado:'MG',modelos:'ALMA-MOVE-DREAM LIVING-KIMI-KATANA-POL.NUBIA',endereco:'Av. Raja Gabáglia 3117, São Bento, Belo Horizonte'},
+    {id:'a4',cliente:'CAPOBIANGO MOVEIS',cidade:'BELO HORIZONTE',estado:'MG',modelos:'',endereco:'Ponteio Lar Shopping, BR 356-2500, Santa Lúcia - loja 106/107'},
+    {id:'a5',cliente:'BARROCA INTERIORES - NEVES COMERCIAL',cidade:'BELO HORIZONTE',estado:'MG',modelos:'POLTRONA SYRAH-BLADE-MATTEO-KIMI-TORD-SYRAH-DONCELLA-NUBIA',endereco:'Av. Amazonas 3802, Belo Horizonte'},
+    {id:'a6',cliente:'TT HOME ARTIGOS PARA DECORAÇÃO',cidade:'MONTES CLAROS',estado:'MG',modelos:'YUMI-KAZUMI-GEMA-FLUF-MOCHI-MASIP',endereco:'Av. Dep. Esteves Rodrigues, 884 - Centro, Montes Claros - MG'},
+    {id:'a7',cliente:'DECOREBEM',cidade:'MONTES CLAROS',estado:'MG',modelos:'GARZON-MASIP-ALMA-VUOTO-GORDON-MORONE-LUZ-NUBE-TOAD',endereco:'Av. Dep. Esteves Rodrigues, 326 - Centro, Montes Claros - MG'},
+    {id:'a8',cliente:'CASA MOLDE',cidade:'ITAPECERICA',estado:'MG',modelos:'URUPE-NUBIA',endereco:'Rua Vigário Antunes, 244 - Itapecerica, MG'},
+    {id:'a9',cliente:'MCM MOVEIS',cidade:'PIRAPORA',estado:'MG',modelos:'LITTLE-PICASSO-MIOLO-WALL-VIDA-KATANA-GIOTTO',endereco:'Praça Coronel Ramos'},
+    {id:'a10',cliente:'NUHAUS - TERCEIRO MILENIO',cidade:'BELO HORIZONTE',estado:'MG',modelos:'FLUF-POLT. NUBIA-SUGOI-LEDA',endereco:'Av. do Contorno, 4480, Belo Horizonte'},
+    {id:'a11',cliente:'ADF DE SOUZA EIRELI',cidade:'BELO HORIZONTE',estado:'MG',modelos:'PUNCH-FLUF',endereco:''},
+    {id:'a12',cliente:'SANTA MOBILIARIO / MOVELARIA OLGA / TEMPLUM',cidade:'BELO HORIZONTE',estado:'MG',modelos:'MATSU-KIMI-ANKUR-EGON-TAIKO-SAMA-GROU ESPECIAL-SAINTS ESPECIAL',endereco:'Ponteio Shopping - BR-356, 2500 - Piso L2, Loja 233/254'},
+    {id:'a13',cliente:'DUO MOVEIS',cidade:'SÃO JOÃO DEL REI',estado:'MG',modelos:'VUOTO-POTI',endereco:'Av. Trinta e Um de Março 1821, São João Del Rei'},
+    {id:'a14',cliente:'TOQUE DE CLASSE ARTIGOS',cidade:'MONTES CLAROS',estado:'MG',modelos:'POL.NEMO',endereco:''},
+    {id:'a15',cliente:'RELIQUIA PLANEJADOS',cidade:'GOVERNADOR VALADARES',estado:'MG',modelos:'AFFAIR',endereco:'R. Israel Pinheiro, 1983 - São Pedro, Gov. Valadares - MG'},
+    {id:'a16',cliente:'CORES E INTERIORES DECORAÇÃO',cidade:'ITAÚNA',estado:'MG',modelos:'YUMI-KIMI-DONCELLA-SHIZEN',endereco:'Rua Silva Jardim, 255, Itaúna'},
+    {id:'a17',cliente:'MARROCOS INTERIORES - THELA',cidade:'LAGOA SANTA',estado:'MG',modelos:'DESIRE',endereco:''},
+    {id:'a18',cliente:'JUCELIA PEREIRA RIBEIRO',cidade:'CONSELHEIRO LAFAIETE',estado:'MG',modelos:'BANCO FLUX-TOAD',endereco:''},
+    {id:'a19',cliente:'SUPER SETE COMERCIO',cidade:'GOVERNADOR VALADARES',estado:'MG',modelos:'ANKUR-FUJI',endereco:''},
+    {id:'a20',cliente:'BARRA LONGA - OURO DECOR',cidade:'OURO PRETO',estado:'MG',modelos:'OCA-POTI-LUZ',endereco:''},
+    {id:'a21',cliente:'LIRIOS',cidade:'MANAUS',estado:'AM',modelos:'FUJI-GIOTTO-TORD',endereco:''},
+    {id:'a22',cliente:'HOME OBJETOS',cidade:'PORTO VELHO',estado:'RO',modelos:'CARYBÉ-GROU TWISTY-SILVESTER',endereco:''},
+    {id:'a23',cliente:'CASA LYZ DENISE',cidade:'BELO HORIZONTE',estado:'MG',modelos:'LASSO-FUJI-EQUILIBRIO',endereco:''},
+    {id:'a24',cliente:'GAIA INTERIORES',cidade:'TOCANTINS',estado:'TO',modelos:'DESIRE',endereco:''},
+    {id:'a25',cliente:'DELUX',cidade:'BOA VISTA',estado:'RR',modelos:'',endereco:''},
+    {id:'a26',cliente:'TENDENZZA',cidade:'ARAGUAÍNA',estado:'TO',modelos:'',endereco:''},
+    {id:'a27',cliente:'CASA NOBRE',cidade:'RIO BRANCO',estado:'AC',modelos:'',endereco:''},
+    {id:'a28',cliente:'WM MOBILI',cidade:'NOVA LIMA',estado:'MG',modelos:'',endereco:''},
+    {id:'a29',cliente:'BIANCO INTERIORES',cidade:'BELO HORIZONTE',estado:'MG',modelos:'',endereco:''},
+    {id:'a30',cliente:'MARROCOS INTERIORES',cidade:'BELO HORIZONTE',estado:'MG',modelos:'',endereco:''},
+    {id:'a31',cliente:'MM MOVEIS DEPOSITO MARROCOS',cidade:'BELO HORIZONTE',estado:'MG',modelos:'',endereco:''},
+    {id:'a32',cliente:'INCASA INTERIORES',cidade:'PORTO VELHO',estado:'RO',modelos:'',endereco:''},
+  ],
+  adormecidos: [
+    {id:'d1',cliente:'7 CAMINHOS AROMAS',cidade:'BIRIGUI',estado:'SP',telefone:'18-36411867',data_contato:'10/05/2024',feedback:'Refiz contato. Loja ainda não abriu mas vai trabalhar com a marca Karams.'},
+    {id:'d2',cliente:'70 CASA COMERCIO DE MOVEIS',cidade:'CAMPINAS',estado:'SP',telefone:'19-972479147',data_contato:'17/06/2024',feedback:'Não tem pedidos por enquanto. Trabalha com projetos. Cliente pediu para atualizar material.'},
+    {id:'d3',cliente:'A QUINTA ESSENCIA MOVEIS',cidade:'CAXIAS DO SUL',estado:'RS',telefone:'54-35376755',data_contato:'',feedback:'Elaine pediu catálogo mas por hora não vão comprar nada.'},
+    {id:'d4',cliente:'STYLLO DESIGNER',cidade:'RONDONÓPOLIS',estado:'MT',telefone:'66-999847307',data_contato:'25/03/2024',feedback:'RETORNEI CLIENTE'},
+    {id:'d5',cliente:'ATTICA HOUSE COMERCIO DE MOVEIS',cidade:'UNAÍ',estado:'MG',telefone:'38-36769850',data_contato:'10/06/2024',feedback:'Retornei novamente contato com Fabiano. Sem sucesso de resposta.'},
+    {id:'d6',cliente:'WJ DESIGN',cidade:'BRASÍLIA',estado:'DF',telefone:'31-33285294',data_contato:'13/06/2024',feedback:'Entrei em contato por mensagens mas sem resposta. Entrei em contato com Vinicius atualizando material.'},
+    {id:'d7',cliente:'BEM ESTAR MOVEIS',cidade:'ERECHIM',estado:'RS',telefone:'54-33211015',data_contato:'24/09/2024',feedback:'Sem resposta. Mandei mensagem para Isabel.'},
+    {id:'d8',cliente:'CASA SHOP & ART DECOR',cidade:'ITAPERUNA',estado:'ES',telefone:'22-38243656',data_contato:'',feedback:'Me pediu catálogos'},
+    {id:'d9',cliente:'CF BATISTA DE SOUZA LTDA',cidade:'NATAL',estado:'RN',telefone:'84-981182120',data_contato:'',feedback:'Mandei mensagem aguardar'},
+    {id:'d10',cliente:'CONCEITOS INTERIORES',cidade:'MINEIROS',estado:'MG',telefone:'64-36614664',data_contato:'10/06/2024',feedback:'Entrei em contato com Vitor, ele mostrou interesse.'},
+    {id:'d11',cliente:'MOVEIS CELEGATRE',cidade:'ANDRADAS',estado:'MG',telefone:'35-37313288',data_contato:'10/06/2024',feedback:'Mandei mensagem. Refiz contato novamente.'},
+    {id:'d12',cliente:'NOEMI DALLA FLORA',cidade:'PRIMAVERA DO LESTE',estado:'MT',telefone:'66-97220330',data_contato:'13/02/2025',feedback:'Conversei com Cintia sobre uma linha mais acessível'},
+    {id:'d13',cliente:'NOKA PRESENTES E DECORAÇÕES',cidade:'ITAPEVA',estado:'SP',telefone:'15-35210589',data_contato:'17/06/2024',feedback:'Atualizei mostruários e catálogos. Retornei contato. Mandei mensagem para Noelia.'},
+  ],
+  prospeccao: [
+    {id:'p1',cliente:'DDESIGN ATEMPORAL SINOP',responsavel:'RAFAEL',contato:'(66)996415756',cidade:'SINOP',estado:'MT',instagram:'https://www.instagram.com/dedesignatemporal/',data:'10/04/2025',feedback:'Rafael pediu para mandar catálogo e tabela.'},
+    {id:'p2',cliente:'FOGAÇA HOME E JARDIM',responsavel:'ANA CAROLINA',contato:'(65)99614-2607 / (65)3057-2323',cidade:'CUIABÁ',estado:'MT',instagram:'https://www.instagram.com/fogacacasaejardim/',data:'12/05/2025',feedback:'Convite ABIMAD. Mandei mensagem e fotos das peças.'},
+    {id:'p3',cliente:'LÉ MARCHE INTERIORES',responsavel:'BRUNA',contato:'(65)99647-1935',cidade:'CUIABÁ',estado:'MT',instagram:'https://www.instagram.com/lemarchecuiaba/',data:'12/05/2025',feedback:'Lojista não tem interesse em comprar.'},
+    {id:'p4',cliente:'SOFISTICATO',responsavel:'',contato:'(65)3023-8871 / (65)98105-0177',cidade:'CUIABÁ',estado:'MT',instagram:'https://www.instagram.com/sofisticatomoveis/',data:'28/04/2025',feedback:'Loja de arquitetos.'},
+    {id:'p5',cliente:'GHALIA DESIGN',responsavel:'',contato:'(66)3498-4417 / (66)99202-0048',cidade:'PRIMAVERA DO LESTE',estado:'MT',instagram:'https://www.instagram.com/ghaliadesign/',data:'28/04/2025',feedback:'Convite ABIMAD. Retornei contato com loja.'},
+    {id:'p6',cliente:'OPERAH HOME TANGARÁ',responsavel:'MARILZA',contato:'(65)99211-8290',cidade:'TANGARÁ DA SERRA',estado:'MT',instagram:'https://www.instagram.com/operahtangara/',data:'28/04/2025',feedback:'Convite ABIMAD. Retornei contato novamente.'},
+    {id:'p7',cliente:'GOTARDO HOME DECOR',responsavel:'',contato:'(65)3326-9370',cidade:'TANGARÁ DA SERRA',estado:'MT',instagram:'https://www.instagram.com/gotardohomedecor/',data:'28/04/2025',feedback:'Loja de presentes.'},
+    {id:'p8',cliente:'ART CASA INTERIORES',responsavel:'PATRICIA / DONA CLEIA',contato:'(65)3382-4523 / (65)98476-5644',cidade:'CAMPO NOVO DO PARECIS',estado:'MT',instagram:'https://www.instagram.com/dimare_artcasainteriores/',data:'10/04/2025',feedback:'Cleia não tem interesse em conhecer.'},
+    {id:'p9',cliente:'HOME DESIGN',responsavel:'FLAVIANE',contato:'(67)3522-7727',cidade:'TRÊS LAGOAS',estado:'MS',instagram:'https://www.instagram.com/homedesign3lagoas/',data:'',feedback:''},
+    {id:'p10',cliente:'ESTRELA CASA DECOR',responsavel:'',contato:'67-35227683',cidade:'TRÊS LAGOAS',estado:'MS',instagram:'https://www.instagram.com/estrelacasadecor/',data:'',feedback:''},
+    {id:'p11',cliente:'HOFFMANN DESIGNER',responsavel:'TATIANE',contato:'(67)3562-1361',cidade:'CHAPADÃO DO SUL',estado:'MS',instagram:'https://www.instagram.com/hoffmanndesigner/',data:'28/05/2025',feedback:'Entrei em contato novamente. Mandei mensagem lojista.'},
+    {id:'p12',cliente:'MD CASA NOBRE',responsavel:'',contato:'(67)3255-2542',cidade:'BONITO',estado:'MS',instagram:'https://www.instagram.com/mdcasanobre/',data:'29/04/2025',feedback:'Convite ABIMAD. Retornei contato com loja novamente.'},
+    {id:'p13',cliente:'GOLD MÓVEIS',responsavel:'FABIO',contato:'(67)3452-2422',cidade:'RIO BRILHANTE',estado:'MS',instagram:'https://www.instagram.com/goldmoveis_decor/',data:'28/05/2025',feedback:'Convite ABIMAD. Retornei contato novamente.'},
+    {id:'p14',cliente:'LE MATAJE MOVEIS E DECORAÇÕES',responsavel:'JULIELI',contato:'(67)3251-6865',cidade:'JARDIM',estado:'MS',instagram:'https://www.instagram.com/lemataje/',data:'28/05/2025',feedback:'Loja disse que por enquanto não está fazendo compras.'},
+  ]
+};
+
+// ══════════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════════
+let dados = JSON.parse(localStorage.getItem('karams_dados') || 'null') || JSON.parse(JSON.stringify(DADOS_INICIAIS));
+let contatos = JSON.parse(localStorage.getItem('karams_contatos') || '[]');
+let metas = JSON.parse(localStorage.getItem('karams_metas') || 'null') || { contatos: 60, vendas: 80000 };
+let filtroAtual = 'todos';
+let clienteSelecionado = null;
+let semanaOffset = 0;
+let produtosTemp = [];
+
+function salvar() { try { localStorage.setItem('karams_dados', JSON.stringify(dados)); localStorage.setItem('karams_contatos', JSON.stringify(contatos)); localStorage.setItem('karams_metas', JSON.stringify(metas)); } catch(e) {} }
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+document.getElementById('rq-data').value = new Date().toISOString().split('T')[0];
+popularDatalist();
+renderizarLista();
+renderizarDashboard();
+
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
+function trocarPagina(pag, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + pag).classList.add('active');
+  el.classList.add('active');
+  if (pag === 'dashboard') { renderizarDashboard(); verificarAlertas3Dias(); }
+  if (pag === 'crm') verificarAlertas3Dias();
+  if (pag === 'calendario') {
+    calAno = new Date().getFullYear();
+    calMes = new Date().getMonth();
+    renderizarCalendario();
+    renderizarAlertas();
+  }
+  if (pag === 'comissoes') renderizarComissoes();
+}
+
+// ══════════════════════════════════════════════
+// CRM
+// ══════════════════════════════════════════════
+function todosClientes() {
+  return [
+    ...dados.ativos.map(c => ({...c, tipo:'ativo'})),
+    ...dados.adormecidos.map(c => ({...c, tipo:'adormecido'})),
+    ...dados.prospeccao.map(c => ({...c, tipo:'prospecto'}))
+  ];
+}
+
+function setFiltro(f, el) {
+  filtroAtual = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderizarLista();
+}
+
+function filtrarClientes() { renderizarLista(); }
+
+function renderizarLista() {
+  const busca = document.getElementById('searchInput').value.toLowerCase();
+  let lista = todosClientes();
+  if (filtroAtual !== 'todos') lista = lista.filter(c => c.tipo === filtroAtual);
+  if (busca) lista = lista.filter(c => c.cliente.toLowerCase().includes(busca) || (c.cidade||'').toLowerCase().includes(busca));
+  const container = document.getElementById('clientList');
+  if (!lista.length) { container.innerHTML = '<div class="no-results">Nenhum cliente encontrado</div>'; return; }
+  container.innerHTML = lista.map(c => `
+    <div class="client-item ${clienteSelecionado && clienteSelecionado.id === c.id ? 'active' : ''}" onclick="selecionarCliente('${c.id}','${c.tipo}')">
+      <div class="client-name">${c.cliente}</div>
+      <div class="client-meta">${c.cidade||''}${c.estado ? ' · '+c.estado : ''}</div>
+      <span class="client-badge badge-${c.tipo}">${c.tipo==='ativo'?'Ativo':c.tipo==='adormecido'?'Adormecido':'Prospecto'}</span>
+    </div>`).join('');
+}
+
+function selecionarCliente(id, tipo) {
+  let arr = tipo==='ativo'?dados.ativos:tipo==='adormecido'?dados.adormecidos:dados.prospeccao;
+  const c = arr.find(x => x.id === id);
+  if (!c) return;
+  c.tipo = tipo;
+  clienteSelecionado = c;
+  renderizarLista();
+  renderizarDetalhe(c);
+}
+
+function renderizarDetalhe(c) {
+  const panel = document.getElementById('detailPanel');
+  const produtos = c.modelos ? c.modelos.split(/[-,]/).map(p=>p.trim()).filter(Boolean) : [];
+  const novosProdutos = c.novosProdutos || [];
+  const historico = c.historicoVendas || [];
+  const badgeClass = c.tipo==='ativo'?'badge-ativo':c.tipo==='adormecido'?'badge-adormecido':'badge-prospecto';
+  const badgeLabel = c.tipo==='ativo'?'Cliente Ativo':c.tipo==='adormecido'?'Adormecido':'Em Prospecção';
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${c.cliente}</div>
+        <div class="detail-city">${c.cidade||''}${c.estado?' · '+c.estado:''}</div>
+      </div>
+      <span class="tag-status ${badgeClass}" style="font-size:13px;padding:6px 14px;">${badgeLabel}</span>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">Informações de Contato</div>
+      <div class="info-grid">
+        ${c.telefone?`<div class="info-item"><label>Telefone</label><value>${c.telefone}</value></div>`:''}
+        ${c.contato?`<div class="info-item"><label>Contato</label><value>${c.contato}</value></div>`:''}
+        ${c.responsavel?`<div class="info-item"><label>Responsável</label><value>${c.responsavel}</value></div>`:''}
+        ${c.endereco?`<div class="info-item" style="grid-column:1/-1"><label>Endereço</label><value>${c.endereco}</value></div>`:''}
+        ${c.instagram?`<div class="info-item" style="grid-column:1/-1"><label>Instagram</label><value><a class="insta-link" href="${c.instagram}" target="_blank">${c.instagram.replace('https://www.instagram.com/','@').replace('/','')}</a></value></div>`:''}
+        ${c.data_contato||c.data?`<div class="info-item"><label>Último Contato</label><value>${c.data_contato||c.data}</value></div>`:''}
+      </div>
+    </div>
+
+    ${produtos.length||novosProdutos.length?`
+    <div class="section-card">
+      <div class="section-title">Produtos com Exclusividade</div>
+      <div class="produtos-grid">
+        ${produtos.map(p=>`<span class="produto-chip">${p}</span>`).join('')}
+        ${novosProdutos.map(p=>`<span class="produto-chip novo">${p} ✦</span>`).join('')}
+      </div>
+    </div>`:''}
+
+    <div class="form-nova-venda">
+      <div class="form-title">✦ Registrar Nova Venda ou Interação</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Data</label><input type="date" id="form-data" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="form-row"><label>Tipo de Registro</label>
+          <select id="form-tipo">
+            <option value="contato">📞 Contato Realizado</option>
+            <option value="venda">💰 Nova Venda</option>
+            <option value="retorno">🔄 Retorno do Cliente</option>
+            <option value="proposta">📋 Proposta Enviada</option>
+            <option value="sem-resposta">🔕 Sem Resposta</option>
+            <option value="obs">📝 Observação</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Produtos Vendidos (novos modelos)</label>
+        <div id="campo-produtos" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;align-items:center;"><span style="color:var(--muted);font-size:12px;">Digite abaixo para adicionar...</span></div>
+        <div class="novo-produto-input">
+          <input type="text" id="input-novo-produto" placeholder="Ex: KATANA, ALMA..." onkeydown="if(event.key==='Enter'){adicionarProduto();}">
+          <button onclick="adicionarProduto()">+ Add</button>
+        </div>
+      </div>
+      <div class="form-row"><label>Observação / Feedback</label><textarea id="form-obs" placeholder="Descreva o que foi tratado..."></textarea></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-secondary" onclick="limparFormulario()">Limpar</button>
+        <button class="btn btn-primary" onclick="salvarRegistro('${c.id}','${c.tipo}')">Salvar Registro</button>
+      </div>
+    </div>
+
+    ${historico.length?`
+    <div class="section-card">
+      <div class="section-title">Histórico de Registros</div>
+      <div class="historico-lista">
+        ${historico.slice().reverse().map(h=>`
+          <div class="historico-item">
+            <div class="historico-dot" style="${h.tipo==='venda'?'background:var(--gold)':h.tipo==='contato'?'background:var(--info)':'background:var(--muted)'}"></div>
+            <div>
+              <div class="historico-texto"><strong>${tipoLabel(h.tipo)}</strong>${h.produtos&&h.produtos.length?' · '+h.produtos.join(', '):''}${h.obs?'<br>'+h.obs:''}</div>
+              <div class="historico-data">${h.data}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`:''}
+
+    ${c.feedback?`
+    <div class="section-card">
+      <div class="section-title">Histórico Original (Planilha)</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;">${c.feedback}</p>
+    </div>`:''}
+  `;
+  produtosTemp = [];
+}
+
+function adicionarProduto() {
+  const input = document.getElementById('input-novo-produto');
+  const val = input.value.trim().toUpperCase();
+  if (!val) return;
+  val.split(',').map(v=>v.trim()).filter(Boolean).forEach(p => { if(!produtosTemp.includes(p)) produtosTemp.push(p); });
+  input.value = '';
+  renderizarProdutosTemp();
+}
+function renderizarProdutosTemp() {
+  const c = document.getElementById('campo-produtos');
+  if (!c) return;
+  if (!produtosTemp.length) { c.innerHTML = '<span style="color:var(--muted);font-size:12px;">Digite abaixo para adicionar...</span>'; return; }
+  c.innerHTML = produtosTemp.map((p,i)=>`<span class="produto-chip novo" style="cursor:pointer;" onclick="removerProdutoTemp(${i})" title="Remover">${p} ×</span>`).join('');
+}
+function removerProdutoTemp(i) { produtosTemp.splice(i,1); renderizarProdutosTemp(); }
+function limparFormulario() { produtosTemp=[]; renderizarProdutosTemp(); const o=document.getElementById('form-obs'); if(o) o.value=''; }
+
+function salvarRegistro(id, tipo) {
+  let arr = tipo==='ativo'?dados.ativos:tipo==='adormecido'?dados.adormecidos:dados.prospeccao;
+  const c = arr.find(x=>x.id===id);
+  if (!c) return;
+  const data = document.getElementById('form-data').value;
+  const tipoReg = document.getElementById('form-tipo').value;
+  const obs = document.getElementById('form-obs').value.trim();
+  if (!obs && !produtosTemp.length) { mostrarToast('⚠️ Preencha pelo menos um produto ou observação.'); return; }
+  if (!c.historicoVendas) c.historicoVendas = [];
+  if (!c.novosProdutos) c.novosProdutos = [];
+  const dataFmt = data ? new Date(data+'T12:00:00').toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+  c.historicoVendas.push({ data: dataFmt, tipo: tipoReg, produtos: [...produtosTemp], obs });
+  if (tipoReg==='venda' && produtosTemp.length) produtosTemp.forEach(p => { if(!c.novosProdutos.includes(p)) c.novosProdutos.push(p); });
+  // Registrar automaticamente no dashboard
+  const isoData = data || new Date().toISOString().split('T')[0];
+  contatos.push({ data: isoData, cliente: c.cliente, resultado: tipoReg, obs, valor: 0 });
+  salvar();
+  mostrarToast('✦ Registro salvo com sucesso!');
+  produtosTemp = [];
+  c.tipo = tipo;
+  clienteSelecionado = c;
+  setTimeout(()=>renderizarDetalhe(c), 200);
+}
+
+function tipoLabel(t) { return {venda:'💰 Venda',contato:'📞 Contato',retorno:'🔄 Retorno',proposta:'📋 Proposta','sem-resposta':'🔕 Sem Resposta',obs:'📝 Observação'}[t]||t; }
+
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
+let diaSelecionado = null; // ISO string do dia ativo nas abas
+
+function getMesAtual() { const n=new Date(); return {ano:n.getFullYear(), mes:n.getMonth()}; }
+
+function contatosMes() {
+  const {ano,mes} = getMesAtual();
+  return contatos.filter(c => { const d=new Date(c.data+'T12:00:00'); return d.getFullYear()===ano && d.getMonth()===mes; });
+}
+
+function getInicioSemana(offset=0) {
+  const base = new Date();
+  const dow = base.getDay();
+  const diff = base.getDate() - dow + (dow===0?-6:1) + offset*7;
+  const ini = new Date(base); ini.setDate(diff); ini.setHours(0,0,0,0);
+  return ini;
+}
+
+function diasDaSemana(offset=0) {
+  const ini = getInicioSemana(offset);
+  return Array.from({length:6}, (_,i) => { const d=new Date(ini); d.setDate(d.getDate()+i); return d; });
+}
+
+function contatosDia(iso) { return contatos.filter(c=>c.data===iso); }
+function contatosSemana(offset=0) {
+  const isos = diasDaSemana(offset).map(d=>d.toISOString().split('T')[0]);
+  return contatos.filter(c=>isos.includes(c.data));
+}
+
+function renderizarDashboard() {
+  const mes = contatosMes();
+  const totalContatos = mes.length;
+  const totalVendas = mes.filter(c=>c.resultado==='venda').reduce((s,c)=>s+(parseFloat(c.valor)||0),0);
+  const numVendas = mes.filter(c=>c.resultado==='venda').length;
+  const semana = contatosSemana(semanaOffset);
+  const metaContatos = metas.contatos;
+  const metaVendas = metas.vendas;
+  const metaSemana = Math.ceil(metaContatos/4);
+  const pctC = Math.min(100, Math.round(totalContatos/metaContatos*100));
+  const pctV = Math.min(100, Math.round(totalVendas/metaVendas*100));
+  const pctSem = Math.min(100, Math.round(semana.length/metaSemana*100));
+  const restC = Math.max(0, metaContatos - totalContatos);
+  const restV = Math.max(0, metaVendas - totalVendas);
+
+  // label mês
+  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const n = new Date();
+  document.getElementById('mes-label').textContent = nomes[n.getMonth()]+' '+n.getFullYear();
+
+  // KPIs
+  document.getElementById('kpi-contatos-mes').textContent = totalContatos;
+  document.getElementById('kpi-contatos-sub').textContent = '/ '+metaContatos;
+  document.getElementById('prog-contatos').style.width = pctC+'%';
+  document.getElementById('meta-c-rest').textContent = restC>0 ? `Faltam ${restC} para a meta` : '✦ Meta atingida!';
+
+  document.getElementById('kpi-vendas-mes').textContent = 'R$ '+totalVendas.toLocaleString('pt-BR',{minimumFractionDigits:0});
+  document.getElementById('kpi-vendas-sub').textContent = `meta: R$ ${metaVendas.toLocaleString('pt-BR')}`;
+  document.getElementById('prog-vendas').style.width = pctV+'%';
+  document.getElementById('meta-v-rest').textContent = restV>0 ? `Faltam R$ ${restV.toLocaleString('pt-BR')}` : '✦ Meta atingida!';
+
+  document.getElementById('kpi-contatos-semana').textContent = semana.length;
+  document.getElementById('prog-sem-label').textContent = '/ '+metaSemana;
+  document.getElementById('prog-semana').style.width = pctSem+'%';
+
+  // dias úteis
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const fimMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
+  let diasUteis = 0;
+  for (let d=new Date(hoje); d<=fimMes; d.setDate(d.getDate()+1)) { if(d.getDay()!==0&&d.getDay()!==6) diasUteis++; }
+  document.getElementById('dias-uteis').textContent = diasUteis;
+  const ritmoC = diasUteis>0 ? Math.ceil(restC/diasUteis) : 0;
+  document.getElementById('ritmo-necessario').textContent = restC>0 ? `Ritmo: ${ritmoC} contato(s)/dia útil` : '🎉 Meta atingida!';
+
+  document.getElementById('kpi-vendas-count').textContent = numVendas;
+  const tiposCount = {};
+  mes.forEach(c => { tiposCount[c.resultado]=(tiposCount[c.resultado]||0)+1; });
+  document.getElementById('kpi-resultado-mini').innerHTML = Object.entries(tiposCount).map(([t,n])=>
+    `<span class="wci-result res-${t}" style="font-size:10px;padding:2px 6px;">${tipoLabel(t).split(' ')[0]} ${n}</span>`).join('');
+
+  renderizarAbasDias();
+  popularDatalist();
+}
+
+function renderizarAbasDias() {
+  const DIAS_NOME = ['Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const lista = diasDaSemana(semanaOffset);
+  const hojeISO = new Date().toISOString().split('T')[0];
+
+  // Se não há dia selecionado, seleciona hoje ou o primeiro dia da semana
+  if (!diaSelecionado) {
+    const hojeNaSemana = lista.find(d=>d.toISOString().split('T')[0]===hojeISO);
+    diaSelecionado = hojeNaSemana ? hojeISO : lista[0].toISOString().split('T')[0];
+    // Pré-preencher data no form
+    document.getElementById('rq-data').value = diaSelecionado;
+  }
+
+  // Navegação semana
+  const ini = lista[0], fim = lista[5];
+  document.getElementById('week-label').textContent =
+    ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+fim.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+
+  // Abas
+  document.getElementById('dayTabs').innerHTML = lista.map((d,i) => {
+    const iso = d.toISOString().split('T')[0];
+    const cnt = contatosDia(iso).length;
+    const isAtivo = iso === diaSelecionado;
+    const isHoje = iso === hojeISO;
+    const temDados = cnt > 0;
+    return `<div onclick="selecionarDia('${iso}')" style="
+      padding:14px 8px; text-align:center; cursor:pointer; transition:all .15s; user-select:none;
+      border-bottom: 3px solid ${isAtivo?'var(--gold)':'transparent'};
+      background: ${isAtivo?'white': temDados?'#F0FAF3':'var(--cream)'};
+      ${isHoje && !isAtivo ? 'box-shadow:inset 0 -3px 0 var(--cream2)':''}
+    ">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:${isAtivo?'var(--gold)':'var(--muted)'};">${DIAS_NOME[i]}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;color:${isAtivo?'var(--text)':isHoje?'var(--gold)':'var(--muted)'};">${d.getDate()}</div>
+      <div style="font-size:10px;margin-top:3px;color:${temDados?'var(--success)':'var(--muted)'};">
+        ${temDados ? cnt+' ✓' : isHoje?'hoje':'—'}
+      </div>
+    </div>`;
+  }).join('');
+
+  renderizarListaDia();
+}
+
+function selecionarDia(iso) {
+  diaSelecionado = iso;
+  document.getElementById('rq-data').value = iso;
+  renderizarAbasDias();
+}
+
+function renderizarListaDia() {
+  const filtroRes = document.getElementById('filtro-resultado')?.value || '';
+  let lista = diaSelecionado ? contatosDia(diaSelecionado) : [];
+  if (filtroRes) lista = lista.filter(c=>c.resultado===filtroRes);
+
+  // Título do dia
+  const d = diaSelecionado ? new Date(diaSelecionado+'T12:00:00') : null;
+  const titulo = d ? d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) : '';
+  const el = document.getElementById('dia-titulo');
+  if (el) el.textContent = titulo ? titulo.charAt(0).toUpperCase()+titulo.slice(1) : 'Selecione um dia';
+
+  const container = document.getElementById('listaDia');
+  if (!container) return;
+  if (!lista.length) {
+    container.innerHTML = `<div style="text-align:center;padding:32px 20px;color:var(--muted);">
+      <div style="font-size:28px;margin-bottom:8px;">📋</div>
+      <div style="font-size:13px;">Nenhum contato registrado neste dia</div>
+      <div style="font-size:12px;margin-top:4px;color:var(--cream2-text,#8AAABB);">Use o formulário ao lado para registrar</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML = lista.map((c,idx) => `
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--cream2);">
+      <div style="width:6px;height:6px;border-radius:50%;background:${c.resultado==='venda'?'var(--gold)':c.resultado==='sem-resposta'?'var(--warning)':'var(--info)'};margin-top:6px;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:13px;">${c.cliente}</div>
+        ${c.obs?`<div style="font-size:12px;color:var(--muted);margin-top:2px;">${c.obs}</div>`:''}
+      </div>
+      ${c.valor?`<div style="font-size:12px;color:var(--success);font-weight:700;white-space:nowrap;">R$ ${parseFloat(c.valor).toLocaleString('pt-BR')}</div>`:''}
+      <span style="font-size:11px;padding:3px 8px;border-radius:12px;" class="wci-result res-${c.resultado}">${tipoLabel(c.resultado)}</span>
+      <button onclick="excluirContato(${contatos.indexOf(c)})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 2px;" title="Excluir">✕</button>
+    </div>`).join('');
+}
+
+function excluirContato(idx) {
+  if (!confirm('Excluir este contato?')) return;
+  contatos.splice(idx,1);
+  salvar();
+  renderizarDashboard();
+  mostrarToast('Contato excluído.');
+}
+
+function semanaAnterior() { semanaOffset--; diaSelecionado=null; renderizarDashboard(); }
+function proximaSemana()  { semanaOffset++; diaSelecionado=null; renderizarDashboard(); }
+
+// ── CONTATO RÁPIDO ──
+function selecionarResultado(el) {
+  document.querySelectorAll('.result-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('campo-valor-wrap').style.display = el.dataset.val==='venda' ? 'block' : 'none';
+}
+
+function salvarContatoRapido() {
+  const cliente = document.getElementById('rq-cliente').value.trim();
+  const data = document.getElementById('rq-data').value;
+  const resultado = document.querySelector('.result-chip.selected')?.dataset.val || 'contato';
+  const obs = document.getElementById('rq-obs').value.trim();
+  const valor = parseFloat(document.getElementById('rq-valor').value)||0;
+  if (!cliente) { mostrarToast('⚠️ Informe o nome do cliente.'); return; }
+  if (!data) { mostrarToast('⚠️ Informe a data.'); return; }
+  contatos.push({ data, cliente, resultado, obs, valor });
+  // Sincronizar dia selecionado com o dia do contato
+  diaSelecionado = data;
+  salvar();
+  mostrarToast('✦ Contato registrado!');
+  limparRapido(data);
+  renderizarDashboard();
+}
+
+function limparRapido(manterData) {
+  document.getElementById('rq-cliente').value = '';
+  document.getElementById('rq-obs').value = '';
+  document.getElementById('rq-valor').value = '';
+  document.getElementById('rq-data').value = manterData || new Date().toISOString().split('T')[0];
+  document.getElementById('campo-valor-wrap').style.display = 'none';
+  document.querySelectorAll('.result-chip').forEach(c=>c.classList.remove('selected'));
+  const chip = document.querySelector('.result-chip[data-val="contato"]');
+  if (chip) chip.classList.add('selected');
+}
+
+function popularDatalist() {
+  const dl = document.getElementById('lista-clientes-rq');
+  if (!dl) return;
+  dl.innerHTML = todosClientes().map(c=>`<option value="${c.cliente}">`).join('');
+}
+
+// ── METAS ──
+function abrirModalMetas() {
+  document.getElementById('cfg-meta-contatos').value = metas.contatos;
+  document.getElementById('cfg-meta-vendas').value = metas.vendas;
+  document.getElementById('modalMetas').classList.add('open');
+}
+function fecharModalMetas() { document.getElementById('modalMetas').classList.remove('open'); }
+function salvarMetas() {
+  metas.contatos = parseInt(document.getElementById('cfg-meta-contatos').value)||60;
+  metas.vendas = parseFloat(document.getElementById('cfg-meta-vendas').value)||80000;
+  salvar();
+  fecharModalMetas();
+  renderizarDashboard();
+  mostrarToast('✦ Metas atualizadas!');
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+</script>
+</body>
+</html>
+
+<!-- ══════════════════════════════════════════════════════
+     PÁGINA RELACIONAMENTO MENSAL + ALERTAS
+══════════════════════════════════════════════════════ -->
+<style>
+/* ── ALERTAS ── */
+.alerta-banner {
+  background: #1C2B3A; border: 1px solid #2E5D8A; border-radius: 10px;
+  padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px;
+}
+.alerta-banner .alerta-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.alerta-lista { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.alerta-item {
+  display: flex; align-items: center; gap: 10px; background: rgba(46,93,138,.12);
+  border-radius: 7px; padding: 8px 12px; cursor: pointer; transition: background .15s;
+}
+.alerta-item:hover { background: rgba(46,93,138,.25); }
+.alerta-dias {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.alerta-dias.critico { background: #2E5D8A; color: #C8DCF0; }
+.alerta-dias.atencao { background: #D4882A; color: #FFF0D0; }
+.alerta-nome { font-size: 13px; font-weight: 600; color: #C8D8E8; flex: 1; }
+.alerta-ultimo { font-size: 11px; color: #6A8A9A; }
+
+/* ── CALENDÁRIO ── */
+#page-calendario { display: none; flex-direction: column; overflow: hidden; }
+#page-calendario.active { display: flex; height: calc(100vh - 104px); }
+
+.cal-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* Coluna de alertas */
+.cal-alertas {
+  width: 300px; min-width: 260px; background: var(--dark); border-right: 1px solid var(--dark3);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.cal-alertas-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--dark3);
+  font-size: 12px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;
+}
+.cal-alertas-lista { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.cal-alertas-lista::-webkit-scrollbar { width: 4px; }
+.cal-alertas-lista::-webkit-scrollbar-thumb { background: var(--dark3); border-radius: 4px; }
+
+.alerta-card {
+  background: var(--dark2); border-radius: 8px; padding: 10px 12px;
+  cursor: pointer; transition: all .15s; border: 1px solid transparent;
+}
+.alerta-card:hover { border-color: var(--gold); }
+.alerta-card.critico { border-left: 3px solid #1A4F7A; }
+.alerta-card.atencao { border-left: 3px solid var(--warning); }
+.alerta-card .ac-nome { font-size: 12px; font-weight: 600; color: #C8D8E8; line-height: 1.3; margin-bottom: 4px; }
+.alerta-card .ac-info { font-size: 11px; color: var(--muted); }
+.alerta-card .ac-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; margin-top: 5px;
+}
+.ac-badge.critico { background: #2E5D8A; color: #C8DCF0; }
+.ac-badge.atencao { background: #2A4A7A; color: #C0D4F0; }
+
+/* Área do calendário */
+.cal-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--cream); }
+
+.cal-controls {
+  padding: 14px 20px; background: white; border-bottom: 1px solid var(--cream2);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.cal-mes-nav { display: flex; align-items: center; gap: 8px; }
+.cal-mes-nav button {
+  background: var(--cream2); border: none; border-radius: 6px; padding: 5px 11px;
+  cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: background .15s;
+}
+.cal-mes-nav button:hover { background: var(--gold); color: var(--dark); }
+.cal-mes-titulo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); min-width: 180px; }
+
+.cal-filtro-cliente {
+  flex: 1; max-width: 280px; padding: 8px 12px; border: 1px solid var(--cream2);
+  border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+}
+.cal-filtro-cliente:focus { border-color: var(--gold); }
+
+/* Grade do calendário */
+.cal-scroll { flex: 1; overflow: auto; }
+.cal-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+.cal-scroll::-webkit-scrollbar-thumb { background: var(--cream2); border-radius: 4px; }
+
+.cal-table { border-collapse: collapse; min-width: 100%; }
+.cal-table th {
+  background: var(--dark); color: var(--gold); font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px; padding: 9px 8px;
+  text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 2;
+  border-right: 1px solid var(--dark3);
+}
+.cal-table th.th-cliente {
+  text-align: left; min-width: 180px; position: sticky; left: 0; z-index: 3;
+  background: var(--dark); border-right: 2px solid var(--gold);
+}
+.cal-table th.th-dia { min-width: 80px; width: 80px; }
+.cal-table th.fim-semana { background: #18283A; color: #5A7A96; }
+
+.cal-table td {
+  border: 1px solid var(--cream2); vertical-align: top; padding: 0;
+  background: white; font-size: 12px;
+}
+.cal-table td.td-cliente {
+  position: sticky; left: 0; z-index: 1; background: #F7F9FB;
+  border-right: 2px solid var(--cream2); padding: 10px 12px;
+  font-weight: 600; font-size: 12px; color: var(--text); min-width: 180px;
+  cursor: pointer;
+}
+.cal-table td.td-cliente:hover { background: #F0F5FA; color: var(--gold); }
+.cal-table td.td-dia { min-width: 80px; width: 80px; height: 60px; }
+.cal-table td.td-dia.fim-semana { background: #F5F8FB; }
+.cal-table td.td-dia.hoje { background: #F2F6FB; }
+.cal-table td.td-dia.tem-nota { background: #F0FBF4; }
+.cal-table tr:hover td.td-cliente { background: #F0F5FA; }
+
+/* Célula clicável */
+.cel-dia {
+  width: 100%; height: 60px; padding: 5px 6px; cursor: pointer;
+  transition: background .1s; display: flex; flex-direction: column; gap: 2px;
+}
+.cel-dia:hover { background: rgba(74,111,165,.12); }
+.cel-dia.tem-nota { background: rgba(58,140,106,.05); }
+.cel-nota-preview {
+  font-size: 10px; color: var(--muted); line-height: 1.3; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.cel-nota-preview.has-text { color: var(--text); font-size: 11px; }
+
+/* Modal de nota */
+.modal-nota { background: white; border-radius: 12px; padding: 0; width: 480px; overflow: hidden; border-top: 3px solid var(--gold); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.modal-nota-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--cream2); }
+.modal-nota-titulo { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--text); margin-bottom: 3px; }
+.modal-nota-sub { font-size: 12px; color: var(--muted); }
+.modal-nota-body { padding: 18px 22px; }
+.modal-nota-body textarea {
+  width: 100%; min-height: 140px; padding: 12px; border: 1px solid var(--cream2);
+  border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  line-height: 1.6; outline: none; resize: vertical; color: var(--text);
+}
+.modal-nota-body textarea:focus { border-color: var(--gold); }
+.modal-nota-footer { padding: 12px 22px 18px; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Legenda */
+.cal-legenda { display: flex; gap: 16px; align-items: center; padding: 0 20px; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+</style>
+
+<div id="page-calendario" class="page">
+  <div class="cal-layout">
+
+    <!-- COLUNA ALERTAS -->
+    <div class="cal-alertas">
+      <div class="cal-alertas-header">
+        🔔 Alertas de Recontato
+        <div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px;text-transform:none;letter-spacing:0;">Clientes sem contato há +7 dias</div>
+      </div>
+      <div class="cal-alertas-lista" id="alertasLista">
+        <div style="color:var(--muted);font-size:12px;text-align:center;padding:20px;">Carregando alertas...</div>
+      </div>
+    </div>
+
+    <!-- CALENDÁRIO PRINCIPAL -->
+    <div class="cal-main">
+      <div class="cal-controls">
+        <div class="cal-mes-nav">
+          <button onclick="calMesAnterior()">◀</button>
+          <div class="cal-mes-titulo" id="calMesTitulo"></div>
+          <button onclick="calMesProximo()">▶</button>
+        </div>
+        <input type="text" class="cal-filtro-cliente" id="calFiltro" placeholder="🔍 Filtrar cliente..." oninput="renderizarCalendario()">
+        <div class="cal-legenda">
+          <div class="leg-item"><div class="leg-dot" style="background:#F0FBF4;border:1px solid #90BAD4;"></div> Com nota</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F2F6FB;border:1px solid var(--gold-light);"></div> Hoje</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F5F8FB;border:1px solid var(--cream2);"></div> Fim de semana</div>
+        </div>
+      </div>
+      <div class="cal-scroll">
+        <table class="cal-table" id="calTable"></table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de nota do dia -->
+<div class="modal-overlay" id="modalNota">
+  <div class="modal-nota">
+    <div class="modal-nota-header">
+      <div class="modal-nota-titulo" id="modalNotaTitulo"></div>
+      <div class="modal-nota-sub" id="modalNotaSub"></div>
+    </div>
+    <div class="modal-nota-body">
+      <textarea id="modalNotaTexto" placeholder="Escreva aqui o que foi conversado, negociado ou observado..."></textarea>
+    </div>
+    <div class="modal-nota-footer">
+      <button class="btn btn-secondary" onclick="fecharModalNota()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarNota()">✦ Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CALENDÁRIO DE RELACIONAMENTO
+// ══════════════════════════════════════════════
+
+// Notas: { 'CLIENTE_KEY:YYYY-MM-DD': 'texto' }
+let notas = JSON.parse(localStorage.getItem('karams_notas') || '{}');
+
+function salvarNotas() { try { localStorage.setItem('karams_notas', JSON.stringify(notas)); } catch(e) {} }
+
+// Estado calendário
+let calAno  = new Date().getFullYear();
+let calMes  = new Date().getMonth(); // 0-based
+let notaAtiva = null; // { clienteKey, iso }
+
+const MESES_NOME = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// Lista de clientes do relacionamento (da planilha + ativos do CRM)
+function clientesRelacionamento() {
+  const fixos = [
+    'SANTA MOBILIARIO LTDA ME','DUBAMBU COMERCIO DE MOVEIS LTDA',
+    'ESSENCIAL DECORACOES COM DE MOVEIS E ADORNOS LTDA','CASA LYZ MOVEIS E DECORACOES LTDA',
+    'IDRI COMERCIO LTDA','ASN DECORACOES LTDA EPP','SOFIA DA S E S ME',
+    'CORES E INTERIORES DECORACAO LTDA','G M COMERCIO E ARTIGOS DE DECORAÇÃO LTDA',
+    'A PREDILAR MATERIAIS PARA CONSTRUCAO LTDA','TERCEIRO MILENIO COMERCIO IMPORTAÇÃO E EXPORTAÇÃO',
+    'SUPER SETE COMERCIO EIRELI EPP','FRANTTONE MOVEIS E DECORACAO LTDA',
+    'TT HOME ARTIGOS PARA DECORACAO LTDA','KAPACININ HOME E DECOR LTDA',
+    'HOME UP LTDA ME','JUCELIA PEREIRA RIBEIRO - EIRELI','GAIA INTERIORES',
+  ];
+  // Mesclar com ativos do CRM
+  const dosCRM = (typeof dados !== 'undefined' ? dados.ativos : []).map(c => c.cliente);
+  const todos = [...new Set([...fixos, ...dosCRM])];
+  return todos.sort();
+}
+
+function chaveNota(cliente, iso) { return cliente.substring(0,30).replace(/[^a-zA-Z0-9]/g,'_') + ':' + iso; }
+
+// Último contato de cada cliente (notas ou contatos do dashboard)
+function ultimoContatoCliente(cliente) {
+  const prefixo = cliente.substring(0,30).replace(/[^a-zA-Z0-9]/g,'_') + ':';
+  // Datas das notas
+  const datasNotas = Object.keys(notas)
+    .filter(k => k.startsWith(prefixo) && notas[k].trim())
+    .map(k => k.split(':').slice(1).join(':'));
+  // Datas dos contatos rápidos
+  const datasContatos = (typeof contatos !== 'undefined' ? contatos : [])
+    .filter(c => c.cliente.toUpperCase().includes(cliente.substring(0,15).toUpperCase()))
+    .map(c => c.data);
+  const todas = [...datasNotas, ...datasContatos].filter(Boolean).sort();
+  return todas.length ? todas[todas.length - 1] : null;
+}
+
+function diasSemContato(iso) {
+  if (!iso) return 999;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const d = new Date(iso + 'T12:00:00');
+  return Math.floor((hoje - d) / 86400000);
+}
+
+// ── ALERTAS ──────────────────────────────────
+function renderizarAlertas() {
+  const lista = clientesRelacionamento();
+  const container = document.getElementById('alertasLista');
+  if (!container) return;
+
+  const alertas = lista.map(c => {
+    const ultimo = ultimoContatoCliente(c);
+    const dias = diasSemContato(ultimo);
+    return { cliente: c, ultimo, dias };
+  })
+  .filter(a => a.dias >= 7)
+  .sort((a,b) => b.dias - a.dias);
+
+  if (!alertas.length) {
+    container.innerHTML = `<div style="text-align:center;padding:30px 10px;color:var(--muted);">
+      <div style="font-size:28px;margin-bottom:8px;">✅</div>
+      <div style="font-size:12px;">Todos os clientes foram<br>contactados esta semana!</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = alertas.map(a => {
+    const grau = a.dias >= 14 ? 'critico' : 'atencao';
+    const label = a.dias >= 999 ? 'Nunca contactado' : `${a.dias} dias sem contato`;
+    const ultimoFmt = a.ultimo ? new Date(a.ultimo+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) : '—';
+    return `<div class="alerta-card ${grau}" onclick="irParaCliente('${a.cliente.replace(/'/g,"\\'")}')">
+      <div class="ac-nome">${a.cliente}</div>
+      <div class="ac-info">Último contato: ${ultimoFmt}</div>
+      <span class="ac-badge ${grau}">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function irParaCliente(nome) {
+  // Filtrar no calendário e rolar
+  const input = document.getElementById('calFiltro');
+  if (input) { input.value = nome.substring(0,20); renderizarCalendario(); }
+}
+
+// ── CALENDÁRIO ───────────────────────────────
+function calMesAnterior() { calMes--; if(calMes<0){calMes=11;calAno--;} renderizarCalendario(); renderizarAlertas(); }
+function calMesProximo()  { calMes++; if(calMes>11){calMes=0;calAno++;} renderizarCalendario(); renderizarAlertas(); }
+
+function renderizarCalendario() {
+  const titulo = document.getElementById('calMesTitulo');
+  if (titulo) titulo.textContent = MESES_NOME[calMes] + ' ' + calAno;
+
+  const filtro = (document.getElementById('calFiltro')?.value || '').toLowerCase();
+  const diasNoMes = new Date(calAno, calMes+1, 0).getDate();
+  const hojeISO = new Date().toISOString().split('T')[0];
+
+  // Gerar array de dias
+  const dias = Array.from({length: diasNoMes}, (_,i) => {
+    const d = new Date(calAno, calMes, i+1);
+    const iso = d.toISOString().split('T')[0];
+    return { num: i+1, iso, dow: d.getDay() }; // 0=dom,6=sab
+  });
+
+  // Clientes filtrados
+  const clientes = clientesRelacionamento().filter(c =>
+    !filtro || c.toLowerCase().includes(filtro)
+  );
+
+  // Cabeçalho
+  let thead = '<thead><tr>';
+  thead += '<th class="th-cliente">Cliente</th>';
+  dias.forEach(d => {
+    const fds = d.dow === 0 || d.dow === 6;
+    const nomesDia = ['D','S','T','Q','Q','S','S'];
+    thead += `<th class="th-dia${fds?' fim-semana':''}" title="${d.iso}">${d.num}<br><span style="font-size:9px;opacity:.6;">${nomesDia[d.dow]}</span></th>`;
+  });
+  thead += '</tr></thead>';
+
+  // Corpo
+  let tbody = '<tbody>';
+  clientes.forEach(cliente => {
+    tbody += '<tr>';
+    // Nome do cliente
+    const nomeAbrev = cliente.length > 28 ? cliente.substring(0,26)+'…' : cliente;
+    tbody += `<td class="td-cliente" title="${cliente}" onclick="irParaClienteNoFiltro('${cliente.replace(/'/g,"\\'")}')">
+      ${nomeAbrev}
+    </td>`;
+    // Dias
+    dias.forEach(d => {
+      const fds = d.dow === 0 || d.dow === 6;
+      const isHoje = d.iso === hojeISO;
+      const chave = chaveNota(cliente, d.iso);
+      const texto = notas[chave] || '';
+      const temNota = texto.trim().length > 0;
+      let classes = 'td-dia';
+      if (fds) classes += ' fim-semana';
+      if (isHoje) classes += ' hoje';
+      if (temNota) classes += ' tem-nota';
+      const preview = temNota ? `<div class="cel-nota-preview has-text">${texto}</div>` : '';
+      tbody += `<td class="${classes}">
+        <div class="cel-dia${temNota?' tem-nota':''}" onclick="abrirNota('${cliente.replace(/'/g,"\\'")}','${d.iso}')">
+          ${preview}
+        </div>
+      </td>`;
+    });
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+
+  const tabela = document.getElementById('calTable');
+  if (tabela) tabela.innerHTML = thead + tbody;
+}
+
+function irParaClienteNoFiltro(nome) {
+  const input = document.getElementById('calFiltro');
+  if (!input) return;
+  input.value = input.value === nome ? '' : nome;
+  renderizarCalendario();
+}
+
+// ── MODAL NOTA ───────────────────────────────
+function abrirNota(cliente, iso) {
+  notaAtiva = { cliente, iso };
+  const d = new Date(iso + 'T12:00:00');
+  const diaSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'][d.getDay()];
+  document.getElementById('modalNotaTitulo').textContent = cliente.length > 45 ? cliente.substring(0,43)+'…' : cliente;
+  document.getElementById('modalNotaSub').textContent = `${diaSemana}, ${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}`;
+  const chave = chaveNota(cliente, iso);
+  document.getElementById('modalNotaTexto').value = notas[chave] || '';
+  document.getElementById('modalNota').classList.add('open');
+  setTimeout(() => document.getElementById('modalNotaTexto').focus(), 100);
+}
+
+function fecharModalNota() {
+  document.getElementById('modalNota').classList.remove('open');
+  notaAtiva = null;
+}
+
+function salvarNota() {
+  if (!notaAtiva) return;
+  const texto = document.getElementById('modalNotaTexto').value.trim();
+  const chave = chaveNota(notaAtiva.cliente, notaAtiva.iso);
+  if (texto) {
+    notas[chave] = texto;
+  } else {
+    delete notas[chave];
+  }
+  salvarNotas();
+  fecharModalNota();
+  renderizarCalendario();
+  renderizarAlertas();
+  mostrarToast('✦ Anotação salva!');
+}
+
+// Fechar modal clicando fora
+document.getElementById('modalNota').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalNota();
+});
+
+// Renderizar alertas ao carregar
+window.addEventListener('load', () => {
+  setTimeout(renderizarAlertas, 500);
+});
+</script>
+
+<!-- ══════════════════════════════════════════════
+     PÁGINA COMISSÕES
+══════════════════════════════════════════════ -->
+<style>
+#page-comissoes { display:none; flex-direction:column; overflow-y:auto; padding:28px 32px; gap:20px; }
+#page-comissoes.active { display:flex; height:calc(100vh - 104px); }
+
+.com-header-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.com-card { background:var(--dark); border-radius:var(--radius); padding:20px 22px; border:1px solid var(--dark3); }
+.com-card-label { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#6A8AAA; margin-bottom:6px; }
+.com-card-value { font-family:'Playfair Display',serif; font-size:32px; color:var(--gold); line-height:1; }
+.com-card-sub { font-size:12px; color:#5A7A9A; margin-top:5px; }
+
+.com-taxa-selector { display:flex; align-items:center; gap:10px; }
+.com-taxa-btn { padding:8px 18px; border-radius:8px; border:2px solid var(--cream2); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:700; font-size:14px; color:var(--muted); transition:all .15s; }
+.com-taxa-btn:hover { border-color:var(--gold); color:var(--gold); }
+.com-taxa-btn.active { background:var(--gold); color:white; border-color:var(--gold); }
+
+.com-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--cream2); overflow:hidden; }
+.com-table { width:100%; border-collapse:collapse; }
+.com-table thead th { background:var(--dark); color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:1px; padding:12px 16px; text-align:left; font-weight:600; }
+.com-table thead th:not(:first-child) { text-align:right; }
+.com-table tbody tr { border-bottom:1px solid var(--cream2); transition:background .12s; }
+.com-table tbody tr:hover { background:var(--cream); }
+.com-table tbody tr:last-child { border-bottom:none; font-weight:700; background:#F0F5FA; }
+.com-table td { padding:12px 16px; font-size:13px; }
+.com-table td:not(:first-child) { text-align:right; }
+.com-table td.td-cliente-com { font-weight:600; }
+.com-table td.td-valor { color:var(--text); }
+.com-table td.td-com { color:#2E7D52; font-weight:700; }
+.com-table td.td-total-row { font-weight:700; font-size:14px; }
+.com-table td.td-total-row.td-com { font-size:15px; color:#1A6A42; }
+
+.com-form-wrap { background:white; border-radius:var(--radius); border:1px solid var(--cream2); padding:22px 24px; }
+.com-form-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--text); margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+.com-form-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:10px; align-items:end; }
+.com-input-group label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:4px; font-weight:600; }
+.com-input-group input, .com-input-group select {
+  width:100%; padding:9px 12px; border:1px solid var(--cream2); border-radius:8px;
+  font-family:'DM Sans',sans-serif; font-size:13px; outline:none; color:var(--text);
+  transition:border-color .2s;
+}
+.com-input-group input:focus, .com-input-group select:focus { border-color:var(--gold); }
+
+.com-mes-nav { display:flex; align-items:center; gap:8px; }
+.com-mes-nav button { background:var(--cream2); border:none; border-radius:6px; padding:5px 11px; cursor:pointer; font-size:13px; font-family:'DM Sans',sans-serif; transition:background .15s; }
+.com-mes-nav button:hover { background:var(--gold); color:white; }
+.com-mes-titulo { font-family:'Playfair Display',serif; font-size:16px; color:var(--text); min-width:160px; }
+
+.com-section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.com-section-title { font-size:13px; font-weight:700; color:var(--text); }
+
+.badge-taxa { display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:12px; }
+.badge-05 { background:#EBF5FF; color:#2C6F9A; }
+.badge-08 { background:#EDF4FF; color:#3A5F95; }
+.badge-10 { background:#E8F5ED; color:#2E7D52; }
+
+.com-resumo-taxas { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.com-taxa-card { border-radius:8px; padding:14px 16px; border:1px solid var(--cream2); text-align:center; }
+.com-taxa-card .ctc-taxa { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.com-taxa-card .ctc-base { font-size:12px; color:var(--muted); margin-bottom:4px; }
+.com-taxa-card .ctc-valor { font-family:'Playfair Display',serif; font-size:24px; color:var(--text); }
+</style>
+
+<div id="page-comissoes" class="page">
+
+  <!-- HEADER: mês + taxa seletora -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="com-mes-nav">
+        <button onclick="comMesAnterior()">◀</button>
+        <div class="com-mes-titulo" id="comMesTitulo"></div>
+        <button onclick="comMesProximo()">▶</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:12px;color:var(--muted);font-weight:600;">Taxa de comissão:</span>
+      <div class="com-taxa-selector">
+        <button class="com-taxa-btn active" data-taxa="0.5" onclick="selecionarTaxa(this)">0,5%</button>
+        <button class="com-taxa-btn" data-taxa="0.8" onclick="selecionarTaxa(this)">0,8%</button>
+        <button class="com-taxa-btn" data-taxa="1.0" onclick="selecionarTaxa(this)">1,0%</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="com-header-cards">
+    <div class="com-card">
+      <div class="com-card-label">Total Vendido no Mês</div>
+      <div class="com-card-value" id="com-total-vendido">R$ 0</div>
+      <div class="com-card-sub" id="com-total-sub">0 vendas registradas</div>
+    </div>
+    <div class="com-card">
+      <div class="com-card-label">Sua Comissão (<span id="com-taxa-label">0,5%</span>)</div>
+      <div class="com-card-value" style="color:#5BC490;" id="com-total-comissao">R$ 0</div>
+      <div class="com-card-sub" id="com-comissao-sub">sobre o total vendido</div>
+    </div>
+    <div class="com-card">
+      <div class="com-card-label">Maior Venda do Mês</div>
+      <div class="com-card-value" id="com-maior-venda">R$ 0</div>
+      <div class="com-card-sub" id="com-maior-cliente">—</div>
+    </div>
+    <div class="com-card">
+      <div class="com-card-label">Ticket Médio</div>
+      <div class="com-card-value" id="com-ticket-medio">R$ 0</div>
+      <div class="com-card-sub">por venda fechada</div>
+    </div>
+  </div>
+
+  <!-- RESUMO POR TAXA -->
+  <div style="background:white;border-radius:var(--radius);border:1px solid var(--cream2);padding:20px 24px;">
+    <div class="com-section-header">
+      <div class="com-section-title">Simulação por Taxa de Comissão</div>
+      <div style="font-size:12px;color:var(--muted);">Baseado no total vendido no mês</div>
+    </div>
+    <div class="com-resumo-taxas">
+      <div class="com-taxa-card" style="background:#EBF5FF;">
+        <div class="ctc-taxa">Taxa 0,5%</div>
+        <div class="ctc-base" id="sim-base-05"></div>
+        <div class="ctc-valor" id="sim-val-05">R$ 0</div>
+      </div>
+      <div class="com-taxa-card" style="background:#EDF4FF;">
+        <div class="ctc-taxa">Taxa 0,8%</div>
+        <div class="ctc-base" id="sim-base-08"></div>
+        <div class="ctc-valor" id="sim-val-08">R$ 0</div>
+      </div>
+      <div class="com-taxa-card" style="background:#E8F5ED;">
+        <div class="ctc-taxa">Taxa 1,0%</div>
+        <div class="ctc-base" id="sim-base-10"></div>
+        <div class="ctc-valor" id="sim-val-10">R$ 0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA DE VENDAS -->
+  <div class="com-table-wrap">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--cream2);display:flex;align-items:center;justify-content:space-between;">
+      <div class="com-section-title">Vendas Registradas no Mês</div>
+      <button onclick="abrirFormVenda()" style="background:var(--gold);color:white;border:none;border-radius:8px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;">+ Nova Venda</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="com-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Data</th>
+            <th>Produtos</th>
+            <th>Valor Vendido</th>
+            <th>Com. 0,5%</th>
+            <th>Com. 0,8%</th>
+            <th>Com. 1,0%</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="comTabelaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO NOVA VENDA -->
+  <div class="com-form-wrap" id="comFormWrap" style="display:none;">
+    <div class="com-form-title">
+      ✦ Registrar Nova Venda
+      <button onclick="fecharFormVenda()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;">×</button>
+    </div>
+    <div class="com-form-grid">
+      <div class="com-input-group">
+        <label>Cliente</label>
+        <input type="text" id="com-cliente" placeholder="Nome do cliente..." list="lista-clientes-com">
+        <datalist id="lista-clientes-com"></datalist>
+      </div>
+      <div class="com-input-group">
+        <label>Data</label>
+        <input type="date" id="com-data">
+      </div>
+      <div class="com-input-group">
+        <label>Produtos</label>
+        <input type="text" id="com-produtos" placeholder="Ex: KATANA, ALMA...">
+      </div>
+      <div class="com-input-group">
+        <label>Valor da Venda (R$)</label>
+        <input type="number" id="com-valor" placeholder="0,00" min="0" step="0.01" oninput="previewComissao()">
+      </div>
+      <div class="com-input-group">
+        <label>&nbsp;</label>
+        <button onclick="salvarVendaComissao()" style="width:100%;padding:9px 16px;background:var(--gold);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">Salvar</button>
+      </div>
+    </div>
+    <div id="com-preview" style="margin-top:14px;padding:12px 16px;background:var(--cream);border-radius:8px;display:none;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Preview de Comissão</div>
+      <div style="display:flex;gap:20px;">
+        <div><span style="font-size:11px;color:var(--muted);">0,5% → </span><strong id="prev-05" style="color:#2C6F9A;">R$ 0</strong></div>
+        <div><span style="font-size:11px;color:var(--muted);">0,8% → </span><strong id="prev-08" style="color:#3A5F95;">R$ 0</strong></div>
+        <div><span style="font-size:11px;color:var(--muted);">1,0% → </span><strong id="prev-10" style="color:#2E7D52;">R$ 0</strong></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-comissoes -->
+
+<script>
+// ══════════════════════════════════════════════
+// COMISSÕES
+// ══════════════════════════════════════════════
+let vendas = JSON.parse(localStorage.getItem('karams_vendas') || '[]');
+let comTaxaAtiva = 0.5;
+let comAno  = new Date().getFullYear();
+let comMes  = new Date().getMonth();
+
+function salvarVendas() { try { localStorage.setItem('karams_vendas', JSON.stringify(vendas)); } catch(e) {} }
+
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function vendasDoMes() {
+  return vendas.filter(v => {
+    const d = new Date(v.data + 'T12:00:00');
+    return d.getFullYear() === comAno && d.getMonth() === comMes;
+  });
+}
+
+function fmtR(n) { return 'R$ ' + (n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function renderizarComissoes() {
+  // Título mês
+  const el = document.getElementById('comMesTitulo');
+  if (el) el.textContent = MESES[comMes] + ' ' + comAno;
+
+  // Popular datalist
+  const dl = document.getElementById('lista-clientes-com');
+  if (dl) dl.innerHTML = todosClientes().map(c=>`<option value="${c.cliente}">`).join('');
+
+  // Data default
+  const dataInput = document.getElementById('com-data');
+  if (dataInput && !dataInput.value) dataInput.value = new Date().toISOString().split('T')[0];
+
+  const lista = vendasDoMes();
+  const totalVendido = lista.reduce((s,v) => s + (parseFloat(v.valor)||0), 0);
+  const numVendas = lista.length;
+  const maior = lista.reduce((m,v) => (parseFloat(v.valor)||0) > (parseFloat(m.valor)||0) ? v : m, {valor:0,cliente:''});
+  const ticket = numVendas > 0 ? totalVendido / numVendas : 0;
+
+  // KPIs
+  document.getElementById('com-total-vendido').textContent = fmtR(totalVendido);
+  document.getElementById('com-total-sub').textContent = `${numVendas} venda${numVendas!==1?'s':''} registrada${numVendas!==1?'s':''}`;
+  document.getElementById('com-total-comissao').textContent = fmtR(totalVendido * comTaxaAtiva / 100);
+  document.getElementById('com-taxa-label').textContent = comTaxaAtiva.toFixed(1).replace('.',',') + '%';
+  document.getElementById('com-comissao-sub').textContent = `taxa ${comTaxaAtiva.toFixed(1).replace('.',',')}% sobre ${fmtR(totalVendido)}`;
+  document.getElementById('com-maior-venda').textContent = fmtR(parseFloat(maior.valor)||0);
+  document.getElementById('com-maior-cliente').textContent = maior.cliente || '—';
+  document.getElementById('com-ticket-medio').textContent = fmtR(ticket);
+
+  // Simulação por taxa
+  ['05','08','10'].forEach(t => {
+    const taxa = t === '05' ? 0.5 : t === '08' ? 0.8 : 1.0;
+    document.getElementById(`sim-base-${t}`).textContent = `sobre ${fmtR(totalVendido)}`;
+    document.getElementById(`sim-val-${t}`).textContent = fmtR(totalVendido * taxa / 100);
+  });
+
+  // Tabela
+  const tbody = document.getElementById('comTabelaBody');
+  if (!tbody) return;
+
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">
+      Nenhuma venda registrada neste mês.<br>
+      <span style="font-size:12px;">Clique em "+ Nova Venda" para registrar.</span>
+    </td></tr>`;
+    return;
+  }
+
+  // Linhas de vendas
+  const linhas = lista.slice().sort((a,b) => b.data.localeCompare(a.data)).map((v,i) => {
+    const val = parseFloat(v.valor)||0;
+    const idx = vendas.indexOf(v);
+    const dataFmt = new Date(v.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'2-digit'});
+    return `<tr>
+      <td class="td-cliente-com">${v.cliente}</td>
+      <td>${dataFmt}</td>
+      <td style="color:var(--muted);font-size:12px;">${v.produtos||'—'}</td>
+      <td class="td-valor">${fmtR(val)}</td>
+      <td class="td-com"><span class="badge-taxa badge-05">${fmtR(val*0.005)}</span></td>
+      <td class="td-com"><span class="badge-taxa badge-08">${fmtR(val*0.008)}</span></td>
+      <td class="td-com"><span class="badge-taxa badge-10">${fmtR(val*0.01)}</span></td>
+      <td><button onclick="excluirVenda(${idx})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 6px;" title="Excluir">✕</button></td>
+    </tr>`;
+  });
+
+  // Linha de totais
+  const totais = `<tr>
+    <td class="td-total-row" colspan="3">TOTAL DO MÊS</td>
+    <td class="td-total-row td-valor">${fmtR(totalVendido)}</td>
+    <td class="td-total-row td-com">${fmtR(totalVendido*0.005)}</td>
+    <td class="td-total-row td-com">${fmtR(totalVendido*0.008)}</td>
+    <td class="td-total-row td-com">${fmtR(totalVendido*0.01)}</td>
+    <td></td>
+  </tr>`;
+
+  tbody.innerHTML = linhas.join('') + totais;
+}
+
+function selecionarTaxa(el) {
+  document.querySelectorAll('.com-taxa-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  comTaxaAtiva = parseFloat(el.dataset.taxa);
+  renderizarComissoes();
+}
+
+function comMesAnterior() { comMes--; if(comMes<0){comMes=11;comAno--;} renderizarComissoes(); }
+function comMesProximo()  { comMes++; if(comMes>11){comMes=0;comAno++;} renderizarComissoes(); }
+
+function abrirFormVenda() {
+  document.getElementById('comFormWrap').style.display = 'block';
+  document.getElementById('com-cliente').focus();
+}
+function fecharFormVenda() {
+  document.getElementById('comFormWrap').style.display = 'none';
+  document.getElementById('com-preview').style.display = 'none';
+}
+
+function previewComissao() {
+  const val = parseFloat(document.getElementById('com-valor').value)||0;
+  const prev = document.getElementById('com-preview');
+  if (val > 0) {
+    prev.style.display = 'block';
+    document.getElementById('prev-05').textContent = fmtR(val*0.005);
+    document.getElementById('prev-08').textContent = fmtR(val*0.008);
+    document.getElementById('prev-10').textContent = fmtR(val*0.01);
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function salvarVendaComissao() {
+  const cliente  = document.getElementById('com-cliente').value.trim();
+  const data     = document.getElementById('com-data').value;
+  const produtos = document.getElementById('com-produtos').value.trim();
+  const valor    = parseFloat(document.getElementById('com-valor').value)||0;
+
+  if (!cliente) { mostrarToast('⚠️ Informe o nome do cliente.'); return; }
+  if (!data)    { mostrarToast('⚠️ Informe a data.'); return; }
+  if (!valor)   { mostrarToast('⚠️ Informe o valor da venda.'); return; }
+
+  vendas.push({ cliente, data, produtos, valor });
+  salvarVendas();
+
+  // Também registrar no dashboard de contatos como venda
+  contatos.push({ data, cliente, resultado:'venda', obs: produtos, valor });
+  salvar();
+
+  // Limpar form
+  document.getElementById('com-cliente').value = '';
+  document.getElementById('com-produtos').value = '';
+  document.getElementById('com-valor').value = '';
+  document.getElementById('com-preview').style.display = 'none';
+  fecharFormVenda();
+
+  mostrarToast('✦ Venda registrada!');
+  renderizarComissoes();
+}
+
+function excluirVenda(idx) {
+  if (!confirm('Excluir esta venda?')) return;
+  vendas.splice(idx,1);
+  salvarVendas();
+  renderizarComissoes();
+  mostrarToast('Venda excluída.');
+}
+</script>
+
+<!-- ══════════════════════════════════════════════
+     MODAL NOVO CLIENTE
+══════════════════════════════════════════════ -->
+<style>
+.modal-lg { background:white; border-radius:12px; padding:0; width:580px; max-width:95vw; border-top:3px solid var(--gold); overflow:hidden; }
+.modal-lg-header { padding:20px 26px 16px; border-bottom:1px solid var(--cream2); }
+.modal-lg-header h3 { font-family:'Playfair Display',serif; font-size:20px; color:var(--text); }
+.modal-lg-header p { font-size:12px; color:var(--muted); margin-top:3px; }
+.modal-lg-body { padding:22px 26px; display:flex; flex-direction:column; gap:14px; max-height:70vh; overflow-y:auto; }
+.modal-lg-footer { padding:14px 26px 20px; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--cream2); }
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-group label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:4px; font-weight:600; }
+.field-group input, .field-group select, .field-group textarea {
+  width:100%; padding:9px 12px; border:1px solid var(--cream2); border-radius:8px;
+  font-family:'DM Sans',sans-serif; font-size:13px; outline:none; color:var(--text); transition:border-color .2s;
+}
+.field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color:var(--gold); }
+.field-group.full { grid-column:1/-1; }
+.tipo-selector { display:flex; gap:8px; }
+.tipo-btn { flex:1; padding:8px; border-radius:8px; border:2px solid var(--cream2); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--muted); transition:all .15s; text-align:center; }
+.tipo-btn.active { border-color:var(--gold); background:#EBF5FF; color:var(--gold); }
+
+/* ALERTA 3 DIAS */
+.alerta3-banner {
+  position:fixed; top:110px; right:20px; z-index:300;
+  background:white; border-radius:10px; border-left:4px solid var(--warning);
+  box-shadow:0 8px 32px rgba(0,0,0,.15); padding:0; width:320px;
+  overflow:hidden; display:none;
+}
+.alerta3-banner.show { display:block; animation: slideInRight .3s ease; }
+@keyframes slideInRight { from{transform:translateX(340px);opacity:0} to{transform:translateX(0);opacity:1} }
+.alerta3-header { background:var(--warning); color:white; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+.alerta3-header span { font-size:13px; font-weight:700; }
+.alerta3-lista { max-height:220px; overflow-y:auto; padding:8px 0; }
+.alerta3-item { padding:10px 14px; border-bottom:1px solid var(--cream2); cursor:pointer; transition:background .12s; }
+.alerta3-item:hover { background:var(--cream); }
+.alerta3-item:last-child { border-bottom:none; }
+.alerta3-nome { font-size:13px; font-weight:600; color:var(--text); }
+.alerta3-info { font-size:11px; color:var(--muted); margin-top:2px; }
+.alerta3-close { background:none;border:none;cursor:pointer;color:white;font-size:16px;line-height:1; }
+
+/* MODO VISUALIZAÇÃO */
+.view-mode-bar {
+  display:none; background:#1A3A5C; color:white;
+  padding:10px 32px; font-size:13px; align-items:center; justify-content:space-between;
+  border-bottom:2px solid #4A8AC0;
+}
+.view-mode-bar.active { display:flex; }
+
+/* MODAL SHARE */
+.share-box { background:#F4F6F8; border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+.share-url { font-size:12px; color:var(--text); word-break:break-all; font-family:monospace; background:white; padding:8px 10px; border-radius:6px; border:1px solid var(--cream2); margin-top:8px; }
+.share-instr { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; }
+</style>
+
+<!-- Barra modo visualização -->
+<div class="view-mode-bar" id="viewModeBar">
+  <div>👁 <strong>Modo Visualização</strong> — Somente leitura · Compartilhe este arquivo HTML para que outros possam ver</div>
+  <button onclick="sairModoVisualizacao()" style="background:none;border:1px solid rgba(255,255,255,.4);color:white;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;">✕ Fechar</button>
+</div>
+
+<!-- Alerta 3 dias -->
+<div class="alerta3-banner" id="alerta3Banner">
+  <div class="alerta3-header">
+    <span>🔔 Retorno em 3 dias</span>
+    <button class="alerta3-close" onclick="fecharAlerta3()">✕</button>
+  </div>
+  <div class="alerta3-lista" id="alerta3Lista"></div>
+</div>
+
+<!-- Modal Novo Cliente -->
+<div class="modal-overlay" id="modalNovoCliente">
+  <div class="modal-lg">
+    <div class="modal-lg-header">
+      <h3>+ Cadastrar Novo Cliente</h3>
+      <p>Preencha os dados e escolha a categoria do cliente</p>
+    </div>
+    <div class="modal-lg-body">
+      <div class="field-group">
+        <label>Categoria do Cliente</label>
+        <div class="tipo-selector">
+          <div class="tipo-btn active" data-tipo="ativo" onclick="selecionarTipoCliente(this)">✅ Ativo</div>
+          <div class="tipo-btn" data-tipo="adormecido" onclick="selecionarTipoCliente(this)">😴 Adormecido</div>
+          <div class="tipo-btn" data-tipo="prospecto" onclick="selecionarTipoCliente(this)">🔍 Prospecção</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group full">
+          <label>Nome do Cliente / Empresa *</label>
+          <input type="text" id="nc-nome" placeholder="Ex: CASA DECOR LTDA">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Cidade</label>
+          <input type="text" id="nc-cidade" placeholder="Ex: Belo Horizonte">
+        </div>
+        <div class="field-group">
+          <label>Estado</label>
+          <select id="nc-estado">
+            <option value="">—</option>
+            <option>AC</option><option>AL</option><option>AM</option><option>AP</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MG</option><option>MS</option>
+            <option>MT</option><option>PA</option><option>PB</option><option>PE</option>
+            <option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+            <option>RO</option><option>RR</option><option>RS</option><option>SC</option>
+            <option>SE</option><option>SP</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Telefone / WhatsApp</label>
+          <input type="text" id="nc-telefone" placeholder="(00) 00000-0000">
+        </div>
+        <div class="field-group">
+          <label>Responsável</label>
+          <input type="text" id="nc-responsavel" placeholder="Nome do contato">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Instagram</label>
+          <input type="text" id="nc-instagram" placeholder="@loja ou URL">
+        </div>
+        <div class="field-group">
+          <label>Data do Primeiro Contato</label>
+          <input type="date" id="nc-data">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Endereço</label>
+        <input type="text" id="nc-endereco" placeholder="Rua, número, bairro, CEP">
+      </div>
+      <div class="field-group">
+        <label>Produtos de Interesse / Exclusividade</label>
+        <input type="text" id="nc-modelos" placeholder="Ex: KATANA-ALMA-DESIRE (separe por -)">
+      </div>
+      <div class="field-group">
+        <label>Observações / Feedback inicial</label>
+        <textarea id="nc-obs" rows="3" placeholder="O que foi conversado no primeiro contato..."></textarea>
+      </div>
+      <!-- Alerta 3 dias -->
+      <div style="background:#FFF8F0;border:1px solid #F5C88A;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="nc-alerta3" checked style="width:16px;height:16px;cursor:pointer;">
+        <label for="nc-alerta3" style="font-size:13px;color:var(--text);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400;">
+          🔔 <strong>Criar alerta de retorno em 3 dias</strong> — Notificar para entrar em contato novamente
+        </label>
+      </div>
+    </div>
+    <div class="modal-lg-footer">
+      <button class="btn btn-secondary" onclick="fecharModalNovoCliente()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarNovoCliente()">✦ Cadastrar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Compartilhar -->
+<div class="modal-overlay" id="modalShare">
+  <div class="modal" style="width:500px;">
+    <h3>👁 Compartilhar — Somente Leitura</h3>
+    <div class="share-box">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Como funciona:</div>
+      <div class="share-instr">
+        1. Baixe o arquivo HTML clicando no botão abaixo<br>
+        2. Envie o arquivo para quem precisa visualizar (WhatsApp, e-mail, etc.)<br>
+        3. A pessoa abre o arquivo no navegador — <strong>somente leitura</strong>, sem poder editar<br>
+        4. Os dados são exportados junto com o arquivo
+      </div>
+    </div>
+    <div class="share-box">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">📊 Resumo que será exportado:</div>
+      <div id="shareResumo" style="font-size:12px;color:var(--muted);line-height:1.8;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+      <button class="btn btn-primary" style="width:100%;" onclick="exportarVisualizacao()">⬇ Baixar Arquivo de Visualização</button>
+      <button class="btn btn-secondary" style="width:100%;margin:0;" onclick="fecharModalShare()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// NOVO CLIENTE
+// ══════════════════════════════════════════════
+let novoClienteTipo = 'ativo';
+
+function abrirModalNovoCliente() {
+  novoClienteTipo = 'ativo';
+  document.getElementById('nc-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('nc-nome').value = '';
+  document.getElementById('nc-cidade').value = '';
+  document.getElementById('nc-estado').value = '';
+  document.getElementById('nc-telefone').value = '';
+  document.getElementById('nc-responsavel').value = '';
+  document.getElementById('nc-instagram').value = '';
+  document.getElementById('nc-endereco').value = '';
+  document.getElementById('nc-modelos').value = '';
+  document.getElementById('nc-obs').value = '';
+  document.getElementById('nc-alerta3').checked = true;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tipo-btn[data-tipo="ativo"]').classList.add('active');
+  document.getElementById('modalNovoCliente').classList.add('open');
+  setTimeout(() => document.getElementById('nc-nome').focus(), 100);
+}
+
+function fecharModalNovoCliente() {
+  document.getElementById('modalNovoCliente').classList.remove('open');
+}
+
+function selecionarTipoCliente(el) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  novoClienteTipo = el.dataset.tipo;
+}
+
+function gerarId(prefixo) {
+  return prefixo + '_' + Date.now();
+}
+
+function salvarNovoCliente() {
+  const nome = document.getElementById('nc-nome').value.trim().toUpperCase();
+  if (!nome) { mostrarToast('⚠️ Informe o nome do cliente.'); return; }
+
+  const novo = {
+    id: gerarId(novoClienteTipo[0]),
+    cliente: nome,
+    cidade: document.getElementById('nc-cidade').value.trim().toUpperCase(),
+    estado: document.getElementById('nc-estado').value,
+    telefone: document.getElementById('nc-telefone').value.trim(),
+    responsavel: document.getElementById('nc-responsavel').value.trim(),
+    instagram: document.getElementById('nc-instagram').value.trim(),
+    endereco: document.getElementById('nc-endereco').value.trim(),
+    modelos: document.getElementById('nc-modelos').value.trim().toUpperCase(),
+    feedback: document.getElementById('nc-obs').value.trim(),
+    data: document.getElementById('nc-data').value,
+    data_contato: document.getElementById('nc-data').value
+      ? new Date(document.getElementById('nc-data').value+'T12:00:00').toLocaleDateString('pt-BR')
+      : '',
+    historicoVendas: [],
+    novosProdutos: []
+  };
+
+  // Adicionar na lista correta
+  if (novoClienteTipo === 'ativo') dados.ativos.push(novo);
+  else if (novoClienteTipo === 'adormecido') dados.adormecidos.push(novo);
+  else dados.prospeccao.push(novo);
+
+  // Alerta 3 dias
+  if (document.getElementById('nc-alerta3').checked && novo.data) {
+    let alertas3 = JSON.parse(localStorage.getItem('karams_alertas3') || '[]');
+    const dataAlerta = new Date(novo.data + 'T12:00:00');
+    dataAlerta.setDate(dataAlerta.getDate() + 3);
+    alertas3.push({
+      cliente: nome,
+      tipo: novoClienteTipo,
+      dataContato: novo.data,
+      dataAlerta: dataAlerta.toISOString().split('T')[0],
+      dispensado: false
+    });
+    localStorage.setItem('karams_alertas3', JSON.stringify(alertas3));
+  }
+
+  salvar();
+  fecharModalNovoCliente();
+  renderizarLista();
+  verificarAlertas3Dias();
+  mostrarToast('✦ Cliente ' + nome + ' cadastrado!');
+
+  // Selecionar o novo cliente
+  setTimeout(() => selecionarCliente(novo.id, novoClienteTipo), 300);
+}
+
+// ══════════════════════════════════════════════
+// ALERTAS 3 DIAS
+// ══════════════════════════════════════════════
+function verificarAlertas3Dias() {
+  const hoje = new Date().toISOString().split('T')[0];
+  let alertas3 = JSON.parse(localStorage.getItem('karams_alertas3') || '[]');
+
+  const pendentes = alertas3.filter(a => !a.dispensado && a.dataAlerta <= hoje);
+  const banner = document.getElementById('alerta3Banner');
+  const lista = document.getElementById('alerta3Lista');
+
+  if (!pendentes.length) { banner.classList.remove('show'); return; }
+
+  lista.innerHTML = pendentes.map((a, i) => {
+    const dataFmt = new Date(a.dataContato+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    const diasPassados = Math.floor((new Date() - new Date(a.dataContato+'T12:00:00')) / 86400000);
+    return `<div class="alerta3-item" onclick="dispensarAlerta3(${alertas3.indexOf(a)})">
+      <div class="alerta3-nome">${a.cliente}</div>
+      <div class="alerta3-info">1º contato: ${dataFmt} · Há ${diasPassados} dia${diasPassados!==1?'s':''}</div>
+      <div style="font-size:10px;color:var(--warning);margin-top:3px;">Clique para marcar como contatado ✓</div>
+    </div>`;
+  }).join('');
+
+  banner.classList.add('show');
+}
+
+function fecharAlerta3() {
+  document.getElementById('alerta3Banner').classList.remove('show');
+}
+
+function dispensarAlerta3(idx) {
+  let alertas3 = JSON.parse(localStorage.getItem('karams_alertas3') || '[]');
+  if (alertas3[idx]) alertas3[idx].dispensado = true;
+  localStorage.setItem('karams_alertas3', JSON.stringify(alertas3));
+  verificarAlertas3Dias();
+  mostrarToast('✓ Contato registrado como realizado!');
+}
+
+// Checar alertas ao carregar
+window.addEventListener('load', () => {
+  setTimeout(verificarAlertas3Dias, 800);
+});
+
+// ══════════════════════════════════════════════
+// COMPARTILHAR — MODO VISUALIZAÇÃO
+// ══════════════════════════════════════════════
+function abrirModoVisualizacao() {
+  // Montar resumo
+  const total = dados.ativos.length + dados.adormecidos.length + dados.prospeccao.length;
+  const vendTotal = (typeof vendas !== 'undefined' ? vendas : []).length;
+  document.getElementById('shareResumo').innerHTML = `
+    👥 ${dados.ativos.length} clientes ativos<br>
+    😴 ${dados.adormecidos.length} clientes adormecidos<br>
+    🔍 ${dados.prospeccao.length} em prospecção<br>
+    💰 ${vendTotal} vendas registradas<br>
+    📅 Calendário de relacionamento incluído
+  `;
+  document.getElementById('modalShare').classList.add('open');
+}
+
+function fecharModalShare() {
+  document.getElementById('modalShare').classList.remove('open');
+}
+
+function exportarVisualizacao() {
+  // Pegar HTML atual e injetar dados + modo somente leitura
+  const snap = {
+    dados,
+    contatos: typeof contatos !== 'undefined' ? contatos : [],
+    metas: typeof metas !== 'undefined' ? metas : {},
+    notas: typeof notas !== 'undefined' ? notas : {},
+    vendas: typeof vendas !== 'undefined' ? vendas : []
+  };
+
+  // Ler o HTML atual e adicionar script de readonly no topo do body
+  let html = document.documentElement.outerHTML;
+
+  // Injetar snapshot dos dados e modo readonly
+  const injecao = '<scr' + 'ipt>\n// MODO SOMENTE LEITURA — gerado em ' + new Date().toLocaleString('pt-BR') + '\nwindow.__READONLY_MODE__ = true;\nwindow.__SNAPSHOT__ = ' + JSON.stringify(snap) + ';\n<\/scr' + 'ipt>';
+
+  html = html.replace('<body>', '<body>' + injecao);
+
+  // Adicionar CSS de readonly: desabilitar todos os botões e inputs
+  const readonlyCss = `<style>
+/* MODO VISUALIZAÇÃO */
+button:not(.nav-tab):not(.fbtn):not([onclick*="trocarPagina"]):not([onclick*="setFiltro"]):not([onclick*="selecionarCliente"]):not([onclick*="calMes"]):not([onclick*="comMes"]):not([onclick*="semana"]):not([onclick*="selecionarDia"]):not([onclick*="fechar"]):not([onclick*="proxima"]):not([onclick*="anterior"]) { pointer-events:none!important; opacity:0.4!important; }
+input, textarea, select { pointer-events:none!important; background:#F8F8F8!important; }
+.form-nova-venda, #comFormWrap, .cal-controls input, .sidebar-search input { display:none!important; }
+header button:not([onclick*="trocarPagina"]) { display:none!important; }
+.view-mode-bar { display:flex!important; }
+</style>`;
+
+  html = html.replace('</head>', readonlyCss + '</head>');
+
+  // Download
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Karams_CRM_Visualizacao_' + new Date().toLocaleDateString('pt-BR').replace(/\//g,'-') + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  fecharModalShare();
+  mostrarToast('✦ Arquivo gerado! Compartilhe com sua equipe.');
+}
+
+function sairModoVisualizacao() {
+  document.getElementById('viewModeBar').classList.remove('active');
+}
+
+// Aplicar snapshot se estiver em modo readonly
+if (window.__READONLY_MODE__ && window.__SNAPSHOT__) {
+  const s = window.__SNAPSHOT__;
+  if (s.dados) { Object.assign(dados, s.dados); }
+  if (s.contatos) contatos.splice(0, contatos.length, ...s.contatos);
+  if (s.metas) Object.assign(metas, s.metas);
+  document.getElementById('viewModeBar').classList.add('active');
+}
+</script>

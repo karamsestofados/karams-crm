@@ -1,0 +1,535 @@
+{
+  "ativos": [
+    {
+      "id": "a1",
+      "cliente": "DUBAMBU COMERCIAL",
+      "cidade": "JUIZ DE FORA",
+      "estado": "MG",
+      "modelos": "YUMI-MALTA-VELVET-GROU-CAMALEÃO-MASIP-ALMA-GEMA-VUOTO-AFFAIR-MATSU-BOLD-GIOTTO-MORONE-DONCELLA-DAYBED-BEA-NEMO-BOJO-KATANA-EQUILIBRIO",
+      "endereco": "Av. Deusdedith Salgado, 1551 - Teixeiras, Juiz de Fora"
+    },
+    {
+      "id": "a2",
+      "cliente": "ESSENCIAL DECORAÇÃO",
+      "cidade": "IPATINGA",
+      "estado": "MG",
+      "modelos": "YUMI-GEMA-AKIRA-MATSU-BOLD-KIMI-KATANA-GORDON-POL. NUBIA-LUZ-BEA-VOLO-PO.TORINO CAMA TORINO",
+      "endereco": "Av. Carlos Chagas, 625 - Cidade Nobre, Ipatinga"
+    },
+    {
+      "id": "a3",
+      "cliente": "VITORIA MOVEIS",
+      "cidade": "IGARAPÉ",
+      "estado": "MG",
+      "modelos": "ALMA-MOVE-DREAM LIVING-KIMI-KATANA-POL.NUBIA",
+      "endereco": "Av. Raja Gabáglia 3117, São Bento, Belo Horizonte"
+    },
+    {
+      "id": "a4",
+      "cliente": "CAPOBIANGO MOVEIS",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "",
+      "endereco": "Ponteio Lar Shopping, BR 356-2500, Santa Lúcia - loja 106/107"
+    },
+    {
+      "id": "a5",
+      "cliente": "BARROCA INTERIORES - NEVES COMERCIAL",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "POLTRONA SYRAH-BLADE-MATTEO-KIMI-TORD-SYRAH-DONCELLA-NUBIA",
+      "endereco": "Av. Amazonas 3802, Belo Horizonte"
+    },
+    {
+      "id": "a6",
+      "cliente": "TT HOME ARTIGOS PARA DECORAÇÃO",
+      "cidade": "MONTES CLAROS",
+      "estado": "MG",
+      "modelos": "YUMI-KAZUMI-GEMA-FLUF-MOCHI-MASIP",
+      "endereco": "Av. Dep. Esteves Rodrigues, 884 - Centro, Montes Claros - MG"
+    },
+    {
+      "id": "a7",
+      "cliente": "DECOREBEM",
+      "cidade": "MONTES CLAROS",
+      "estado": "MG",
+      "modelos": "GARZON-MASIP-ALMA-VUOTO-GORDON-MORONE-LUZ-NUBE-TOAD",
+      "endereco": "Av. Dep. Esteves Rodrigues, 326 - Centro, Montes Claros - MG"
+    },
+    {
+      "id": "a8",
+      "cliente": "CASA MOLDE",
+      "cidade": "ITAPECERICA",
+      "estado": "MG",
+      "modelos": "URUPE-NUBIA",
+      "endereco": "Rua Vigário Antunes, 244 - Itapecerica, MG"
+    },
+    {
+      "id": "a9",
+      "cliente": "MCM MOVEIS",
+      "cidade": "PIRAPORA",
+      "estado": "MG",
+      "modelos": "LITTLE-PICASSO-MIOLO-WALL-VIDA-KATANA-GIOTTO",
+      "endereco": "Praça Coronel Ramos"
+    },
+    {
+      "id": "a10",
+      "cliente": "NUHAUS - TERCEIRO MILENIO",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "FLUF-POLT. NUBIA-SUGOI-LEDA",
+      "endereco": "Av. do Contorno, 4480, Belo Horizonte"
+    },
+    {
+      "id": "a11",
+      "cliente": "ADF DE SOUZA EIRELI",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "PUNCH-FLUF",
+      "endereco": ""
+    },
+    {
+      "id": "a12",
+      "cliente": "SANTA MOBILIARIO / MOVELARIA OLGA / TEMPLUM",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "MATSU-KIMI-ANKUR-EGON-TAIKO-SAMA-GROU ESPECIAL-SAINTS ESPECIAL",
+      "endereco": "Ponteio Shopping - BR-356, 2500 - Piso L2, Loja 233/254"
+    },
+    {
+      "id": "a13",
+      "cliente": "DUO MOVEIS",
+      "cidade": "SÃO JOÃO DEL REI",
+      "estado": "MG",
+      "modelos": "VUOTO-POTI",
+      "endereco": "Av. Trinta e Um de Março 1821, São João Del Rei"
+    },
+    {
+      "id": "a14",
+      "cliente": "TOQUE DE CLASSE ARTIGOS",
+      "cidade": "MONTES CLAROS",
+      "estado": "MG",
+      "modelos": "POL.NEMO",
+      "endereco": ""
+    },
+    {
+      "id": "a15",
+      "cliente": "RELIQUIA PLANEJADOS",
+      "cidade": "GOVERNADOR VALADARES",
+      "estado": "MG",
+      "modelos": "AFFAIR",
+      "endereco": "R. Israel Pinheiro, 1983 - São Pedro, Gov. Valadares - MG"
+    },
+    {
+      "id": "a16",
+      "cliente": "CORES E INTERIORES DECORAÇÃO",
+      "cidade": "ITAÚNA",
+      "estado": "MG",
+      "modelos": "YUMI-KIMI-DONCELLA-SHIZEN",
+      "endereco": "Rua Silva Jardim, 255, Itaúna"
+    },
+    {
+      "id": "a17",
+      "cliente": "MARROCOS INTERIORES - THELA",
+      "cidade": "LAGOA SANTA",
+      "estado": "MG",
+      "modelos": "DESIRE",
+      "endereco": ""
+    },
+    {
+      "id": "a18",
+      "cliente": "JUCELIA PEREIRA RIBEIRO",
+      "cidade": "CONSELHEIRO LAFAIETE",
+      "estado": "MG",
+      "modelos": "BANCO FLUX-TOAD",
+      "endereco": ""
+    },
+    {
+      "id": "a19",
+      "cliente": "SUPER SETE COMERCIO",
+      "cidade": "GOVERNADOR VALADARES",
+      "estado": "MG",
+      "modelos": "ANKUR-FUJI",
+      "endereco": ""
+    },
+    {
+      "id": "a20",
+      "cliente": "BARRA LONGA - OURO DECOR",
+      "cidade": "OURO PRETO",
+      "estado": "MG",
+      "modelos": "OCA-POTI-LUZ",
+      "endereco": ""
+    },
+    {
+      "id": "a21",
+      "cliente": "LIRIOS",
+      "cidade": "MANAUS",
+      "estado": "AM",
+      "modelos": "FUJI-GIOTTO-TORD",
+      "endereco": ""
+    },
+    {
+      "id": "a22",
+      "cliente": "HOME OBJETOS",
+      "cidade": "PORTO VELHO",
+      "estado": "RO",
+      "modelos": "CARYBÉ-GROU TWISTY-SILVESTER",
+      "endereco": ""
+    },
+    {
+      "id": "a23",
+      "cliente": "CASA LYZ DENISE",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "LASSO-FUJI-EQUILIBRIO",
+      "endereco": ""
+    },
+    {
+      "id": "a24",
+      "cliente": "GAIA INTERIORES",
+      "cidade": "TOCANTINS",
+      "estado": "TO",
+      "modelos": "DESIRE",
+      "endereco": ""
+    },
+    {
+      "id": "a25",
+      "cliente": "DELUX",
+      "cidade": "BOA VISTA",
+      "estado": "RR",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a26",
+      "cliente": "TENDENZZA",
+      "cidade": "ARAGUAÍNA",
+      "estado": "TO",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a27",
+      "cliente": "CASA NOBRE",
+      "cidade": "RIO BRANCO",
+      "estado": "AC",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a28",
+      "cliente": "WM MOBILI",
+      "cidade": "NOVA LIMA",
+      "estado": "MG",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a29",
+      "cliente": "BIANCO INTERIORES",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a30",
+      "cliente": "MARROCOS INTERIORES",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a31",
+      "cliente": "MM MOVEIS DEPOSITO MARROCOS",
+      "cidade": "BELO HORIZONTE",
+      "estado": "MG",
+      "modelos": "",
+      "endereco": ""
+    },
+    {
+      "id": "a32",
+      "cliente": "INCASA INTERIORES",
+      "cidade": "PORTO VELHO",
+      "estado": "RO",
+      "modelos": "",
+      "endereco": ""
+    }
+  ],
+  "adormecidos": [
+    {
+      "id": "d1",
+      "cliente": "7 CAMINHOS AROMAS",
+      "cidade": "BIRIGUI",
+      "estado": "SP",
+      "telefone": "18-36411867",
+      "data_contato": "10/05/2024",
+      "feedback": "Refiz contato. Loja ainda não abriu mas vai trabalhar com a marca Karams."
+    },
+    {
+      "id": "d2",
+      "cliente": "70 CASA COMERCIO DE MOVEIS",
+      "cidade": "CAMPINAS",
+      "estado": "SP",
+      "telefone": "19-972479147",
+      "data_contato": "17/06/2024",
+      "feedback": "Não tem pedidos por enquanto. Trabalha com projetos. Cliente pediu para atualizar material."
+    },
+    {
+      "id": "d3",
+      "cliente": "A QUINTA ESSENCIA MOVEIS",
+      "cidade": "CAXIAS DO SUL",
+      "estado": "RS",
+      "telefone": "54-35376755",
+      "data_contato": "",
+      "feedback": "Elaine pediu catálogo mas por hora não vão comprar nada."
+    },
+    {
+      "id": "d4",
+      "cliente": "STYLLO DESIGNER",
+      "cidade": "RONDONÓPOLIS",
+      "estado": "MT",
+      "telefone": "66-999847307",
+      "data_contato": "25/03/2024",
+      "feedback": "RETORNEI CLIENTE"
+    },
+    {
+      "id": "d5",
+      "cliente": "ATTICA HOUSE COMERCIO DE MOVEIS",
+      "cidade": "UNAÍ",
+      "estado": "MG",
+      "telefone": "38-36769850",
+      "data_contato": "10/06/2024",
+      "feedback": "Retornei novamente contato com Fabiano. Sem sucesso de resposta."
+    },
+    {
+      "id": "d6",
+      "cliente": "WJ DESIGN",
+      "cidade": "BRASÍLIA",
+      "estado": "DF",
+      "telefone": "31-33285294",
+      "data_contato": "13/06/2024",
+      "feedback": "Entrei em contato por mensagens mas sem resposta. Entrei em contato com Vinicius atualizando material."
+    },
+    {
+      "id": "d7",
+      "cliente": "BEM ESTAR MOVEIS",
+      "cidade": "ERECHIM",
+      "estado": "RS",
+      "telefone": "54-33211015",
+      "data_contato": "24/09/2024",
+      "feedback": "Sem resposta. Mandei mensagem para Isabel."
+    },
+    {
+      "id": "d8",
+      "cliente": "CASA SHOP & ART DECOR",
+      "cidade": "ITAPERUNA",
+      "estado": "ES",
+      "telefone": "22-38243656",
+      "data_contato": "",
+      "feedback": "Me pediu catálogos"
+    },
+    {
+      "id": "d9",
+      "cliente": "CF BATISTA DE SOUZA LTDA",
+      "cidade": "NATAL",
+      "estado": "RN",
+      "telefone": "84-981182120",
+      "data_contato": "",
+      "feedback": "Mandei mensagem aguardar"
+    },
+    {
+      "id": "d10",
+      "cliente": "CONCEITOS INTERIORES",
+      "cidade": "MINEIROS",
+      "estado": "MG",
+      "telefone": "64-36614664",
+      "data_contato": "10/06/2024",
+      "feedback": "Entrei em contato com Vitor, ele mostrou interesse."
+    },
+    {
+      "id": "d11",
+      "cliente": "MOVEIS CELEGATRE",
+      "cidade": "ANDRADAS",
+      "estado": "MG",
+      "telefone": "35-37313288",
+      "data_contato": "10/06/2024",
+      "feedback": "Mandei mensagem. Refiz contato novamente."
+    },
+    {
+      "id": "d12",
+      "cliente": "NOEMI DALLA FLORA",
+      "cidade": "PRIMAVERA DO LESTE",
+      "estado": "MT",
+      "telefone": "66-97220330",
+      "data_contato": "13/02/2025",
+      "feedback": "Conversei com Cintia sobre uma linha mais acessível"
+    },
+    {
+      "id": "d13",
+      "cliente": "NOKA PRESENTES E DECORAÇÕES",
+      "cidade": "ITAPEVA",
+      "estado": "SP",
+      "telefone": "15-35210589",
+      "data_contato": "17/06/2024",
+      "feedback": "Atualizei mostruários e catálogos. Retornei contato. Mandei mensagem para Noelia."
+    }
+  ],
+  "prospeccao": [
+    {
+      "id": "p1",
+      "cliente": "DDESIGN ATEMPORAL SINOP",
+      "responsavel": "RAFAEL",
+      "contato": "(66)996415756",
+      "cidade": "SINOP",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/dedesignatemporal/",
+      "data": "10/04/2025",
+      "feedback": "Rafael pediu para mandar catálogo e tabela."
+    },
+    {
+      "id": "p2",
+      "cliente": "FOGAÇA HOME E JARDIM",
+      "responsavel": "ANA CAROLINA",
+      "contato": "(65)99614-2607 / (65)3057-2323",
+      "cidade": "CUIABÁ",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/fogacacasaejardim/",
+      "data": "12/05/2025",
+      "feedback": "Convite ABIMAD. Mandei mensagem e fotos das peças."
+    },
+    {
+      "id": "p3",
+      "cliente": "LÉ MARCHE INTERIORES",
+      "responsavel": "BRUNA",
+      "contato": "(65)99647-1935",
+      "cidade": "CUIABÁ",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/lemarchecuiaba/",
+      "data": "12/05/2025",
+      "feedback": "Lojista não tem interesse em comprar."
+    },
+    {
+      "id": "p4",
+      "cliente": "SOFISTICATO",
+      "responsavel": "",
+      "contato": "(65)3023-8871 / (65)98105-0177",
+      "cidade": "CUIABÁ",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/sofisticatomoveis/",
+      "data": "28/04/2025",
+      "feedback": "Loja de arquitetos."
+    },
+    {
+      "id": "p5",
+      "cliente": "GHALIA DESIGN",
+      "responsavel": "",
+      "contato": "(66)3498-4417 / (66)99202-0048",
+      "cidade": "PRIMAVERA DO LESTE",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/ghaliadesign/",
+      "data": "28/04/2025",
+      "feedback": "Convite ABIMAD. Retornei contato com loja."
+    },
+    {
+      "id": "p6",
+      "cliente": "OPERAH HOME TANGARÁ",
+      "responsavel": "MARILZA",
+      "contato": "(65)99211-8290",
+      "cidade": "TANGARÁ DA SERRA",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/operahtangara/",
+      "data": "28/04/2025",
+      "feedback": "Convite ABIMAD. Retornei contato novamente."
+    },
+    {
+      "id": "p7",
+      "cliente": "GOTARDO HOME DECOR",
+      "responsavel": "",
+      "contato": "(65)3326-9370",
+      "cidade": "TANGARÁ DA SERRA",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/gotardohomedecor/",
+      "data": "28/04/2025",
+      "feedback": "Loja de presentes."
+    },
+    {
+      "id": "p8",
+      "cliente": "ART CASA INTERIORES",
+      "responsavel": "PATRICIA / DONA CLEIA",
+      "contato": "(65)3382-4523 / (65)98476-5644",
+      "cidade": "CAMPO NOVO DO PARECIS",
+      "estado": "MT",
+      "instagram": "https://www.instagram.com/dimare_artcasainteriores/",
+      "data": "10/04/2025",
+      "feedback": "Cleia não tem interesse em conhecer."
+    },
+    {
+      "id": "p9",
+      "cliente": "HOME DESIGN",
+      "responsavel": "FLAVIANE",
+      "contato": "(67)3522-7727",
+      "cidade": "TRÊS LAGOAS",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/homedesign3lagoas/",
+      "data": "",
+      "feedback": ""
+    },
+    {
+      "id": "p10",
+      "cliente": "ESTRELA CASA DECOR",
+      "responsavel": "",
+      "contato": "67-35227683",
+      "cidade": "TRÊS LAGOAS",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/estrelacasadecor/",
+      "data": "",
+      "feedback": ""
+    },
+    {
+      "id": "p11",
+      "cliente": "HOFFMANN DESIGNER",
+      "responsavel": "TATIANE",
+      "contato": "(67)3562-1361",
+      "cidade": "CHAPADÃO DO SUL",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/hoffmanndesigner/",
+      "data": "28/05/2025",
+      "feedback": "Entrei em contato novamente. Mandei mensagem lojista."
+    },
+    {
+      "id": "p12",
+      "cliente": "MD CASA NOBRE",
+      "responsavel": "",
+      "contato": "(67)3255-2542",
+      "cidade": "BONITO",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/mdcasanobre/",
+      "data": "29/04/2025",
+      "feedback": "Convite ABIMAD. Retornei contato com loja novamente."
+    },
+    {
+      "id": "p13",
+      "cliente": "GOLD MÓVEIS",
+      "responsavel": "FABIO",
+      "contato": "(67)3452-2422",
+      "cidade": "RIO BRILHANTE",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/goldmoveis_decor/",
+      "data": "28/05/2025",
+      "feedback": "Convite ABIMAD. Retornei contato novamente."
+    },
+    {
+      "id": "p14",
+      "cliente": "LE MATAJE MOVEIS E DECORAÇÕES",
+      "responsavel": "JULIELI",
+      "contato": "(67)3251-6865",
+      "cidade": "JARDIM",
+      "estado": "MS",
+      "instagram": "https://www.instagram.com/lemataje/",
+      "data": "28/05/2025",
+      "feedback": "Loja disse que por enquanto não está fazendo compras."
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — Karams CRM{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<main class="main-content">
+  <h1 class="font-display" style="font-size:1.75rem; margin-bottom:0.25rem;">Dashboard</h1>
+  <p style="color:var(--muted); margin-bottom:2rem;">
+    Bem-vindo(a), {{ user.get_full_name|default:user.username }} · {{ papel }}
+  </p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total de clientes</div>
+      <div class="kpi-value">{{ total_clientes }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ativos</div>
+      <div class="kpi-value">{{ clientes_ativos }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Adormecidos</div>
+      <div class="kpi-value">{{ clientes_adormecidos }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Prospecção</div>
+      <div class="kpi-value">{{ clientes_prospeccao }}</div>
+    </div>
+  </div>
+
+  {% if meta_mensal %}
+  <div class="card">
+    <div class="section-title">Meta do mês ({{ meta_mensal.mes }}/{{ meta_mensal.ano }})</div>
+    <div class="grid-2">
+      <div>
+        <strong>{{ meta_mensal.meta_contatos }}</strong> contatos
+        <span style="color:var(--muted); font-size:0.8125rem;">
+          (semanal: {{ meta_mensal.meta_semanal_contatos }})
+        </span>
+      </div>
+      <div>
+        <strong>R$ {{ meta_mensal.meta_vendas|floatformat:0 }}</strong> em vendas
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="section-title">Próximas fases</div>
+    <p style="font-size:0.875rem; line-height:1.6; color:var(--muted);">
+      Fase 1 concluída: autenticação, modelos, admin e deploy Railway.
+      As abas Clientes, Atividade Diária, Relacionamento, Comissões e Relatórios
+      serão habilitadas nas próximas fases.
+    </p>
+    {% if user_is_admin %}
+    <p style="margin-top:1rem;">
+      <a href="{% url 'admin:index' %}" class="btn btn-primary">Abrir Django Admin</a>
+    </p>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
