@@ -1,5 +1,4 @@
 from datetime import date
-import json
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -54,33 +53,28 @@ def _cockpit_context(request, dia_selecionado=None):
     )
 
 
-def _render_cockpit_main(request):
-    return render(request, 'relacionamento/partials/cockpit_main.html', _cockpit_context(request))
+def _render_cockpit_main(request, calendar_url=None):
+    context = _cockpit_context(request)
+    if calendar_url:
+        context['google_calendar_url'] = calendar_url
+    return render(request, 'relacionamento/partials/cockpit_main.html', context)
 
 
 def _interacao_success_message(calendar_url=None):
-    msg = 'Interação registrada com sucesso.'
     if calendar_url:
-        msg += ' Abrindo Google Agenda...'
-    return msg
+        return 'Interação registrada com sucesso. Use o botão abaixo para salvar no Google Agenda.'
+    return 'Interação registrada com sucesso.'
 
 
 def _concluir_success_message(calendar_url=None):
-    msg = 'Resultado registrado e nova atividade gerada.'
     if calendar_url:
-        msg += ' Abrindo Google Agenda...'
-    return msg
-
-
-def _attach_calendar_trigger(response, calendar_url):
-    if calendar_url:
-        response['HX-Trigger'] = json.dumps({'openExternalCalendar': {'url': calendar_url}})
-    return response
+        return 'Resultado registrado. Use o botão abaixo para salvar no Google Agenda.'
+    return 'Resultado registrado e nova atividade gerada.'
 
 
 def _finalize_interacao_response(request, calendar_url, render_response, redirect_url):
     if request.headers.get('HX-Request'):
-        return _attach_calendar_trigger(render_response, calendar_url)
+        return render_response
     if calendar_url:
         request.session['pending_calendar_url'] = calendar_url
     return redirect(redirect_url)
@@ -139,7 +133,7 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                 return _finalize_interacao_response(
                     request,
                     calendar_url,
-                    _render_cockpit_main(request),
+                    _render_cockpit_main(request, calendar_url),
                     'atividade:atividade_diaria',
                 )
             except ValidationError as exc:
@@ -201,7 +195,7 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                 return _finalize_interacao_response(
                     request,
                     calendar_url,
-                    _render_cockpit_main(request),
+                    _render_cockpit_main(request, calendar_url),
                     'atividade:atividade_diaria',
                 )
             except ValidationError as exc:
@@ -287,13 +281,12 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                 messages.success(request, _interacao_success_message(calendar_url))
                 redirect_url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
                 if request.headers.get('HX-Request'):
-                    return _attach_calendar_trigger(
-                        render(
-                            request,
-                            'relacionamento/partials/relacionamento_tab.html',
-                            _cliente_tab_context(cliente),
-                        ),
-                        calendar_url,
+                    ctx = _cliente_tab_context(cliente)
+                    ctx['google_calendar_url'] = calendar_url
+                    return render(
+                        request,
+                        'relacionamento/partials/relacionamento_tab.html',
+                        ctx,
                     )
                 if calendar_url:
                     request.session['pending_calendar_url'] = calendar_url

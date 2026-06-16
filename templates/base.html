@@ -118,14 +118,19 @@
     </div>
   </div>
   {% endblock %}
-  <script>
-    document.body.addEventListener('openExternalCalendar', function(evt) {
-      var url = evt.detail && evt.detail.url;
-      if (url) window.open(url, '_blank', 'noopener,noreferrer');
-    });
-    {% if pending_calendar_url %}
-    window.open('{{ pending_calendar_url|escapejs }}', '_blank', 'noopener,noreferrer');
-    {% endif %}
-  </script>
+  {% if pending_calendar_url %}
+  <div class="calendar-cta-banner calendar-cta-banner--fixed" role="alert">
+    <div class="calendar-cta-banner-text">
+      <strong>Compromisso agendado no CRM.</strong>
+      <span>Clique para abrir o Google Agenda com os dados preenchidos.</span>
+    </div>
+    <a href="{{ pending_calendar_url }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="btn btn-primary calendar-cta-btn">
+      Salvar no Google Agenda
+    </a>
+  </div>
+  {% endif %}
 </body>
 </html>

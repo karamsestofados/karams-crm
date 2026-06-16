@@ -134,7 +134,7 @@ class CalendarHtmxTests(TestCase):
             estado='PR',
         )
 
-    def test_interacao_post_dispara_hx_trigger(self):
+    def test_interacao_post_exibe_botao_google_agenda(self):
         self.client.login(username='vendedor_htmx', password='testpass123')
         response = self.client.post(
             '/atividade-diaria/interacao/nova/',
@@ -153,6 +153,6 @@ class CalendarHtmxTests(TestCase):
             HTTP_HX_REQUEST='true',
         )
         self.assertEqual(response.status_code, 200)
-        trigger = response.headers.get('HX-Trigger', '')
-        self.assertIn('openExternalCalendar', trigger)
-        self.assertIn('calendar.google.com', trigger)
+        self.assertContains(response, 'Salvar no Google Agenda')
+        self.assertContains(response, 'calendar.google.com')
+        self.assertContains(response, 'action=TEMPLATE')
