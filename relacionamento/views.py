@@ -28,24 +28,28 @@ def _parse_int(value, default):
         return default
 
 
-def _cockpit_context(request, extra=None):
+def _cockpit_context(request, dia_selecionado=None):
     hoje = timezone.localdate()
     ano = _parse_int(request.GET.get('ano'), hoje.year)
     mes = _parse_int(request.GET.get('mes'), hoje.month)
-    dia_str = request.GET.get('dia')
-    if dia_str:
-        try:
-            parts = dia_str.split('-')
-            dia_selecionado = date(int(parts[0]), int(parts[1]), int(parts[2]))
-        except (ValueError, IndexError):
-            dia_selecionado = hoje
-    else:
-        dia_selecionado = hoje
 
-    ctx = contexto_cockpit_completo(request.user, ano=ano, mes=mes, dia_selecionado=dia_selecionado)
-    if extra:
-        ctx.update(extra)
-    return ctx
+    if dia_selecionado is None:
+        dia_str = request.GET.get('dia')
+        if dia_str:
+            try:
+                parts = dia_str.split('-')
+                dia_selecionado = date(int(parts[0]), int(parts[1]), int(parts[2]))
+            except (ValueError, IndexError):
+                dia_selecionado = hoje
+        else:
+            dia_selecionado = hoje
+
+    return contexto_cockpit_completo(
+        request.user,
+        ano=ano,
+        mes=mes,
+        dia_selecionado=dia_selecionado,
+    )
 
 
 def _render_cockpit_main(request):
@@ -174,8 +178,12 @@ class CalendarioDiaPartialView(VendedorRequiredMixin, View):
         except (ValueError, IndexError):
             return redirect('atividade:atividade_diaria')
 
-        ctx = _cockpit_context(request, {'dia_selecionado': dia})
-        return render(request, 'relacionamento/partials/cockpit_calendario_dia.html', ctx)
+        from .services.cockpit import eventos_do_dia
+
+        return render(request, 'relacionamento/partials/cockpit_calendario_dia.html', {
+            'dia_selecionado': dia,
+            'eventos_dia': eventos_do_dia(request.user, dia),
+        })
 
 
 class RelatorioRelacionamentoView(VendedorRequiredMixin, TemplateView):

@@ -1,6 +1,8 @@
 import calendar
-from datetime import date, datetime
+from datetime import date
 
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from clientes.models import CategoriaCliente, Cliente
@@ -14,11 +16,18 @@ MESES_PT = [
 ]
 
 
-def _pendentes_qs(usuario):
+def _atividades_qs(usuario):
     return (
         AtividadeCliente.objects
-        .pendentes_para_usuario(usuario)
+        .para_usuario(usuario)
         .select_related('cliente', 'cliente__vendedor', 'produto_relacionado', 'usuario')
+    )
+
+
+def _pendentes_qs(usuario):
+    return (
+        _atividades_qs(usuario)
+        .pendentes()
         .order_by('data_proxima_acao', 'hora_proxima_acao', 'cliente__nome')
     )
 
@@ -27,10 +36,7 @@ def resumo_dia(usuario):
     rotina = rotina_diaria_para_usuario(usuario)
     hoje = timezone.localdate()
 
-    atividades_hoje = (
-        AtividadeCliente.objects.para_usuario(usuario)
-        .filter(data_criacao__date=hoje)
-    )
+    atividades_hoje = _atividades_qs(usuario).filter(data_criacao__date=hoje)
     interacoes_hoje = atividades_hoje.count()
     clientes_atendidos_hoje = atividades_hoje.values('cliente_id').distinct().count()
 
@@ -79,13 +85,12 @@ def clientes_sem_contato(usuario, dias=30, limit=20):
 
 def ultimas_interacoes(usuario, limit=15):
     return (
-        AtividadeCliente.objects.para_usuario(usuario)
-        .select_related('cliente', 'usuario', 'produto_relacionado')
+        _atividades_qs(usuario)
         .order_by('-data_criacao')[:limit]
     )
 
 
-def _status_dia(data_ref, hoje):
+def _status_compromisso(data_ref, hoje):
     if data_ref < hoje:
         return 'atrasado'
     if data_ref == hoje:
@@ -93,20 +98,46 @@ def _status_dia(data_ref, hoje):
     return 'futuro'
 
 
+def eventos_do_dia(usuario, data):
+    """Compromissos agendados (follow-up pendente) + interações registradas na data."""
+    compromissos = list(_pendentes_qs(usuario).filter(data_proxima_acao=data))
+    interacoes = list(
+        _atividades_qs(usuario)
+        .filter(data_criacao__date=data)
+        .order_by('-data_criacao')
+    )
+    return {
+        'compromissos': compromissos,
+        'interacoes': interacoes,
+    }
+
+
 def calendario_mensal(usuario, ano, mes):
     hoje = timezone.localdate()
+
     pendentes = list(_pendentes_qs(usuario).filter(
         data_proxima_acao__year=ano,
         data_proxima_acao__month=mes,
     ))
 
-    por_dia = {}
+    por_dia_compromissos = {}
     for atv in pendentes:
         dia = atv.data_proxima_acao.day
-        por_dia.setdefault(dia, {'atrasado': 0, 'hoje': 0, 'futuro': 0, 'total': 0})
-        status = _status_dia(atv.data_proxima_acao, hoje)
-        por_dia[dia][status] += 1
-        por_dia[dia]['total'] += 1
+        por_dia_compromissos.setdefault(dia, {'atrasado': 0, 'hoje': 0, 'futuro': 0})
+        status = _status_compromisso(atv.data_proxima_acao, hoje)
+        por_dia_compromissos[dia][status] += 1
+
+    por_dia_interacoes = {}
+    interacoes_mes = (
+        _atividades_qs(usuario)
+        .filter(data_criacao__year=ano, data_criacao__month=mes)
+        .annotate(dia_local=TruncDate('data_criacao'))
+        .values('dia_local')
+        .annotate(total=Count('id'))
+    )
+    for row in interacoes_mes:
+        if row['dia_local']:
+            por_dia_interacoes[row['dia_local'].day] = row['total']
 
     cal = calendar.Calendar(firstweekday=6)
     semanas_raw = cal.monthdayscalendar(ano, mes)
@@ -117,12 +148,15 @@ def calendario_mensal(usuario, ano, mes):
             if dia_num == 0:
                 row.append({'empty': True})
             else:
-                info = por_dia.get(dia_num, {'atrasado': 0, 'hoje': 0, 'futuro': 0, 'total': 0})
+                comp = por_dia_compromissos.get(dia_num, {'atrasado': 0, 'hoje': 0, 'futuro': 0})
                 row.append({
                     'empty': False,
                     'day': dia_num,
                     'date': date(ano, mes, dia_num),
-                    'indicators': info,
+                    'indicators': {
+                        **comp,
+                        'interacoes': por_dia_interacoes.get(dia_num, 0),
+                    },
                     'is_today': hoje == date(ano, mes, dia_num),
                 })
         semanas.append(row)
@@ -136,13 +170,6 @@ def calendario_mensal(usuario, ano, mes):
     }
 
 
-def atividades_do_dia(usuario, data):
-    return list(
-        _pendentes_qs(usuario)
-        .filter(data_proxima_acao=data)
-    )
-
-
 def contexto_cockpit_completo(usuario, ano=None, mes=None, dia_selecionado=None):
     hoje = timezone.localdate()
     ano = ano or hoje.year
@@ -152,7 +179,7 @@ def contexto_cockpit_completo(usuario, ano=None, mes=None, dia_selecionado=None)
     ctx = resumo_dia(usuario)
     ctx['calendario'] = calendario_mensal(usuario, ano, mes)
     ctx['dia_selecionado'] = dia_selecionado
-    ctx['atividades_dia'] = atividades_do_dia(usuario, dia_selecionado)
+    ctx['eventos_dia'] = eventos_do_dia(usuario, dia_selecionado)
     ctx['clientes_sem_contato'] = clientes_sem_contato(usuario)
     ctx['ultimas_interacoes'] = ultimas_interacoes(usuario)
     return ctx

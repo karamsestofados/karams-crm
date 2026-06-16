@@ -1,15 +1,42 @@
 <div class="cockpit-dia-panel">
   <h4 class="cockpit-dia-title">{{ dia_selecionado|date:"d/m/Y" }}</h4>
-  {% if atividades_dia %}
-  <ul class="cockpit-dia-lista">
-    {% for atv in atividades_dia %}
-    <li class="cockpit-dia-item">
-      <span class="cockpit-dia-hora">{% if atv.hora_proxima_acao %}{{ atv.hora_proxima_acao|time:"H:i" }}{% else %}—{% endif %}</span>
-      <span class="cockpit-dia-text">{{ atv.get_proxima_acao_display }} — {{ atv.cliente.nome }}</span>
-    </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="client-panel-empty">Nenhum compromisso neste dia.</p>
+
+  {% if eventos_dia.compromissos %}
+  <div class="cockpit-dia-section">
+    <h5 class="cockpit-dia-subtitle">Compromissos agendados</h5>
+    <ul class="cockpit-dia-lista">
+      {% for atv in eventos_dia.compromissos %}
+      <li class="cockpit-dia-item cockpit-dia-item--compromisso">
+        <span class="cockpit-dia-hora">{% if atv.hora_proxima_acao %}{{ atv.hora_proxima_acao|time:"H:i" }}{% else %}—{% endif %}</span>
+        <span class="cockpit-dia-text">
+          <strong>{{ atv.get_proxima_acao_display }}</strong> — {{ atv.cliente.nome }}
+          {% if atv.assunto %}<em>({{ atv.assunto }})</em>{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if eventos_dia.interacoes %}
+  <div class="cockpit-dia-section">
+    <h5 class="cockpit-dia-subtitle">Interações registradas</h5>
+    <ul class="cockpit-dia-lista">
+      {% for atv in eventos_dia.interacoes %}
+      <li class="cockpit-dia-item cockpit-dia-item--interacao">
+        <span class="cockpit-dia-hora">{{ atv.data_criacao|time:"H:i" }}</span>
+        <span class="cockpit-dia-text">
+          <strong>{{ atv.get_tipo_contato_display }}</strong> — {{ atv.cliente.nome }}
+          · {{ atv.get_resultado_display }}
+          {% if atv.resumo %}<br><span class="cockpit-dia-resumo">{{ atv.resumo|truncatechars:120 }}</span>{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if not eventos_dia.compromissos and not eventos_dia.interacoes %}
+  <p class="client-panel-empty">Nenhum compromisso ou interação neste dia.</p>
   {% endif %}
 </div>

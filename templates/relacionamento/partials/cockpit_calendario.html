@@ -43,8 +43,9 @@
               hx-target="#cockpit-calendario-dia"
               hx-swap="innerHTML">
         <span class="cockpit-cal-num">{{ cel.day }}</span>
+        {% if cel.indicators.interacoes %}<i class="cockpit-dot cockpit-dot--interacao" title="Interações"></i>{% endif %}
         {% if cel.indicators.atrasado %}<i class="cockpit-dot cockpit-dot--atrasado" title="Atrasado"></i>{% endif %}
-        {% if cel.indicators.hoje %}<i class="cockpit-dot cockpit-dot--hoje" title="Hoje"></i>{% endif %}
+        {% if cel.indicators.hoje %}<i class="cockpit-dot cockpit-dot--hoje" title="Compromisso hoje"></i>{% endif %}
         {% if cel.indicators.futuro %}<i class="cockpit-dot cockpit-dot--futuro" title="Futuro"></i>{% endif %}
       </button>
       {% endif %}
@@ -52,8 +53,9 @@
     {% endfor %}
   </div>
   <div class="cockpit-cal-legend">
+    <span><i class="cockpit-dot cockpit-dot--interacao"></i> Interação</span>
     <span><i class="cockpit-dot cockpit-dot--atrasado"></i> Atrasado</span>
-    <span><i class="cockpit-dot cockpit-dot--hoje"></i> Hoje</span>
+    <span><i class="cockpit-dot cockpit-dot--hoje"></i> Compromisso hoje</span>
     <span><i class="cockpit-dot cockpit-dot--futuro"></i> Futuro</span>
   </div>
   <div id="cockpit-calendario-dia">
