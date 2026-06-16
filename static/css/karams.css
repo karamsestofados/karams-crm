@@ -1,7 +1,11 @@
 /* Karams CRM — dark modern UI + laranja #FF9220 */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap');
 
 :root {
+  --font-heading: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --tracking-heading: -0.02em;
+  --tracking-body: normal;
   --primary: #FF9220;
   --primary-dark: #E07A10;
   --primary-glow: #FFB366;
@@ -34,14 +38,31 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: var(--tracking-body);
   background: var(--bg-app);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-.font-display { font-family: 'Playfair Display', serif; }
+h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
+}
+
+h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
+}
+
+.font-display {
+  font-family: var(--font-heading);
+  letter-spacing: var(--tracking-heading);
+}
 
 /* ─── App Shell ─── */
 .app-shell {
@@ -84,6 +105,7 @@ body {
 
 .sidebar-section {
   padding: 0.5rem 1rem 0.25rem;
+  font-family: var(--font-body);
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -105,6 +127,7 @@ body {
   border-radius: 999px;
   color: var(--sidebar-text);
   text-decoration: none;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
   font-weight: 500;
   transition: all 0.2s;
@@ -230,10 +253,11 @@ body {
 }
 
 .hero-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.75rem;
   color: var(--on-primary);
   font-weight: 700;
+  letter-spacing: var(--tracking-heading);
 }
 
 .hero-subtitle {
@@ -342,12 +366,14 @@ body {
 }
 
 .kpi-card-title {
+  font-family: var(--font-body);
   font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 500;
 }
 
 .kpi-badge {
+  font-family: var(--font-body);
   font-size: 0.6875rem;
   font-weight: 600;
   padding: 0.125rem 0.5rem;
@@ -367,9 +393,10 @@ body {
 }
 
 .kpi-value-lg {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
   color: var(--text);
   line-height: 1;
 }
@@ -403,8 +430,10 @@ body {
 }
 
 .chart-card-title {
+  font-family: var(--font-heading);
   font-size: 0.9375rem;
   font-weight: 600;
+  letter-spacing: var(--tracking-heading);
 }
 
 .chart-tabs {
@@ -458,14 +487,18 @@ body {
 }
 
 .table-card-title {
+  font-family: var(--font-heading);
   font-size: 0.9375rem;
   font-weight: 600;
+  letter-spacing: var(--tracking-heading);
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
+  font-weight: 400;
 }
 
 .data-table thead th {
@@ -496,6 +529,7 @@ body {
 /* ─── Badges ─── */
 .badge {
   display: inline-block;
+  font-family: var(--font-body);
   font-size: 0.625rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
@@ -549,12 +583,13 @@ body {
 
 .form-label {
   display: block;
+  font-family: var(--font-body);
   font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-muted);
   margin-bottom: 0.375rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .form-input {
@@ -562,8 +597,9 @@ body {
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
+  font-weight: 400;
   background: var(--bg-input);
   color: var(--text);
   outline: none;
@@ -580,8 +616,8 @@ body {
   border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: 500;
   font-size: 0.8125rem;
   text-decoration: none;
   transition: all 0.2s;
@@ -655,11 +691,13 @@ body {
 }
 
 .setup-title {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
   text-align: center;
   margin: 0 0 0.35rem;
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .setup-fieldset {
@@ -713,6 +751,7 @@ body {
 }
 
 .section-title {
+  font-family: var(--font-heading);
   font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -724,8 +763,10 @@ body {
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
 .page-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
   margin-bottom: 0.25rem;
 }
 
@@ -772,8 +813,10 @@ body {
 }
 
 .crm-page-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
 }
 
 .crm-layout {
@@ -808,8 +851,9 @@ body {
 .filter-chip {
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
+  font-family: var(--font-body);
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   color: var(--sidebar-text-muted);
   border: 1px solid var(--border-subtle);
@@ -846,7 +890,9 @@ body {
 }
 
 .client-list-name {
+  font-family: var(--font-heading);
   font-weight: 600;
+  letter-spacing: var(--tracking-heading);
   font-size: 0.8125rem;
   margin-bottom: 0.25rem;
 }
@@ -871,8 +917,10 @@ body {
 }
 
 .crm-detail-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
   line-height: 1.2;
 }
 
@@ -891,11 +939,13 @@ body {
 
 .crm-field label {
   display: block;
+  font-family: var(--font-body);
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-muted);
   margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
 .crm-field value,

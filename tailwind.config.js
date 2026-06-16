@@ -13,8 +13,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        sans: ['DM Sans', 'sans-serif'],
+        display: ['Sora', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
       },
     },
   },

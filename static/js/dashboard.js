@@ -131,7 +131,7 @@
     });
   } else if (document.getElementById('chartEstados')) {
     const ctx = document.getElementById('chartEstados').getContext('2d');
-    ctx.font = '13px DM Sans, sans-serif';
+    ctx.font = '13px Inter, sans-serif';
     ctx.fillStyle = TEXT_MUTED;
     ctx.textAlign = 'center';
     ctx.fillText('Sem dados de UF', ctx.canvas.width / 2, ctx.canvas.height / 2);

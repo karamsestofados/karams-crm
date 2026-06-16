@@ -15,7 +15,7 @@ CRM multiusuário para a Karams Estofados — reconstrução do sistema legado (
 - **Fundo:** branco (`#FFFFFF`)
 - **Cor principal:** laranja Karams `#FF9220` (header, nav, botões, KPIs)
 - **Logo:** oficial em `static/img/` (preta no login, branca no header)
-- **Fontes:** Playfair Display (títulos) + DM Sans (UI)
+- **Fontes:** Sora (títulos) + Inter (UI)
 
 ## GitHub
 

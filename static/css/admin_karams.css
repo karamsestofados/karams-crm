@@ -1,9 +1,13 @@
 /* Karams CRM — Django Admin dark theme */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap');
 
 :root,
 html[data-theme="light"],
 html[data-theme="dark"] {
+  --font-heading: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --tracking-heading: -0.02em;
+  --tracking-body: normal;
   --primary: #FF9220;
   --secondary: #1A1A1E;
   --accent: #FFB366;
@@ -50,8 +54,16 @@ html {
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: var(--tracking-body);
   background: #0D0D0F;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
 }
 
 #header {
@@ -69,9 +81,10 @@ body {
 }
 
 #site-name span {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
+  letter-spacing: var(--tracking-heading);
   color: #FFFFFF;
 }
 
@@ -136,10 +149,10 @@ div.breadcrumbs a {
 .inline-group h2 {
   background: linear-gradient(90deg, #FF9220 0%, #E07A10 100%);
   color: #1E2D3D;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
+  letter-spacing: var(--tracking-heading);
   font-size: 0.75rem;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 0.65rem 1rem;
 }
@@ -152,6 +165,8 @@ thead th {
   background: #141416;
   color: #9CA3AF;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-body);
+  font-weight: 500;
 }
 
 tbody tr {
@@ -171,6 +186,8 @@ tbody td,
 tbody th {
   color: #F3F4F6;
   border-color: rgba(255, 255, 255, 0.06);
+  font-family: var(--font-body);
+  font-weight: 400;
 }
 
 tbody td a,
@@ -193,6 +210,9 @@ tbody th a {
   background: #1A1A1E;
   color: #FFB366;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
 }
 
 #changelist-filter li.selected a {
@@ -212,6 +232,8 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: #F3F4F6;
+  font-family: var(--font-body);
+  font-weight: 400;
 }
 
 input:focus,
@@ -230,7 +252,8 @@ a.button {
   background: #FF9220;
   color: #1E2D3D;
   border-radius: 8px;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: 500;
   border: none;
 }
 
@@ -283,6 +306,9 @@ input[type="submit"].default,
 #recent-actions-module h2 {
   background: #141416;
   color: #FFB366;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
 }
 
 .login #header,
@@ -296,6 +322,8 @@ input[type="submit"].default,
 
 .login .form-row label {
   color: #9CA3AF;
+  font-family: var(--font-body);
+  font-weight: 500;
 }
 
 .login #content-main {
@@ -329,6 +357,9 @@ fieldset {
 fieldset h2 {
   background: #141416;
   color: #FFB366;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-heading);
 }
 
 .help,
