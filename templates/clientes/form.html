@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente — Karams CRM{% endblock %}
 {% block nav_clientes %}active{% endblock %}
+
+{% block extra_head %}
+<script defer src="{% static 'js/cliente-form.js' %}"></script>
+{% endblock %}
 
 {% block content %}
 <div class="crm-page-header">
@@ -35,12 +40,39 @@
         <div class="form-group">
           <label class="form-label" for="{{ form.nome.id_for_label }}">Nome *</label>
           {{ form.nome }}
-          {% if form.nome.errors %}<span style="color:var(--danger);font-size:0.75rem;">{{ form.nome.errors.0 }}</span>{% endif %}
+          {% if form.nome.errors %}<p class="field-error">{{ form.nome.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.tipo_cliente.id_for_label }}">Tipo de Cliente</label>
+          {{ form.tipo_cliente }}
+          {% if form.tipo_cliente.errors %}<p class="field-error">{{ form.tipo_cliente.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.segmento.id_for_label }}">Segmento</label>
+          {{ form.segmento }}
+          {% if form.segmento.errors %}<p class="field-error">{{ form.segmento.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group">
           <label class="form-label" for="{{ form.categoria.id_for_label }}">Categoria</label>
           {{ form.categoria }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.status_funil.id_for_label }}">Status do Funil</label>
+          {{ form.status_funil }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.origem_lead.id_for_label }}">Origem do Lead</label>
+          {{ form.origem_lead }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.regiao_atuacao.id_for_label }}">Região de Atuação</label>
+          {{ form.regiao_atuacao }}
         </div>
 
         <div class="form-group">
@@ -54,8 +86,15 @@
         </div>
 
         <div class="form-group">
+          <label class="form-label" for="{{ form.cep.id_for_label }}">CEP</label>
+          {{ form.cep }}
+          {% if form.cep.errors %}<p class="field-error">{{ form.cep.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
           <label class="form-label" for="{{ form.telefone.id_for_label }}">Telefone</label>
           {{ form.telefone }}
+          {% if form.telefone.errors %}<p class="field-error">{{ form.telefone.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group">
@@ -66,10 +105,11 @@
         <div class="form-group">
           <label class="form-label" for="{{ form.instagram.id_for_label }}">Instagram</label>
           {{ form.instagram }}
+          {% if form.instagram.errors %}<p class="field-error">{{ form.instagram.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="{{ form.data_primeiro_contato.id_for_label }}">Data primeiro contato</label>
+          <label class="form-label" for="{{ form.data_primeiro_contato.id_for_label }}">Data Primeiro Contato</label>
           {{ form.data_primeiro_contato }}
         </div>
 
@@ -79,12 +119,12 @@
         </div>
 
         <div class="form-group full-width">
-          <label class="form-label" for="{{ form.feedback_original.id_for_label }}">Observações / feedback</label>
+          <label class="form-label" for="{{ form.feedback_original.id_for_label }}">Observações / Feedback</label>
           {{ form.feedback_original }}
         </div>
 
         <div class="form-group full-width">
-          <label class="form-label">Produtos exclusivos</label>
+          <label class="form-label">Produtos Exclusivos</label>
           <div class="checkbox-group">
             {% for checkbox in form.produtos_exclusivos %}
             <label>{{ checkbox.tag }} {{ checkbox.choice_label }}</label>

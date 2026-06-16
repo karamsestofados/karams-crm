@@ -507,6 +507,40 @@ body {
 .badge-prospeccao { background: var(--primary-subtle); color: var(--primary-glow); }
 .badge-admin { background: rgba(255, 255, 255, 0.15); color: var(--text); }
 
+.badge-segmento {
+  background: rgba(255, 146, 32, 0.12);
+  color: var(--primary-glow);
+}
+
+.badge-funil {
+  font-size: 0.5625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-funil-lead_novo { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+.badge-funil-em_contato { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+.badge-funil-proposta_enviada { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+.badge-funil-negociacao { background: var(--primary-subtle); color: var(--primary-glow); }
+.badge-funil-aguardando_retorno { background: rgba(251, 146, 60, 0.15); color: #fb923c; }
+.badge-funil-pedido_fechado { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+.badge-funil-cliente_ativo { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.badge-funil-cliente_perdido { background: rgba(248, 113, 113, 0.15); color: var(--danger); }
+
+.crm-filters-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0 0 0.75rem;
+}
+
+.crm-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
 /* ─── Forms ─── */
 .form-group { margin-bottom: 1rem; }
 
@@ -990,4 +1024,6 @@ body {
   .crm-detail-grid { grid-template-columns: 1fr; }
 
   .form-grid { grid-template-columns: 1fr; }
+
+  .crm-filters-grid { grid-template-columns: 1fr; }
 }

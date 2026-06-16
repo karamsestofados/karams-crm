@@ -21,6 +21,65 @@ class CategoriaCliente(models.TextChoices):
     PROSPECCAO = 'prospeccao', 'Prospecção'
 
 
+class TipoCliente(models.TextChoices):
+    LOJA_MOVEIS = 'LOJA_MOVEIS', 'Loja de Móveis'
+    ARQUITETO = 'ARQUITETO', 'Arquiteto'
+    DESIGNER_INTERIORES = 'DESIGNER_INTERIORES', 'Designer de Interiores'
+    REVENDA = 'REVENDA', 'Revenda'
+    MARKETPLACE = 'MARKETPLACE', 'Marketplace'
+    HOTELARIA = 'HOTELARIA', 'Hotelaria'
+    CORPORATIVO = 'CORPORATIVO', 'Corporativo'
+    CONSUMIDOR_FINAL = 'CONSUMIDOR_FINAL', 'Consumidor Final'
+    OUTROS = 'OUTROS', 'Outros'
+
+
+class SegmentoCliente(models.TextChoices):
+    MOVEIS = 'MOVEIS', 'Móveis'
+    ESTOFADOS = 'ESTOFADOS', 'Estofados'
+    VAREJO = 'VAREJO', 'Varejo'
+    ALTO_PADRAO = 'ALTO_PADRAO', 'Alto Padrão'
+    DECORACAO = 'DECORACAO', 'Decoração'
+    PLANEJADOS = 'PLANEJADOS', 'Planejados'
+    CORPORATIVO = 'CORPORATIVO', 'Corporativo'
+    HOTELARIA = 'HOTELARIA', 'Hotelaria'
+    E_COMMERCE = 'E_COMMERCE', 'E-commerce'
+    OUTROS = 'OUTROS', 'Outros'
+
+
+class OrigemLead(models.TextChoices):
+    INSTAGRAM = 'INSTAGRAM', 'Instagram'
+    FACEBOOK = 'FACEBOOK', 'Facebook'
+    GOOGLE = 'GOOGLE', 'Google'
+    SITE = 'SITE', 'Site'
+    WHATSAPP = 'WHATSAPP', 'WhatsApp'
+    INDICACAO = 'INDICACAO', 'Indicação'
+    REPRESENTANTE = 'REPRESENTANTE', 'Representante'
+    CLIENTE_ANTIGO = 'CLIENTE_ANTIGO', 'Cliente Antigo'
+    TELEMARKETING = 'TELEMARKETING', 'Telemarketing'
+    FEIRA = 'FEIRA', 'Feira'
+    PESQUISA = 'PESQUISA', 'Pesquisa'
+    OUTROS = 'OUTROS', 'Outros'
+
+
+class StatusFunil(models.TextChoices):
+    LEAD_NOVO = 'LEAD_NOVO', 'Lead Novo'
+    EM_CONTATO = 'EM_CONTATO', 'Em Contato'
+    PROPOSTA_ENVIADA = 'PROPOSTA_ENVIADA', 'Proposta Enviada'
+    NEGOCIACAO = 'NEGOCIACAO', 'Negociação'
+    AGUARDANDO_RETORNO = 'AGUARDANDO_RETORNO', 'Aguardando Retorno'
+    PEDIDO_FECHADO = 'PEDIDO_FECHADO', 'Pedido Fechado'
+    CLIENTE_ATIVO = 'CLIENTE_ATIVO', 'Cliente Ativo'
+    CLIENTE_PERDIDO = 'CLIENTE_PERDIDO', 'Cliente Perdido'
+
+
+class RegiaoAtuacao(models.TextChoices):
+    NORTE = 'NORTE', 'Norte'
+    NORDESTE = 'NORDESTE', 'Nordeste'
+    CENTRO_OESTE = 'CENTRO_OESTE', 'Centro-Oeste'
+    SUDESTE = 'SUDESTE', 'Sudeste'
+    SUL = 'SUL', 'Sul'
+
+
 class ClienteQuerySet(models.QuerySet):
     def para_usuario(self, usuario):
         if usuario.is_admin:
@@ -43,11 +102,41 @@ class Cliente(models.Model):
         default=CategoriaCliente.ATIVO,
     )
     nome = models.CharField(max_length=255)
+    tipo_cliente = models.CharField(
+        max_length=30,
+        choices=TipoCliente.choices,
+        null=True,
+        blank=True,
+    )
+    segmento = models.CharField(
+        max_length=30,
+        choices=SegmentoCliente.choices,
+        null=True,
+        blank=True,
+    )
+    origem_lead = models.CharField(
+        max_length=30,
+        choices=OrigemLead.choices,
+        null=True,
+        blank=True,
+    )
+    status_funil = models.CharField(
+        max_length=30,
+        choices=StatusFunil.choices,
+        default=StatusFunil.LEAD_NOVO,
+    )
+    regiao_atuacao = models.CharField(
+        max_length=20,
+        choices=RegiaoAtuacao.choices,
+        null=True,
+        blank=True,
+    )
     cidade = models.CharField(max_length=100, blank=True)
     estado = models.CharField(max_length=2, blank=True)
+    cep = models.CharField(max_length=9, blank=True, default='')
     telefone = models.CharField(max_length=50, blank=True)
     responsavel = models.CharField(max_length=150, blank=True)
-    instagram = models.URLField(blank=True)
+    instagram = models.CharField(max_length=150, blank=True)
     endereco = models.TextField(blank=True)
     data_primeiro_contato = models.DateField(null=True, blank=True)
     feedback_original = models.TextField(blank=True)
@@ -70,6 +159,12 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def instagram_url(self):
+        if self.instagram:
+            return f'https://instagram.com/{self.instagram}'
+        return ''
 
     @property
     def ultima_interacao(self):

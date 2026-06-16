@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from accounts.models import Papel, Usuario
 from clientes.legacy_import import load_legacy_data, parse_date_br, split_modelos
 from clientes.models import CategoriaCliente, Cliente, Produto
+from clientes.utils import normalizar_instagram, normalizar_telefone
 from comissoes.models import MetaMensal
 
 
@@ -57,6 +58,8 @@ class Command(BaseCommand):
                     continue
 
                 telefone = item.get('telefone') or item.get('contato') or ''
+                telefone = normalizar_telefone(telefone.strip()) if telefone.strip() else ''
+                instagram = normalizar_instagram(item.get('instagram', '').strip())
                 data_contato = parse_date_br(
                     item.get('data_contato') or item.get('data') or ''
                 )
@@ -69,9 +72,9 @@ class Command(BaseCommand):
                         'nome': nome,
                         'cidade': item.get('cidade', '').strip(),
                         'estado': item.get('estado', '').strip()[:2],
-                        'telefone': telefone.strip(),
+                        'telefone': telefone,
                         'responsavel': item.get('responsavel', '').strip(),
-                        'instagram': item.get('instagram', '').strip(),
+                        'instagram': instagram,
                         'endereco': item.get('endereco', '').strip(),
                         'data_primeiro_contato': data_contato,
                         'feedback_original': item.get('feedback', '').strip(),
