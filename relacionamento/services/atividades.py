@@ -15,6 +15,7 @@ def registrar_interacao(
     produto_relacionado=None,
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
+    hora_proxima_acao=None,
 ):
     if not resumo or not resumo.strip():
         raise ValidationError('O resumo é obrigatório.')
@@ -24,6 +25,7 @@ def registrar_interacao(
 
     if proxima_acao == ProximaAcao.SEM_ACAO:
         data_proxima_acao = None
+        hora_proxima_acao = None
 
     atividade = AtividadeCliente(
         cliente=cliente,
@@ -36,6 +38,7 @@ def registrar_interacao(
         produto_relacionado=produto_relacionado,
         proxima_acao=proxima_acao,
         data_proxima_acao=data_proxima_acao,
+        hora_proxima_acao=hora_proxima_acao,
         concluida=proxima_acao == ProximaAcao.SEM_ACAO,
     )
     atividade.full_clean()
@@ -54,6 +57,7 @@ def concluir_followup(
     produto_relacionado=None,
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
+    hora_proxima_acao=None,
 ):
     if not atividade_pendente.tem_followup_pendente:
         raise ValidationError('Esta atividade não possui follow-up pendente.')
@@ -75,4 +79,5 @@ def concluir_followup(
         produto_relacionado=produto_relacionado or atividade_pendente.produto_relacionado,
         proxima_acao=proxima_acao,
         data_proxima_acao=data_proxima_acao,
+        hora_proxima_acao=hora_proxima_acao,
     )

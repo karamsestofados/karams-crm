@@ -1,0 +1,11 @@
+<div class="timeline-filtros">
+  {% for valor, label in timeline_filtros %}
+  <button type="button"
+          class="timeline-filtro-chip{% if tipo_filtro == valor %} active{% endif %}"
+          hx-get="{% url 'clientes:atividades_timeline' cliente_selecionado.pk %}{% if valor %}?tipo={{ valor }}{% endif %}"
+          hx-target="#relacionamento-tab-content"
+          hx-swap="innerHTML">
+    {{ label }}
+  </button>
+  {% endfor %}
+</div>

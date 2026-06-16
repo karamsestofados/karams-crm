@@ -16,7 +16,7 @@ class AtividadeClienteForm(forms.ModelForm):
         model = AtividadeCliente
         fields = [
             'tipo_contato', 'assunto', 'resumo', 'resultado', 'humor_cliente',
-            'produto_relacionado', 'proxima_acao', 'data_proxima_acao',
+            'produto_relacionado', 'proxima_acao', 'data_proxima_acao', 'hora_proxima_acao',
         ]
         widgets = {
             'tipo_contato': forms.Select(attrs={'class': 'form-input'}),
@@ -27,6 +27,7 @@ class AtividadeClienteForm(forms.ModelForm):
             'produto_relacionado': forms.Select(attrs={'class': 'form-input'}),
             'proxima_acao': forms.Select(attrs={'class': 'form-input'}),
             'data_proxima_acao': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+            'hora_proxima_acao': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
         }
 
     def __init__(self, *args, cliente=None, **kwargs):
@@ -37,6 +38,7 @@ class AtividadeClienteForm(forms.ModelForm):
         self.fields['produto_relacionado'].empty_label = '— Nenhum —'
         self.fields['produto_relacionado'].queryset = Produto.objects.ativos().order_by('nome')
         self.fields['data_proxima_acao'].required = False
+        self.fields['hora_proxima_acao'].required = False
 
     def clean(self):
         cleaned = super().clean()
@@ -46,6 +48,7 @@ class AtividadeClienteForm(forms.ModelForm):
             self.add_error('data_proxima_acao', 'Informe a data da próxima ação.')
         if proxima == ProximaAcao.SEM_ACAO:
             cleaned['data_proxima_acao'] = None
+            cleaned['hora_proxima_acao'] = None
         resumo = cleaned.get('resumo', '')
         if not resumo or not resumo.strip():
             self.add_error('resumo', 'O resumo é obrigatório.')
@@ -54,8 +57,8 @@ class AtividadeClienteForm(forms.ModelForm):
 
 class ConcluirFollowupForm(forms.Form):
     resumo = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'O que aconteceu?'}),
-        label='O que aconteceu?',
+        widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Registre tudo que foi conversado...'}),
+        label='Resumo',
     )
     tipo_contato = forms.ChoiceField(
         choices=TipoContato.choices,
@@ -78,6 +81,11 @@ class ConcluirFollowupForm(forms.Form):
         widget=forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
         label='Data próxima ação',
     )
+    hora_proxima_acao = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
+        label='Hora',
+    )
 
     def clean(self):
         cleaned = super().clean()
@@ -85,4 +93,25 @@ class ConcluirFollowupForm(forms.Form):
         data = cleaned.get('data_proxima_acao')
         if proxima and proxima != ProximaAcao.SEM_ACAO and not data:
             self.add_error('data_proxima_acao', 'Informe a data da próxima ação.')
+        if proxima == ProximaAcao.SEM_ACAO:
+            cleaned['data_proxima_acao'] = None
+            cleaned['hora_proxima_acao'] = None
         return cleaned
+
+
+class InteracaoGlobalForm(AtividadeClienteForm):
+    cliente = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label='Cliente',
+    )
+
+    def __init__(self, *args, user=None, cliente=None, **kwargs):
+        super().__init__(*args, cliente=cliente, **kwargs)
+        from clientes.models import Cliente
+
+        self.fields['cliente'].queryset = Cliente.objects.para_usuario(user).ativos().order_by('nome')
+        if cliente:
+            self.fields['cliente'].initial = cliente.pk
+        if 'tipo_contato' in self.initial:
+            self.fields['tipo_contato'].initial = self.initial['tipo_contato']

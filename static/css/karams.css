@@ -1565,6 +1565,219 @@ h2, h3 {
   height: 1rem;
   flex-shrink: 0;
 }
+.modal-panel-lg { max-width: 640px; }
+
+/* Cockpit Comercial */
+.cockpit-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.cockpit-kpi {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+.cockpit-kpi-value {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.cockpit-kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+.cockpit-kpi--danger .cockpit-kpi-value { color: #dc2626; }
+.cockpit-kpi--warning .cockpit-kpi-value { color: #f59e0b; }
+
+.cockpit-acoes-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.cockpit-acao-btn { white-space: nowrap; }
+
+.cockpit-middle-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.cockpit-calendario { padding: 1.25rem; }
+.cockpit-calendario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.cockpit-calendario-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.cockpit-calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+}
+.cockpit-cal-dow {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.25rem;
+}
+.cockpit-cal-day {
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: var(--bg-input);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 0.25rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cockpit-cal-day:hover { border-color: var(--primary); }
+.cockpit-cal-day.is-selected { border-color: var(--primary); background: var(--primary-subtle); }
+.cockpit-cal-day.is-today .cockpit-cal-num { color: var(--primary); font-weight: 700; }
+.cockpit-cal-day--empty { background: transparent; border: none; cursor: default; }
+.cockpit-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.cockpit-dot--atrasado { background: #dc2626; }
+.cockpit-dot--hoje { background: #f59e0b; }
+.cockpit-dot--futuro { background: #4ade80; }
+.cockpit-cal-legend {
+  display: flex;
+  gap: 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.cockpit-cal-legend span { display: flex; align-items: center; gap: 0.35rem; }
+.cockpit-dia-panel { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); }
+.cockpit-dia-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+.cockpit-dia-lista { list-style: none; }
+.cockpit-dia-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.8125rem;
+}
+.cockpit-dia-hora { color: var(--primary); min-width: 3rem; font-weight: 600; }
+.cockpit-panel-sub { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.cockpit-table-wrap { overflow-x: auto; }
+.cockpit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.cockpit-table th,
+.cockpit-table td {
+  padding: 0.625rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cockpit-table th { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; }
+.cockpit-ultimas { padding: 1.25rem; margin-top: 1.25rem; }
+.cockpit-ultima-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.8125rem;
+}
+.cockpit-ultima-time { color: var(--text-muted); min-width: 4.5rem; }
+.cockpit-ultima-body { display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; align-items: center; }
+.cockpit-ultima-tipo { color: var(--primary); }
+.cockpit-ultima-resultado { color: var(--success); font-size: 0.75rem; }
+
+.atividade-card {
+  background: #111827 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.atividade-card-top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+.atividade-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.atividade-card-icon svg { width: 18px; height: 18px; color: var(--primary); }
+.atividade-card-tipo { font-size: 0.75rem; color: var(--primary); font-weight: 600; }
+.atividade-card-assunto { font-size: 0.8125rem; margin: 0.35rem 0; }
+.atividade-card-vencimento { font-size: 0.8125rem; color: var(--text-muted); }
+
+.timeline-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.timeline-filtro-chip {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.timeline-filtro-chip:hover,
+.timeline-filtro-chip.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-subtle);
+}
+.resumo-comercial-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-card);
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .cockpit-resumo-grid { grid-template-columns: repeat(3, 1fr); }
+  .cockpit-middle-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .cockpit-resumo-grid { grid-template-columns: repeat(2, 1fr); }
+  .cockpit-acoes-bar { flex-direction: column; }
+  .cockpit-acoes-bar .btn { width: 100%; justify-content: center; }
+  .resumo-comercial-grid { grid-template-columns: 1fr !important; }
+}
+
 .form-label-inline {
   margin: 0;
   font-size: 0.8125rem;

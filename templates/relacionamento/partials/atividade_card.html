@@ -1,20 +1,33 @@
 <article class="atividade-card atividade-card--{{ variant }}">
-  <div class="atividade-card-header">
-    <h3 class="atividade-card-cliente">{{ atividade.cliente.nome }}</h3>
-    <span class="atividade-card-data">{{ atividade.data_proxima_acao|date:"d/m/Y" }}</span>
+  <div class="atividade-card-top">
+    <div class="atividade-card-icon">
+      {% include 'relacionamento/partials/icon_tipo_contato.html' with tipo=atividade.proxima_acao %}
+    </div>
+    <div class="atividade-card-head">
+      <span class="atividade-card-tipo">{{ atividade.get_proxima_acao_display }}</span>
+      <h3 class="atividade-card-cliente">{{ atividade.cliente.nome }}</h3>
+    </div>
   </div>
-  <p class="atividade-card-acao"><strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }}</p>
+  {% if atividade.assunto %}
+  <p class="atividade-card-assunto"><strong>Assunto:</strong> {{ atividade.assunto }}</p>
+  {% endif %}
   {% if atividade.produto_relacionado %}
   <p class="atividade-card-produto"><strong>Produto:</strong> {{ atividade.produto_relacionado.nome }}</p>
   {% endif %}
-  <p class="atividade-card-vendedor"><strong>Vendedor:</strong> {{ atividade.cliente.vendedor.get_full_name|default:atividade.cliente.vendedor.username }}</p>
+  <p class="atividade-card-vencimento">
+    <strong>Vencimento:</strong>
+    {{ atividade.data_proxima_acao|date:"d/m/Y" }}
+    {% if atividade.hora_proxima_acao %} {{ atividade.hora_proxima_acao|time:"H:i" }}{% endif %}
+    {% if variant == 'atrasada' %} · Atrasada{% elif variant == 'hoje' %} · Hoje{% endif %}
+  </p>
+  <p class="atividade-card-vendedor"><strong>Responsável:</strong> {{ atividade.cliente.vendedor.get_full_name|default:atividade.cliente.vendedor.username }}</p>
   <div class="atividade-card-actions">
-    <a href="{% url 'clientes:lista' %}?id={{ atividade.cliente.pk }}&tab=relacionamento" class="btn btn-secondary btn-sm">Abrir Cliente</a>
+    <a href="{% url 'clientes:lista' %}?id={{ atividade.cliente.pk }}&tab=historico" class="btn btn-secondary btn-sm">Abrir Cliente</a>
     <button type="button" class="btn btn-primary btn-sm"
             hx-get="{% url 'atividade:concluir_followup' atividade.pk %}"
             hx-target="#modal-concluir-container"
             hx-swap="innerHTML">
-      Concluir
+      Registrar Resultado
     </button>
   </div>
 </article>

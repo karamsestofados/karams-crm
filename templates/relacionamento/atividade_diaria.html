@@ -5,14 +5,15 @@
 
 {% block content %}
 <div class="crm-page-header">
-  <h1 class="crm-page-title">Atividade Diária</h1>
-  <p style="color:var(--text-muted);font-size:0.875rem;">Follow-ups gerados automaticamente das interações com clientes</p>
+  <h1 class="crm-page-title">Cockpit Comercial</h1>
+  <p class="page-subtitle">Rotina diária, calendário e histórico de interações</p>
 </div>
 
-<div class="page-body" id="atividade-diaria-content">
-  {% include 'relacionamento/partials/atividade_diaria_listas.html' %}
+<div id="cockpit-main">
+  {% include 'relacionamento/partials/cockpit_main.html' %}
 </div>
 
+<div id="modal-interacao-global-container"></div>
 <div id="modal-concluir-container"></div>
 {% endblock %}
 
@@ -22,6 +23,10 @@
     if (evt.detail.target.id === 'modal-concluir-container') {
       var modal = document.getElementById('modal-concluir');
       if (modal) modal.classList.add('open');
+    }
+    if (evt.detail.target.id === 'modal-interacao-global-container') {
+      var modalG = document.getElementById('modal-interacao-global');
+      if (modalG) modalG.classList.add('open');
     }
   });
 </script>

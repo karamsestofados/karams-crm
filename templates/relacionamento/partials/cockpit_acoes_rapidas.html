@@ -1,0 +1,38 @@
+<div class="cockpit-acoes-bar">
+  <button type="button" class="btn btn-primary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    + Registrar Interação
+  </button>
+  <button type="button" class="btn btn-secondary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}?tipo=LIGACAO"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    Nova Ligação
+  </button>
+  <button type="button" class="btn btn-secondary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}?tipo=WHATSAPP"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    Novo WhatsApp
+  </button>
+  <button type="button" class="btn btn-secondary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}?tipo=EMAIL"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    Novo E-mail
+  </button>
+  <button type="button" class="btn btn-secondary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}?tipo=VISITA"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    Nova Visita
+  </button>
+  <button type="button" class="btn btn-secondary btn-sm cockpit-acao-btn"
+          hx-get="{% url 'atividade:interacao_nova' %}?tipo=LIGACAO"
+          hx-target="#modal-interacao-global-container"
+          hx-swap="innerHTML">
+    Agendar Follow-up
+  </button>
+</div>

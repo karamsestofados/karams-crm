@@ -8,7 +8,7 @@ def rotina_diaria_para_usuario(usuario):
         AtividadeCliente.objects
         .pendentes_para_usuario(usuario)
         .select_related('cliente', 'cliente__vendedor', 'produto_relacionado', 'usuario')
-        .order_by('data_proxima_acao', 'cliente__nome')
+        .order_by('data_proxima_acao', 'hora_proxima_acao', 'cliente__nome')
     )
     hoje = timezone.localdate()
     return {

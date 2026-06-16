@@ -1,4 +1,4 @@
-<div class="client-panel-section">
+<div class="client-panel-section resumo-comercial-section">
   <div class="client-panel-section-header">
     <h3 class="client-panel-section-title">Resumo Comercial</h3>
     <button type="button" class="btn btn-primary btn-sm"
@@ -10,7 +10,8 @@
 </div>
 
 <div class="client-panel-section">
-  <h3 class="client-panel-section-title">Timeline Comercial</h3>
+  <h3 class="client-panel-section-title">Histórico Comercial</h3>
+  {% include 'relacionamento/partials/timeline_filtros.html' %}
   <div id="timeline-cliente">
     {% include 'relacionamento/partials/timeline.html' %}
   </div>

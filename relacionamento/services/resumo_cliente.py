@@ -40,6 +40,7 @@ def resumo_comercial_cliente(cliente):
         Q(tipo_contato=TipoContato.NEGOCIACAO)
         | Q(resultado=Resultado.AGUARDANDO_RETORNO)
     ).count()
+    pedidos_fechados = atividades.filter(resultado=Resultado.PEDIDO_FECHADO).count()
 
     humor_avg = None
     humor_label = '—'
@@ -58,6 +59,8 @@ def resumo_comercial_cliente(cliente):
         'total_interacoes': total,
         'total_propostas': propostas,
         'total_negociacoes': negociacoes,
+        'total_pedidos_fechados': pedidos_fechados,
+        'ultimo_vendedor': ultima.usuario if ultima else None,
         'humor_medio': humor_avg,
         'humor_medio_label': humor_label,
     }

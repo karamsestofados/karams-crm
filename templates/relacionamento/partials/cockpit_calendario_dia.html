@@ -1,0 +1,15 @@
+<div class="cockpit-dia-panel">
+  <h4 class="cockpit-dia-title">{{ dia_selecionado|date:"d/m/Y" }}</h4>
+  {% if atividades_dia %}
+  <ul class="cockpit-dia-lista">
+    {% for atv in atividades_dia %}
+    <li class="cockpit-dia-item">
+      <span class="cockpit-dia-hora">{% if atv.hora_proxima_acao %}{{ atv.hora_proxima_acao|time:"H:i" }}{% else %}—{% endif %}</span>
+      <span class="cockpit-dia-text">{{ atv.get_proxima_acao_display }} — {{ atv.cliente.nome }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="client-panel-empty">Nenhum compromisso neste dia.</p>
+  {% endif %}
+</div>

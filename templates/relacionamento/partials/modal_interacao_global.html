@@ -1,0 +1,62 @@
+<div id="modal-interacao-global" class="modal-overlay open" onclick="if(event.target===this){this.classList.remove('open');document.getElementById('modal-interacao-global-container').innerHTML=''}">
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-panel-header">
+      <h3>Registrar Interação</h3>
+      <button type="button" class="modal-close" onclick="document.getElementById('modal-interacao-global-container').innerHTML=''">&times;</button>
+    </div>
+    <form method="post"
+          action="{% url 'atividade:interacao_nova' %}"
+          hx-post="{% url 'atividade:interacao_nova' %}"
+          hx-target="#cockpit-main"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful) document.getElementById('modal-interacao-global-container').innerHTML=''">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">{{ form.cliente.label }}</label>
+        {{ form.cliente }}
+      </div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">{{ form.tipo_contato.label }}</label>
+          {{ form.tipo_contato }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.assunto.label }}</label>
+          {{ form.assunto }}
+        </div>
+        <div class="form-group full-width">
+          <label class="form-label">{{ form.resumo.label }}</label>
+          {{ form.resumo }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.resultado.label }}</label>
+          {{ form.resultado }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.humor_cliente.label }}</label>
+          {{ form.humor_cliente }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.produto_relacionado.label }}</label>
+          {{ form.produto_relacionado }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.proxima_acao.label }}</label>
+          {{ form.proxima_acao }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.data_proxima_acao.label }}</label>
+          {{ form.data_proxima_acao }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.hora_proxima_acao.label }}</label>
+          {{ form.hora_proxima_acao }}
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-interacao-global-container').innerHTML=''">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar interação</button>
+      </div>
+    </form>
+  </div>
+</div>

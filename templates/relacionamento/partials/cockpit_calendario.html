@@ -1,0 +1,62 @@
+<div class="cockpit-calendario card">
+  <div class="cockpit-calendario-header">
+    {% if calendario.mes == 1 %}
+    {% with prev_ano=calendario.ano|add:"-1" prev_mes=12 %}
+    <button type="button" class="btn btn-secondary btn-sm"
+            hx-get="{% url 'atividade:atividade_diaria' %}?ano={{ prev_ano }}&mes={{ prev_mes }}"
+            hx-target="#cockpit-main" hx-swap="innerHTML">&larr;</button>
+    {% endwith %}
+    {% else %}
+    <button type="button" class="btn btn-secondary btn-sm"
+            hx-get="{% url 'atividade:atividade_diaria' %}?ano={{ calendario.ano }}&mes={{ calendario.mes|add:'-1' }}"
+            hx-target="#cockpit-main" hx-swap="innerHTML">&larr;</button>
+    {% endif %}
+    <h3 class="cockpit-calendario-title">{{ calendario.mes_nome }} {{ calendario.ano }}</h3>
+    {% if calendario.mes == 12 %}
+    {% with next_ano=calendario.ano|add:"1" %}
+    <button type="button" class="btn btn-secondary btn-sm"
+            hx-get="{% url 'atividade:atividade_diaria' %}?ano={{ next_ano }}&mes=1"
+            hx-target="#cockpit-main" hx-swap="innerHTML">&rarr;</button>
+    {% endwith %}
+    {% else %}
+    <button type="button" class="btn btn-secondary btn-sm"
+            hx-get="{% url 'atividade:atividade_diaria' %}?ano={{ calendario.ano }}&mes={{ calendario.mes|add:'1' }}"
+            hx-target="#cockpit-main" hx-swap="innerHTML">&rarr;</button>
+    {% endif %}
+  </div>
+  <div class="cockpit-calendario-grid">
+    <span class="cockpit-cal-dow">Dom</span>
+    <span class="cockpit-cal-dow">Seg</span>
+    <span class="cockpit-cal-dow">Ter</span>
+    <span class="cockpit-cal-dow">Qua</span>
+    <span class="cockpit-cal-dow">Qui</span>
+    <span class="cockpit-cal-dow">Sex</span>
+    <span class="cockpit-cal-dow">Sáb</span>
+    {% for semana in calendario.semanas %}
+      {% for cel in semana %}
+      {% if cel.empty %}
+      <span class="cockpit-cal-day cockpit-cal-day--empty"></span>
+      {% else %}
+      <button type="button"
+              class="cockpit-cal-day{% if cel.date == dia_selecionado %} is-selected{% endif %}{% if cel.is_today %} is-today{% endif %}"
+              hx-get="{% url 'atividade:calendario_dia' cel.date|date:'Y-m-d' %}"
+              hx-target="#cockpit-calendario-dia"
+              hx-swap="innerHTML">
+        <span class="cockpit-cal-num">{{ cel.day }}</span>
+        {% if cel.indicators.atrasado %}<i class="cockpit-dot cockpit-dot--atrasado" title="Atrasado"></i>{% endif %}
+        {% if cel.indicators.hoje %}<i class="cockpit-dot cockpit-dot--hoje" title="Hoje"></i>{% endif %}
+        {% if cel.indicators.futuro %}<i class="cockpit-dot cockpit-dot--futuro" title="Futuro"></i>{% endif %}
+      </button>
+      {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+  <div class="cockpit-cal-legend">
+    <span><i class="cockpit-dot cockpit-dot--atrasado"></i> Atrasado</span>
+    <span><i class="cockpit-dot cockpit-dot--hoje"></i> Hoje</span>
+    <span><i class="cockpit-dot cockpit-dot--futuro"></i> Futuro</span>
+  </div>
+  <div id="cockpit-calendario-dia">
+    {% include 'relacionamento/partials/cockpit_calendario_dia.html' %}
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<div class="cockpit-ultimas card">
+  <h3 class="section-title">Últimas interações</h3>
+  <div class="cockpit-ultimas-list">
+    {% for atv in ultimas_interacoes %}
+    <article class="cockpit-ultima-item">
+      <time class="cockpit-ultima-time">{{ atv.data_criacao|date:"d/m H:i" }}</time>
+      <div class="cockpit-ultima-body">
+        <strong>{{ atv.usuario.get_full_name|default:atv.usuario.username }}</strong>
+        <span class="cockpit-ultima-tipo">{{ atv.get_tipo_contato_display }}</span>
+        <span class="cockpit-ultima-cliente">{{ atv.cliente.nome }}</span>
+        <span class="cockpit-ultima-resultado">{{ atv.get_resultado_display }}</span>
+      </div>
+    </article>
+    {% empty %}
+    <p class="client-panel-empty">Nenhuma interação registrada.</p>
+    {% endfor %}
+  </div>
+</div>

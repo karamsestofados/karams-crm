@@ -29,7 +29,7 @@
       <span><strong>Humor:</strong> {{ atividade.get_humor_cliente_display }}</span>
       {% endif %}
       {% if atividade.proxima_acao != 'SEM_ACAO' and atividade.data_proxima_acao %}
-      <span><strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }} · {{ atividade.data_proxima_acao|date:"d/m/Y" }}</span>
+      <span><strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }} · {{ atividade.data_proxima_acao|date:"d/m/Y" }}{% if atividade.hora_proxima_acao %} {{ atividade.hora_proxima_acao|time:"H:i" }}{% endif %}</span>
       {% endif %}
     </div>
     {% if atividade.produto_relacionado %}

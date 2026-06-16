@@ -1,4 +1,4 @@
-<div class="resumo-comercial-grid">
+<div class="resumo-comercial-grid resumo-comercial-sticky">
   <div class="resumo-comercial-item">
     <span class="resumo-comercial-label">Último contato</span>
     <span class="resumo-comercial-value">
@@ -20,6 +20,7 @@
     <span class="resumo-comercial-value">
       {% if resumo_comercial.proxima_pendente %}
       {{ resumo_comercial.proxima_pendente.data_proxima_acao|date:"d/m/Y" }}
+      {% if resumo_comercial.proxima_pendente.hora_proxima_acao %} {{ resumo_comercial.proxima_pendente.hora_proxima_acao|time:"H:i" }}{% endif %}
       {% else %}—{% endif %}
     </span>
   </div>
@@ -34,6 +35,18 @@
   <div class="resumo-comercial-item">
     <span class="resumo-comercial-label">Negociações</span>
     <span class="resumo-comercial-value">{{ resumo_comercial.total_negociacoes }}</span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Pedidos fechados</span>
+    <span class="resumo-comercial-value">{{ resumo_comercial.total_pedidos_fechados }}</span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Último vendedor</span>
+    <span class="resumo-comercial-value">
+      {% if resumo_comercial.ultimo_vendedor %}
+      {{ resumo_comercial.ultimo_vendedor.get_full_name|default:resumo_comercial.ultimo_vendedor.username }}
+      {% else %}—{% endif %}
+    </span>
   </div>
   <div class="resumo-comercial-item">
     <span class="resumo-comercial-label">Humor médio</span>

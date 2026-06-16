@@ -189,6 +189,21 @@ Disponível em **Configurações** (somente administradores):
 
 Guarde os arquivos de backup em local seguro fora do servidor para recuperação em emergências.
 
+## Cockpit Comercial
+
+A página **Atividade Diária** (`/atividade-diaria/`) funciona como cockpit de gestão comercial:
+
+- **Resumo do dia** — atividades hoje/atrasadas/futuras, interações e clientes atendidos
+- **Ações rápidas** — registrar interação, ligação, WhatsApp, e-mail, visita ou follow-up (modal global)
+- **Calendário mensal** — indicadores por status (atrasado/hoje/futuro) com horário opcional
+- **Clientes sem contato** — lista de clientes ativos sem interação há 30+ dias
+- **Últimas interações** — timeline global cross-client
+- **Fila de follow-ups** — cards enriquecidos com ação "Registrar Resultado"
+
+No painel do cliente, a aba **Histórico Comercial** exibe resumo expandido, filtros por tipo de contato e timeline cronológica.
+
+Services reutilizáveis para BI futuro: `relacionamento/services/cockpit.py`, `resumo_cliente.py`, `relatorio.py`.
+
 ## Roadmap
 
 - [x] **Fase 1** — Base: modelos, auth, admin, deploy Railway

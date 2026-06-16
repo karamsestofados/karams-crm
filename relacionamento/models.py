@@ -16,13 +16,15 @@ class TipoContato(models.TextChoices):
 
 
 class Resultado(models.TextChoices):
+    SEM_RESPOSTA = 'SEM_RESPOSTA', 'Sem resposta'
+    CONTATO_REALIZADO = 'CONTATO_REALIZADO', 'Contato realizado'
     SEM_INTERESSE = 'SEM_INTERESSE', 'Sem interesse'
     INTERESSADO = 'INTERESSADO', 'Interessado'
     PROPOSTA_ENVIADA = 'PROPOSTA_ENVIADA', 'Proposta enviada'
     AGUARDANDO_RETORNO = 'AGUARDANDO_RETORNO', 'Aguardando retorno'
     PEDIDO_FECHADO = 'PEDIDO_FECHADO', 'Pedido fechado'
     POS_VENDA = 'POS_VENDA', 'Pós-venda'
-    PENDENTE = 'PENDENTE', 'Pendente'
+    PENDENTE = 'PENDENTE', 'Sem resposta'  # legado — mesmo label
 
 
 class HumorCliente(models.TextChoices):
@@ -40,7 +42,7 @@ class ProximaAcao(models.TextChoices):
     AGENDAR_VISITA = 'AGENDAR_VISITA', 'Agendar visita'
     ENVIAR_WHATSAPP = 'ENVIAR_WHATSAPP', 'Enviar WhatsApp'
     ENVIAR_EMAIL = 'ENVIAR_EMAIL', 'Enviar e-mail'
-    SEM_ACAO = 'SEM_ACAO', 'Sem ação'
+    SEM_ACAO = 'SEM_ACAO', 'Encerrar atendimento'
 
 
 class AtividadeClienteQuerySet(models.QuerySet):
@@ -75,6 +77,9 @@ class AtividadeClienteQuerySet(models.QuerySet):
     def proximas(self):
         hoje = timezone.localdate()
         return self.pendentes().filter(data_proxima_acao__gt=hoje)
+
+    def ordenar_pendentes(self):
+        return self.order_by('data_proxima_acao', 'hora_proxima_acao', 'cliente__nome')
 
 
 class AtividadeCliente(models.Model):
@@ -119,6 +124,7 @@ class AtividadeCliente(models.Model):
         default=ProximaAcao.SEM_ACAO,
     )
     data_proxima_acao = models.DateField(null=True, blank=True)
+    hora_proxima_acao = models.TimeField(null=True, blank=True)
     concluida = models.BooleanField(default=False)
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)

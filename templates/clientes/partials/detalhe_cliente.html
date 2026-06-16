@@ -45,7 +45,7 @@
     <div class="client-tabs" x-data="{ tab: '{{ tab_ativa|default:'dados' }}' }">
       <div class="client-tabs-nav">
         <button type="button" class="client-tab" :class="{ 'active': tab === 'dados' }" @click="tab = 'dados'">Dados</button>
-        <button type="button" class="client-tab" :class="{ 'active': tab === 'relacionamento' }" @click="tab = 'relacionamento'">Relacionamento</button>
+        <button type="button" class="client-tab" :class="{ 'active': tab === 'historico' }" @click="tab = 'historico'">Histórico Comercial</button>
       </div>
 
       <div x-show="tab === 'dados'" x-cloak>
@@ -203,7 +203,7 @@
     {% endif %}
       </div>
 
-      <div x-show="tab === 'relacionamento'" x-cloak id="relacionamento-tab-content">
+      <div x-show="tab === 'historico'" x-cloak id="relacionamento-tab-content">
         {% include 'relacionamento/partials/relacionamento_tab.html' %}
       </div>
     </div>

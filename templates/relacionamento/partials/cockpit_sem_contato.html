@@ -1,0 +1,37 @@
+<div class="cockpit-sem-contato card">
+  <h3 class="section-title">Clientes sem contato</h3>
+  <p class="cockpit-panel-sub">Sem interação nos últimos 30 dias</p>
+  {% if clientes_sem_contato %}
+  <div class="cockpit-table-wrap">
+    <table class="cockpit-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Último contato</th>
+          <th>Dias</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in clientes_sem_contato %}
+        <tr>
+          <td>{{ item.cliente.nome }}</td>
+          <td>{% if item.ultima_atividade %}{{ item.ultima_atividade.data_criacao|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+          <td>{{ item.dias_sem_contato }}{% if item.dias_sem_contato != '—' %} dias{% endif %}</td>
+          <td>
+            <button type="button" class="btn btn-primary btn-sm"
+                    hx-get="{% url 'atividade:interacao_nova' %}?cliente={{ item.cliente.pk }}"
+                    hx-target="#modal-interacao-global-container"
+                    hx-swap="innerHTML">
+              Registrar Contato
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="client-panel-empty">Todos os clientes ativos foram contatados recentemente.</p>
+  {% endif %}
+</div>

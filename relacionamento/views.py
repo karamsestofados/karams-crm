@@ -1,7 +1,10 @@
+from datetime import date
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 
 from accounts.mixins import VendedorRequiredMixin
@@ -9,12 +12,44 @@ from accounts.models import Papel, Usuario
 from clientes.models import Cliente, Produto
 from clientes.views import get_cliente_or_404
 
-from .forms import AtividadeClienteForm, ConcluirFollowupForm
+from .constants import TIMELINE_FILTROS
+from .forms import AtividadeClienteForm, ConcluirFollowupForm, InteracaoGlobalForm
 from .models import AtividadeCliente, TipoContato
 from .services.atividades import concluir_followup, registrar_interacao
+from .services.cockpit import contexto_cockpit_completo
 from .services.relatorio import filtrar_atividades, indicadores_por_tipo, ranking_vendedores
 from .services.resumo_cliente import resumo_comercial_cliente
-from .services.rotina_diaria import rotina_diaria_para_usuario
+
+
+def _parse_int(value, default):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _cockpit_context(request, extra=None):
+    hoje = timezone.localdate()
+    ano = _parse_int(request.GET.get('ano'), hoje.year)
+    mes = _parse_int(request.GET.get('mes'), hoje.month)
+    dia_str = request.GET.get('dia')
+    if dia_str:
+        try:
+            parts = dia_str.split('-')
+            dia_selecionado = date(int(parts[0]), int(parts[1]), int(parts[2]))
+        except (ValueError, IndexError):
+            dia_selecionado = hoje
+    else:
+        dia_selecionado = hoje
+
+    ctx = contexto_cockpit_completo(request.user, ano=ano, mes=mes, dia_selecionado=dia_selecionado)
+    if extra:
+        ctx.update(extra)
+    return ctx
+
+
+def _render_cockpit_main(request):
+    return render(request, 'relacionamento/partials/cockpit_main.html', _cockpit_context(request))
 
 
 class AtividadeDiariaView(VendedorRequiredMixin, TemplateView):
@@ -22,11 +57,8 @@ class AtividadeDiariaView(VendedorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        rotina = rotina_diaria_para_usuario(self.request.user)
-        context.update(rotina)
-        context['total_hoje'] = rotina['hoje'].count()
-        context['total_atrasadas'] = rotina['atrasadas'].count()
-        context['total_proximas'] = rotina['proximas'].count()
+        context.update(_cockpit_context(self.request))
+        context['tipos_contato'] = TipoContato
         return context
 
 
@@ -58,8 +90,9 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                     resultado=form.cleaned_data['resultado'],
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
+                    hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                 )
-                messages.success(request, 'Atividade concluída e nova interação registrada.')
+                messages.success(request, 'Resultado registrado e nova atividade gerada.')
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
@@ -75,9 +108,74 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                 }, status=422)
 
         if request.headers.get('HX-Request'):
-            rotina = rotina_diaria_para_usuario(request.user)
-            return render(request, 'relacionamento/partials/atividade_diaria_listas.html', rotina)
+            return _render_cockpit_main(request)
         return redirect('atividade:atividade_diaria')
+
+
+class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
+    def get(self, request):
+        tipo = request.GET.get('tipo', TipoContato.OUTRO)
+        cliente_id = request.GET.get('cliente')
+        cliente = None
+        if cliente_id:
+            cliente = get_cliente_or_404(request.user, cliente_id)
+
+        form = InteracaoGlobalForm(
+            user=request.user,
+            cliente=cliente,
+            initial={'tipo_contato': tipo},
+        )
+        return render(request, 'relacionamento/partials/modal_interacao_global.html', {
+            'form': form,
+            'tipo_preset': tipo,
+        })
+
+    def post(self, request):
+        form = InteracaoGlobalForm(request.POST, user=request.user)
+        if form.is_valid():
+            cliente = form.cleaned_data['cliente']
+            try:
+                registrar_interacao(
+                    cliente=cliente,
+                    usuario=request.user,
+                    tipo_contato=form.cleaned_data['tipo_contato'],
+                    resumo=form.cleaned_data['resumo'],
+                    assunto=form.cleaned_data.get('assunto', ''),
+                    resultado=form.cleaned_data['resultado'],
+                    humor_cliente=form.cleaned_data.get('humor_cliente'),
+                    produto_relacionado=form.cleaned_data.get('produto_relacionado'),
+                    proxima_acao=form.cleaned_data['proxima_acao'],
+                    data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
+                    hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
+                )
+                messages.success(request, 'Interação registrada com sucesso.')
+            except ValidationError as exc:
+                messages.error(request, exc.messages[0] if exc.messages else str(exc))
+                if request.headers.get('HX-Request'):
+                    return render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                        'form': form,
+                    }, status=422)
+        else:
+            if request.headers.get('HX-Request'):
+                return render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                    'form': form,
+                }, status=422)
+
+        if request.headers.get('HX-Request'):
+            return _render_cockpit_main(request)
+        return redirect('atividade:atividade_diaria')
+
+
+class CalendarioDiaPartialView(VendedorRequiredMixin, View):
+    def get(self, request, data_str):
+        try:
+            parts = data_str.split('-')
+            dia = date(int(parts[0]), int(parts[1]), int(parts[2]))
+        except (ValueError, IndexError):
+            return redirect('atividade:atividade_diaria')
+
+        ctx = _cockpit_context(request, {'dia_selecionado': dia})
+        return render(request, 'relacionamento/partials/cockpit_calendario_dia.html', ctx)
 
 
 class RelatorioRelacionamentoView(VendedorRequiredMixin, TemplateView):
@@ -125,56 +223,40 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     produto_relacionado=form.cleaned_data.get('produto_relacionado'),
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
+                    hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                 )
                 messages.success(request, 'Interação registrada com sucesso.')
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return render(request, 'relacionamento/partials/relacionamento_tab.html', {
-                        'cliente_selecionado': cliente,
-                        'atividades': AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado').order_by('-data_criacao')[:50],
-                        'resumo_comercial': resumo_comercial_cliente(cliente),
-                        'atividade_form': form,
-                    }, status=422)
+                    return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, form))
         else:
             if request.headers.get('HX-Request'):
-                return render(request, 'relacionamento/partials/relacionamento_tab.html', {
-                    'cliente_selecionado': cliente,
-                    'atividades': AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado').order_by('-data_criacao')[:50],
-                    'resumo_comercial': resumo_comercial_cliente(cliente),
-                    'atividade_form': form,
-                }, status=422)
+                return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, form))
 
         if request.headers.get('HX-Request'):
-            atividades = (
-                AtividadeCliente.objects.ativas()
-                .filter(cliente=cliente)
-                .select_related('usuario', 'produto_relacionado')
-                .order_by('-data_criacao')[:50]
-            )
-            return render(request, 'relacionamento/partials/relacionamento_tab.html', {
-                'cliente_selecionado': cliente,
-                'atividades': atividades,
-                'resumo_comercial': resumo_comercial_cliente(cliente),
-                'atividade_form': AtividadeClienteForm(cliente=cliente),
-            })
+            return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente))
 
-        url = reverse('clientes:lista') + f'?id={pk}&tab=relacionamento'
+        url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
         return redirect(url)
+
+
+def _cliente_tab_context(cliente, form=None, tipo_filtro=''):
+    qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado')
+    if tipo_filtro:
+        qs = qs.filter(tipo_contato=tipo_filtro)
+    return {
+        'cliente_selecionado': cliente,
+        'atividades': qs.order_by('-data_criacao')[:50],
+        'resumo_comercial': resumo_comercial_cliente(cliente),
+        'atividade_form': form or AtividadeClienteForm(cliente=cliente),
+        'tipo_filtro': tipo_filtro,
+        'timeline_filtros': TIMELINE_FILTROS,
+    }
 
 
 class ClienteTimelinePartialView(VendedorRequiredMixin, View):
     def get(self, request, pk):
         cliente = get_cliente_or_404(request.user, pk)
-        atividades = (
-            AtividadeCliente.objects.ativas()
-            .filter(cliente=cliente)
-            .select_related('usuario', 'produto_relacionado')
-            .order_by('-data_criacao')[:50]
-        )
-        return render(request, 'relacionamento/partials/relacionamento_tab.html', {
-            'cliente_selecionado': cliente,
-            'atividades': atividades,
-            'resumo_comercial': resumo_comercial_cliente(cliente),
-            'atividade_form': AtividadeClienteForm(cliente=cliente),
-        })
+        tipo_filtro = request.GET.get('tipo', '')
+        return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, tipo_filtro=tipo_filtro))
