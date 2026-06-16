@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.utils import timezone
 
+from comissoes.services.produtividade import meta_do_dia
 from relacionamento.services.cockpit import clientes_sem_contato, resumo_dia
 from relacionamento.services.rotina_diaria import rotina_diaria_para_usuario
 

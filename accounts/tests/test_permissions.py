@@ -83,3 +83,13 @@ class PermissionSmokeTests(TestCase):
         self.client.login(username='vendedor_test', password='testpass123')
         response = self.client.get(reverse('core:dashboard'))
         self.assertEqual(response.status_code, 200)
+
+    def test_atividade_diaria_admin(self):
+        self.client.login(username='admin_test', password='testpass123')
+        response = self.client.get(reverse('atividade:atividade_diaria'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_atividade_diaria_vendedor(self):
+        self.client.login(username='vendedor_test', password='testpass123')
+        response = self.client.get(reverse('atividade:atividade_diaria'))
+        self.assertEqual(response.status_code, 200)
