@@ -16,9 +16,9 @@ class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = [
-            'vendedor', 'nome', 'tipo_cliente', 'segmento', 'categoria', 'status_funil',
-            'origem_lead', 'regiao_atuacao', 'cidade', 'estado', 'cep', 'telefone',
-            'responsavel', 'instagram', 'data_primeiro_contato', 'endereco',
+            'vendedor', 'nome', 'tipo_cliente', 'segmento', 'modalidade_cliente',
+            'categoria', 'status_funil', 'origem_lead', 'regiao_atuacao', 'cidade', 'estado',
+            'cep', 'telefone', 'responsavel', 'instagram', 'data_primeiro_contato', 'endereco',
             'feedback_original', 'produtos_exclusivos', 'ativo_no_sistema',
         ]
         widgets = {
@@ -26,6 +26,7 @@ class ClienteForm(forms.ModelForm):
             'nome': forms.TextInput(attrs={'class': 'form-input'}),
             'tipo_cliente': forms.Select(attrs={'class': 'form-input'}),
             'segmento': forms.Select(attrs={'class': 'form-input'}),
+            'modalidade_cliente': forms.Select(attrs={'class': 'form-input'}),
             'categoria': forms.Select(attrs={'class': 'form-input'}),
             'status_funil': forms.Select(attrs={'class': 'form-input'}),
             'origem_lead': forms.Select(attrs={'class': 'form-input'}),
@@ -65,11 +66,14 @@ class ClienteForm(forms.ModelForm):
         self.fields['estado'].widget.attrs['placeholder'] = 'UF'
 
         optional_selects = (
-            'tipo_cliente', 'segmento', 'origem_lead', 'regiao_atuacao',
+            'tipo_cliente', 'segmento', 'modalidade_cliente', 'origem_lead', 'regiao_atuacao',
         )
         for name in optional_selects:
             self.fields[name].required = False
             self.fields[name].empty_label = '— Selecione —'
+
+        self.fields['tipo_cliente'].label = 'Perfil do Cliente'
+        self.fields['modalidade_cliente'].label = 'Tipo Cliente'
 
         if user and not user.is_admin:
             self.fields['vendedor'].widget = forms.HiddenInput()

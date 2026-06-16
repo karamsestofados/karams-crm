@@ -15,7 +15,7 @@ class ClienteResource(resources.ModelResource):
     class Meta:
         model = Cliente
         fields = (
-            'id', 'vendedor', 'categoria', 'nome', 'tipo_cliente', 'segmento',
+            'id', 'vendedor', 'categoria', 'nome', 'tipo_cliente', 'modalidade_cliente', 'segmento',
             'origem_lead', 'status_funil', 'regiao_atuacao', 'cidade', 'estado',
             'cep', 'telefone', 'responsavel', 'instagram', 'endereco',
             'data_primeiro_contato', 'feedback_original', 'ativo_no_sistema', 'legacy_id',
@@ -41,11 +41,11 @@ class ProdutoAdmin(ImportExportModelAdmin):
 class ClienteAdmin(ImportExportModelAdmin):
     resource_class = ClienteResource
     list_display = (
-        'nome', 'tipo_cliente', 'segmento', 'status_funil', 'categoria',
+        'nome', 'tipo_cliente', 'modalidade_cliente', 'segmento', 'status_funil', 'categoria',
         'cidade', 'estado', 'vendedor', 'ativo_no_sistema',
     )
     list_filter = (
-        'tipo_cliente', 'segmento', 'origem_lead', 'status_funil', 'regiao_atuacao',
+        'tipo_cliente', 'modalidade_cliente', 'segmento', 'origem_lead', 'status_funil', 'regiao_atuacao',
         'categoria', 'estado', 'ativo_no_sistema', 'vendedor',
     )
     search_fields = ('nome', 'cidade', 'telefone', 'cep', 'legacy_id')

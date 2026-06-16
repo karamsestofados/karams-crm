@@ -25,9 +25,14 @@
         {% endfor %}
       </div>
       <div class="crm-filters-grid">
-        <select name="tipo_cliente" class="form-input">
+        <select name="tipo_cliente" class="form-input" title="Perfil do Cliente">
           {% for val, label in tipos_cliente %}
-          <option value="{{ val }}" {% if tipo_cliente_atual == val %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ val }}" {% if tipo_cliente_atual == val %}selected{% endif %}>{% if val == 'todos' %}Perfil: Todos{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+        <select name="modalidade_cliente" class="form-input" title="Tipo Cliente">
+          {% for val, label in modalidades_cliente %}
+          <option value="{{ val }}" {% if modalidade_cliente_atual == val %}selected{% endif %}>{% if val == 'todos' %}Tipo: Todos{% else %}{{ label }}{% endif %}</option>
           {% endfor %}
         </select>
         <select name="segmento" class="form-input">
@@ -90,6 +95,9 @@
           {% if cliente_selecionado.tipo_cliente %}
           <span class="badge badge-segmento">{{ cliente_selecionado.get_tipo_cliente_display }}</span>
           {% endif %}
+          {% if cliente_selecionado.modalidade_cliente %}
+          <span class="badge badge-modalidade badge-modalidade-{{ cliente_selecionado.modalidade_cliente|lower }}">{{ cliente_selecionado.get_modalidade_cliente_display }}</span>
+          {% endif %}
           {% if cliente_selecionado.segmento %}
           <span class="badge badge-segmento">{{ cliente_selecionado.get_segmento_display }}</span>
           {% endif %}
@@ -131,6 +139,14 @@
       <div class="crm-field">
         <label>Vendedor</label>
         <span>{{ cliente_selecionado.vendedor.get_full_name|default:cliente_selecionado.vendedor.username }}</span>
+      </div>
+      <div class="crm-field">
+        <label>Tipo Cliente</label>
+        <span>{% if cliente_selecionado.modalidade_cliente %}{{ cliente_selecionado.get_modalidade_cliente_display }}{% else %}—{% endif %}</span>
+      </div>
+      <div class="crm-field">
+        <label>Perfil do Cliente</label>
+        <span>{% if cliente_selecionado.tipo_cliente %}{{ cliente_selecionado.get_tipo_cliente_display }}{% else %}—{% endif %}</span>
       </div>
       <div class="crm-field">
         <label>Origem do Lead</label>

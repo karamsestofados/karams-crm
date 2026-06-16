@@ -12,6 +12,7 @@ from .forms import ClienteForm
 from .models import (
     CategoriaCliente,
     Cliente,
+    ModalidadeCliente,
     OrigemLead,
     RegiaoAtuacao,
     SegmentoCliente,
@@ -21,7 +22,7 @@ from .models import (
 
 FILTRO_PARAMS = (
     'q', 'categoria', 'vendedor', 'inativos',
-    'tipo_cliente', 'segmento', 'origem_lead', 'status_funil', 'regiao_atuacao',
+    'tipo_cliente', 'modalidade_cliente', 'segmento', 'origem_lead', 'status_funil', 'regiao_atuacao',
 )
 
 
@@ -62,6 +63,7 @@ def aplicar_filtros_clientes(qs, request):
 
     for param, choices in (
         ('tipo_cliente', TipoCliente),
+        ('modalidade_cliente', ModalidadeCliente),
         ('segmento', SegmentoCliente),
         ('origem_lead', OrigemLead),
         ('status_funil', StatusFunil),
@@ -106,6 +108,7 @@ class ClienteListView(VendedorRequiredMixin, ListView):
         context['inativos'] = request.GET.get('inativos') == '1'
         context['vendedor_atual'] = request.GET.get('vendedor', '')
         context['tipo_cliente_atual'] = request.GET.get('tipo_cliente', 'todos')
+        context['modalidade_cliente_atual'] = request.GET.get('modalidade_cliente', 'todos')
         context['segmento_atual'] = request.GET.get('segmento', 'todos')
         context['origem_lead_atual'] = request.GET.get('origem_lead', 'todos')
         context['status_funil_atual'] = request.GET.get('status_funil', 'todos')
@@ -129,6 +132,7 @@ class ClienteListView(VendedorRequiredMixin, ListView):
 
         context['categorias'] = [('todos', 'Todos'), *CategoriaCliente.choices]
         context['tipos_cliente'] = [('todos', 'Todos'), *TipoCliente.choices]
+        context['modalidades_cliente'] = [('todos', 'Todos'), *ModalidadeCliente.choices]
         context['segmentos'] = [('todos', 'Todos'), *SegmentoCliente.choices]
         context['origens_lead'] = [('todos', 'Todos'), *OrigemLead.choices]
         context['status_funil_opcoes'] = [('todos', 'Todos'), *StatusFunil.choices]

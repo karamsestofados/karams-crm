@@ -33,6 +33,11 @@ class TipoCliente(models.TextChoices):
     OUTROS = 'OUTROS', 'Outros'
 
 
+class ModalidadeCliente(models.TextChoices):
+    RECORRENTE = 'RECORRENTE', 'Recorrente'
+    COMPRA_UNICA = 'COMPRA_UNICA', 'Compra Única'
+
+
 class SegmentoCliente(models.TextChoices):
     MOVEIS = 'MOVEIS', 'Móveis'
     ESTOFADOS = 'ESTOFADOS', 'Estofados'
@@ -107,6 +112,14 @@ class Cliente(models.Model):
         choices=TipoCliente.choices,
         null=True,
         blank=True,
+        verbose_name='Perfil do Cliente',
+    )
+    modalidade_cliente = models.CharField(
+        max_length=20,
+        choices=ModalidadeCliente.choices,
+        null=True,
+        blank=True,
+        verbose_name='Tipo Cliente',
     )
     segmento = models.CharField(
         max_length=30,

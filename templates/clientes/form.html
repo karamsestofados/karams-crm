@@ -44,7 +44,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="{{ form.tipo_cliente.id_for_label }}">Tipo de Cliente</label>
+          <label class="form-label" for="{{ form.tipo_cliente.id_for_label }}">Perfil do Cliente</label>
           {{ form.tipo_cliente }}
           {% if form.tipo_cliente.errors %}<p class="field-error">{{ form.tipo_cliente.errors.0 }}</p>{% endif %}
         </div>
@@ -53,6 +53,12 @@
           <label class="form-label" for="{{ form.segmento.id_for_label }}">Segmento</label>
           {{ form.segmento }}
           {% if form.segmento.errors %}<p class="field-error">{{ form.segmento.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.modalidade_cliente.id_for_label }}">Tipo Cliente</label>
+          {{ form.modalidade_cliente }}
+          {% if form.modalidade_cliente.errors %}<p class="field-error">{{ form.modalidade_cliente.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group">
