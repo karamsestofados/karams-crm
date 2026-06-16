@@ -1,0 +1,28 @@
+<div class="atividade-diaria-grid">
+  <section class="atividade-diaria-col">
+    <h2 class="atividade-diaria-title">Hoje <span class="atividade-count">{{ hoje|length }}</span></h2>
+    {% for item in hoje %}
+    {% include 'relacionamento/partials/atividade_card.html' with atividade=item variant='hoje' %}
+    {% empty %}
+    <p class="client-panel-empty">Nenhuma ação para hoje.</p>
+    {% endfor %}
+  </section>
+
+  <section class="atividade-diaria-col atividade-diaria-col--atrasada">
+    <h2 class="atividade-diaria-title">Atrasadas <span class="atividade-count">{{ atrasadas|length }}</span></h2>
+    {% for item in atrasadas %}
+    {% include 'relacionamento/partials/atividade_card.html' with atividade=item variant='atrasada' %}
+    {% empty %}
+    <p class="client-panel-empty">Nenhuma ação atrasada.</p>
+    {% endfor %}
+  </section>
+
+  <section class="atividade-diaria-col atividade-diaria-col--proxima">
+    <h2 class="atividade-diaria-title">Próximas <span class="atividade-count">{{ proximas|length }}</span></h2>
+    {% for item in proximas %}
+    {% include 'relacionamento/partials/atividade_card.html' with atividade=item variant='proxima' %}
+    {% empty %}
+    <p class="client-panel-empty">Nenhuma ação futura agendada.</p>
+    {% endfor %}
+  </section>
+</div>

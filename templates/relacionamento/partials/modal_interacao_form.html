@@ -1,0 +1,46 @@
+<form method="post"
+      action="{% url 'clientes:atividade_nova' cliente_selecionado.pk %}"
+      hx-post="{% url 'clientes:atividade_nova' cliente_selecionado.pk %}"
+      hx-target="#relacionamento-tab-content"
+      hx-swap="innerHTML"
+      hx-on::after-request="if(event.detail.successful) document.getElementById('modal-interacao')?.classList.remove('open')">
+  {% csrf_token %}
+  <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="form-group">
+      <label class="form-label">Tipo de contato</label>
+      {{ atividade_form.tipo_contato }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assunto</label>
+      {{ atividade_form.assunto }}
+    </div>
+    <div class="form-group full-width" style="grid-column:1/-1;">
+      <label class="form-label">Resumo *</label>
+      {{ atividade_form.resumo }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Resultado</label>
+      {{ atividade_form.resultado }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Humor do cliente</label>
+      {{ atividade_form.humor_cliente }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Produto relacionado</label>
+      {{ atividade_form.produto_relacionado }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Próxima ação</label>
+      {{ atividade_form.proxima_acao }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data próxima ação</label>
+      {{ atividade_form.data_proxima_acao }}
+    </div>
+  </div>
+  <div style="margin-top:1rem;display:flex;gap:0.75rem;justify-content:flex-end;">
+    <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-interacao').classList.remove('open')">Cancelar</button>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+  </div>
+</form>

@@ -1,0 +1,20 @@
+<article class="atividade-card atividade-card--{{ variant }}">
+  <div class="atividade-card-header">
+    <h3 class="atividade-card-cliente">{{ atividade.cliente.nome }}</h3>
+    <span class="atividade-card-data">{{ atividade.data_proxima_acao|date:"d/m/Y" }}</span>
+  </div>
+  <p class="atividade-card-acao"><strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }}</p>
+  {% if atividade.produto_relacionado %}
+  <p class="atividade-card-produto"><strong>Produto:</strong> {{ atividade.produto_relacionado.nome }}</p>
+  {% endif %}
+  <p class="atividade-card-vendedor"><strong>Vendedor:</strong> {{ atividade.cliente.vendedor.get_full_name|default:atividade.cliente.vendedor.username }}</p>
+  <div class="atividade-card-actions">
+    <a href="{% url 'clientes:lista' %}?id={{ atividade.cliente.pk }}&tab=relacionamento" class="btn btn-secondary btn-sm">Abrir Cliente</a>
+    <button type="button" class="btn btn-primary btn-sm"
+            hx-get="{% url 'atividade:concluir_followup' atividade.pk %}"
+            hx-target="#modal-concluir-container"
+            hx-swap="innerHTML">
+      Concluir
+    </button>
+  </div>
+</article>

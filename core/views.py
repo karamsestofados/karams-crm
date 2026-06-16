@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from accounts.mixins import VendedorRequiredMixin
 from clientes.models import Cliente
 from comissoes.models import MetaMensal
+from relacionamento.services.dashboard import kpis_relacionamento
 
 
 class DashboardView(VendedorRequiredMixin, TemplateView):
@@ -73,5 +74,17 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
 
         pct_ativos = round(ativos / total * 100) if total else 0
         context['pct_ativos'] = pct_ativos
+
+        rel_kpis = kpis_relacionamento(user)
+        context.update(rel_kpis)
+
+        realizado_contatos = rel_kpis['contatos_hoje']
+        meta_contatos = meta.meta_contatos if meta else 60
+        context['sparkline_contatos'] = [
+            0,
+            max(realizado_contatos, meta_contatos // 4),
+            max(rel_kpis['interacoes_semana'] // 2, meta_contatos // 2),
+            max(rel_kpis['interacoes_semana'], meta_contatos),
+        ]
 
         return context

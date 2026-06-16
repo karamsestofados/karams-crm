@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Relacionamento — Karams CRM{% endblock %}
+{% block nav_relacionamento %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Relatório de Relacionamento</h1>
+</div>
+
+<div class="page-body">
+  <form method="get" class="crm-search" style="margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">De</label>
+      <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Até</label>
+      <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+    </div>
+    {% if vendedores %}
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Vendedor</label>
+      <select name="vendedor" class="form-input">
+        <option value="">Todos</option>
+        {% for v in vendedores %}
+        <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Cliente</label>
+      <select name="cliente" class="form-input">
+        <option value="">Todos</option>
+        {% for c in clientes %}
+        <option value="{{ c.pk }}" {% if filtros.cliente == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Produto</label>
+      <select name="produto" class="form-input">
+        <option value="">Todos</option>
+        {% for p in produtos %}
+        <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Tipo contato</label>
+      <select name="tipo_contato" class="form-input">
+        {% for val, label in tipos_contato %}
+        <option value="{{ val }}" {% if filtros.tipo_contato == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </form>
+
+  <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1.5rem;">{{ total_interacoes }} interações no período</p>
+
+  <div class="resumo-comercial-grid" style="margin-bottom:2rem;">
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">Ligações</span><span class="resumo-comercial-value">{{ indicadores.ligacoes }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">WhatsApps</span><span class="resumo-comercial-value">{{ indicadores.whatsapps }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">E-mails</span><span class="resumo-comercial-value">{{ indicadores.emails }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">Visitas</span><span class="resumo-comercial-value">{{ indicadores.visitas }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">Reuniões</span><span class="resumo-comercial-value">{{ indicadores.reunioes }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">Propostas</span><span class="resumo-comercial-value">{{ indicadores.propostas }}</span></div>
+    <div class="resumo-comercial-item"><span class="resumo-comercial-label">Pedidos Fechados</span><span class="resumo-comercial-value">{{ indicadores.pedidos_fechados }}</span></div>
+  </div>
+
+  <div class="table-card">
+    <div class="section-title" style="padding:1rem 1rem 0;">Ranking de Vendedores</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Interações</th>
+          <th>Clientes Atendidos</th>
+          <th>Propostas</th>
+          <th>Fechamentos</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in ranking %}
+        <tr>
+          <td>{{ row.vendedor.get_full_name|default:row.vendedor.username }}</td>
+          <td>{{ row.interacoes }}</td>
+          <td>{{ row.clientes_atendidos }}</td>
+          <td>{{ row.propostas }}</td>
+          <td>{{ row.fechamentos }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">Sem dados para o filtro selecionado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

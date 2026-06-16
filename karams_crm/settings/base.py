@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'atividades',
     'calendario',
     'comissoes',
+    'relacionamento',
     'relatorios',
 ]
 

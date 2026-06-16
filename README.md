@@ -119,9 +119,10 @@ O comando `seed_usuarios` cria apenas o vendedor demo. **Não** cria admin em pr
 |-----|------------------|
 | `core` | Dashboard, backup log, configurações globais |
 | `accounts` | Usuários, papéis (admin/vendedor), perfil |
-| `clientes` | Cliente, Produto, Histórico de interações |
-| `atividades` | Registros diários de contato |
-| `calendario` | Notas de relacionamento, alertas de retorno |
+| `clientes` | Cliente, Produto, vínculos comerciais |
+| `relacionamento` | AtividadeCliente — hub central de interações comerciais |
+| `atividades` | Registros diários de contato (legado, admin only) |
+| `calendario` | Notas de relacionamento, alertas de retorno (legado, admin only) |
 | `comissoes` | Vendas, metas mensais |
 | `relatorios` | Exportações (Fase 5) |
 
@@ -154,11 +155,36 @@ O CRM trata produtos como base para exclusividades comerciais, não apenas catá
 - Comissões por produto
 - Dashboard: produtos exclusivos/únicos, clientes por produto, produtos sem cliente (`ProdutoQuerySet.sem_cliente()`)
 
+## Relacionamento Comercial
+
+O app `relacionamento` centraliza todas as interações comerciais via model `AtividadeCliente`.
+
+### Funcionalidades
+
+- **Aba Relacionamento** no painel do cliente: resumo comercial, timeline e registro de interações (HTMX)
+- **Atividade Diária** (`/atividade-diaria/`): fila Hoje / Atrasadas / Próximas derivada de follow-ups pendentes
+- **Concluir follow-up:** marca a pendência como concluída e registra nova interação
+- **Dashboard:** KPIs reais (contatos hoje, interações na semana, clientes sem contato 30+ dias, negociações, fechamentos)
+- **Relatório** (`/relacionamento/relatorio/`): filtros por período/vendedor/cliente/produto/tipo e ranking de vendedores
+
+### Model AtividadeCliente
+
+Campos principais: tipo de contato, resumo, resultado, humor do cliente, produto relacionado, próxima ação + data. Soft delete via `deleted_at`.
+
+### Migração de dados legados
+
+A migration `relacionamento.0001_initial` migra automaticamente:
+
+- `HistoricoInteracao` → atividades concluídas (histórico)
+- `AlertaRetorno` (não dispensados) → follow-ups pendentes
+
+Models legados permanecem read-only no admin.
+
 ## Roadmap
 
 - [x] **Fase 1** — Base: modelos, auth, admin, deploy Railway
-- [ ] **Fase 2** — CRM de clientes (lista, ficha 360°, filtros HTMX)
-- [ ] **Fase 3** — Dashboard de atividade diária + gráficos
+- [x] **Fase 2** — CRM de clientes (lista, ficha 360°, filtros HTMX)
+- [x] **Fase 3** — Atividade diária + dashboard KPIs de relacionamento
 - [ ] **Fase 4** — Calendário de relacionamento
 - [ ] **Fase 5** — Comissões e relatórios (Excel/PDF)
 - [ ] **Fase 6** — Backup/restore e polish UI

@@ -1,0 +1,27 @@
+<div class="client-panel-section">
+  <div class="client-panel-section-header">
+    <h3 class="client-panel-section-title">Resumo Comercial</h3>
+    <button type="button" class="btn btn-primary btn-sm"
+            onclick="document.getElementById('modal-interacao').classList.add('open')">
+      + Registrar Interação
+    </button>
+  </div>
+  {% include 'relacionamento/partials/resumo_comercial.html' %}
+</div>
+
+<div class="client-panel-section">
+  <h3 class="client-panel-section-title">Timeline Comercial</h3>
+  <div id="timeline-cliente">
+    {% include 'relacionamento/partials/timeline.html' %}
+  </div>
+</div>
+
+<div id="modal-interacao" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-panel">
+    <div class="modal-panel-header">
+      <h3>Registrar Interação</h3>
+      <button type="button" class="modal-close" onclick="document.getElementById('modal-interacao').classList.remove('open')">&times;</button>
+    </div>
+    {% include 'relacionamento/partials/modal_interacao_form.html' %}
+  </div>
+</div>

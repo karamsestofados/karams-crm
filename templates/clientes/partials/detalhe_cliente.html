@@ -42,6 +42,13 @@
       </div>
     </div>
 
+    <div class="client-tabs" x-data="{ tab: '{{ tab_ativa|default:'dados' }}' }">
+      <div class="client-tabs-nav">
+        <button type="button" class="client-tab" :class="{ 'active': tab === 'dados' }" @click="tab = 'dados'">Dados</button>
+        <button type="button" class="client-tab" :class="{ 'active': tab === 'relacionamento' }" @click="tab = 'relacionamento'">Relacionamento</button>
+      </div>
+
+      <div x-show="tab === 'dados'" x-cloak>
     <div class="client-panel-section">
       <h3 class="client-panel-section-title">Dados Gerais</h3>
       <div class="client-field-grid">
@@ -194,6 +201,12 @@
       <p class="client-panel-observacoes">{{ cliente_selecionado.feedback_original|linebreaksbr }}</p>
     </div>
     {% endif %}
+      </div>
+
+      <div x-show="tab === 'relacionamento'" x-cloak id="relacionamento-tab-content">
+        {% include 'relacionamento/partials/relacionamento_tab.html' %}
+      </div>
+    </div>
   </div>
 </div>
 {% else %}

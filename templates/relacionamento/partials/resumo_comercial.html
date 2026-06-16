@@ -1,0 +1,46 @@
+<div class="resumo-comercial-grid">
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Último contato</span>
+    <span class="resumo-comercial-value">
+      {% if resumo_comercial.ultima_atividade %}
+      {{ resumo_comercial.ultima_atividade.data_criacao|date:"d/m/Y H:i" }} · {{ resumo_comercial.ultima_atividade.get_tipo_contato_display }}
+      {% else %}—{% endif %}
+    </span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Próxima ação</span>
+    <span class="resumo-comercial-value">
+      {% if resumo_comercial.proxima_pendente %}
+      {{ resumo_comercial.proxima_pendente.get_proxima_acao_display }}
+      {% else %}—{% endif %}
+    </span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Data próxima ação</span>
+    <span class="resumo-comercial-value">
+      {% if resumo_comercial.proxima_pendente %}
+      {{ resumo_comercial.proxima_pendente.data_proxima_acao|date:"d/m/Y" }}
+      {% else %}—{% endif %}
+    </span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Interações</span>
+    <span class="resumo-comercial-value">{{ resumo_comercial.total_interacoes }}</span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Propostas</span>
+    <span class="resumo-comercial-value">{{ resumo_comercial.total_propostas }}</span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Negociações</span>
+    <span class="resumo-comercial-value">{{ resumo_comercial.total_negociacoes }}</span>
+  </div>
+  <div class="resumo-comercial-item">
+    <span class="resumo-comercial-label">Humor médio</span>
+    <span class="resumo-comercial-value">
+      {% if resumo_comercial.humor_medio %}
+      <span class="badge badge-segmento">{{ resumo_comercial.humor_medio_label }}</span>
+      {% else %}—{% endif %}
+    </span>
+  </div>
+</div>

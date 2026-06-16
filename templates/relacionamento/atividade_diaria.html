@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividade Diária — Karams CRM{% endblock %}
+{% block nav_atividade %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Atividade Diária</h1>
+  <p style="color:var(--text-muted);font-size:0.875rem;">Follow-ups gerados automaticamente das interações com clientes</p>
+</div>
+
+<div class="page-body" id="atividade-diaria-content">
+  {% include 'relacionamento/partials/atividade_diaria_listas.html' %}
+</div>
+
+<div id="modal-concluir-container"></div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'modal-concluir-container') {
+      var modal = document.getElementById('modal-concluir');
+      if (modal) modal.classList.add('open');
+    }
+  });
+</script>
+{% endblock %}

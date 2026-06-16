@@ -59,6 +59,43 @@
       <div class="kpi-value-lg">{% if meta_mensal %}R$ {{ meta_mensal.meta_vendas|floatformat:0 }}{% else %}R$ 80.000{% endif %}</div>
       <div class="kpi-value-sub">objetivo mensal da equipe</div>
     </div>
+
+  <div class="kpi-row" style="margin-top:0;">
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Contatos Hoje</span>
+      </div>
+      <div class="kpi-value-lg">{{ contatos_hoje }}</div>
+      <div class="kpi-value-sub">interações registradas hoje</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Interações na Semana</span>
+      </div>
+      <div class="kpi-value-lg">{{ interacoes_semana }}</div>
+      <div class="kpi-value-sub">últimos 7 dias</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Sem Contato 30+ dias</span>
+      </div>
+      <div class="kpi-value-lg">{{ clientes_sem_contato_30 }}</div>
+      <div class="kpi-value-sub">clientes ativos</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Negociações Abertas</span>
+      </div>
+      <div class="kpi-value-lg">{{ negociacoes_abertas }}</div>
+      <div class="kpi-value-sub">aguardando retorno / follow-ups</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header">
+        <span class="kpi-card-title">Pedidos Fechados</span>
+      </div>
+      <div class="kpi-value-lg">{{ pedidos_fechados_mes }}</div>
+      <div class="kpi-value-sub">no mês atual</div>
+    </div>
   </div>
 
   <div class="charts-row">

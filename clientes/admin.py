@@ -40,6 +40,13 @@ class HistoricoInteracaoInline(admin.TabularInline):
     extra = 0
     fields = ('data', 'tipo', 'vendedor', 'observacao', 'valor')
     autocomplete_fields = ['vendedor']
+    readonly_fields = ('data', 'tipo', 'vendedor', 'observacao', 'valor')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ProdutoExclusividadeInline(admin.TabularInline):
@@ -88,6 +95,13 @@ class HistoricoInteracaoAdmin(admin.ModelAdmin):
     search_fields = ('cliente__nome', 'observacao')
     filter_horizontal = ('produtos',)
     autocomplete_fields = ['cliente', 'vendedor']
+    readonly_fields = ('cliente', 'tipo', 'data', 'vendedor', 'observacao', 'valor', 'created_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(ProdutoExclusividade)

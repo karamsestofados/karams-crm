@@ -221,7 +221,10 @@ class Cliente(models.Model):
 
     @property
     def ultima_interacao(self):
-        return self.historico.order_by('-data', '-created_at').first()
+        try:
+            return self.atividades.filter(deleted_at__isnull=True).order_by('-data_criacao').first()
+        except Exception:
+            return self.historico.order_by('-data', '-created_at').first()
 
     @property
     def dias_desde_ultimo_contato(self):
@@ -229,7 +232,10 @@ class Cliente(models.Model):
         if not ultima:
             return None
         from django.utils import timezone
-        return (timezone.localdate() - ultima.data).days
+        data_ref = getattr(ultima, 'data_criacao', None) or getattr(ultima, 'data', None)
+        if hasattr(data_ref, 'date'):
+            data_ref = data_ref.date()
+        return (timezone.localdate() - data_ref).days
 
     @property
     def compra_unica(self):

@@ -22,3 +22,10 @@ class AlertaRetornoAdmin(admin.ModelAdmin):
     list_filter = ('dispensado', 'data_alerta', 'vendedor')
     search_fields = ('cliente__nome',)
     autocomplete_fields = ['cliente', 'vendedor']
+    readonly_fields = ('cliente', 'vendedor', 'data_contato', 'data_alerta', 'dispensado')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

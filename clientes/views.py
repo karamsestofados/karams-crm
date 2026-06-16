@@ -147,6 +147,22 @@ class ClienteListView(VendedorRequiredMixin, ListView):
         context['status_funil_opcoes'] = [('todos', 'Todos'), *StatusFunil.choices]
         context['regioes_atuacao'] = [('todos', 'Todos'), *RegiaoAtuacao.choices]
         context['reativar_form'] = ClienteReativarForm()
+        context['tab_ativa'] = request.GET.get('tab', 'dados')
+
+        cliente = context.get('cliente_selecionado')
+        if cliente:
+            from relacionamento.forms import AtividadeClienteForm
+            from relacionamento.models import AtividadeCliente
+            from relacionamento.services.resumo_cliente import resumo_comercial_cliente
+            context['resumo_comercial'] = resumo_comercial_cliente(cliente)
+            context['atividades'] = (
+                AtividadeCliente.objects.ativas()
+                .filter(cliente=cliente)
+                .select_related('usuario', 'produto_relacionado')
+                .order_by('-data_criacao')[:50]
+            )
+            context['atividade_form'] = AtividadeClienteForm(cliente=cliente)
+
         return context
 
     def get_template_names(self):

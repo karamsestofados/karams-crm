@@ -1,5 +1,7 @@
 from django.urls import path
 
+from relacionamento.views import ClienteAtividadeCreateView, ClienteTimelinePartialView
+
 from . import views
 
 app_name = 'clientes'
@@ -12,4 +14,6 @@ urlpatterns = [
     path('<int:pk>/reativar/', views.ClienteReativarView.as_view(), name='reativar'),
     path('<int:pk>/produtos/vincular/', views.ClienteProdutoVincularView.as_view(), name='produto_vincular'),
     path('<int:pk>/produtos/<int:vinculo_pk>/remover/', views.ClienteProdutoRemoverView.as_view(), name='produto_remover'),
+    path('<int:pk>/atividades/nova/', ClienteAtividadeCreateView.as_view(), name='atividade_nova'),
+    path('<int:pk>/atividades/', ClienteTimelinePartialView.as_view(), name='atividades_timeline'),
 ]

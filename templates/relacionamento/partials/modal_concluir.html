@@ -1,0 +1,45 @@
+<div id="modal-concluir" class="modal-overlay open" onclick="if(event.target===this){this.classList.remove('open');document.getElementById('modal-concluir-container').innerHTML=''}">
+  <div class="modal-panel">
+    <div class="modal-panel-header">
+      <h3>Concluir — {{ atividade.cliente.nome }}</h3>
+      <button type="button" class="modal-close" onclick="document.getElementById('modal-concluir-container').innerHTML=''">&times;</button>
+    </div>
+    <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;">
+      Ação pendente: {{ atividade.get_proxima_acao_display }} · {{ atividade.data_proxima_acao|date:"d/m/Y" }}
+    </p>
+    <form method="post"
+          action="{% url 'atividade:concluir_followup' atividade.pk %}"
+          hx-post="{% url 'atividade:concluir_followup' atividade.pk %}"
+          hx-target="#atividade-diaria-content"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful) document.getElementById('modal-concluir-container').innerHTML=''">
+      {% csrf_token %}
+      <div class="form-group full-width">
+        <label class="form-label">{{ form.resumo.label }}</label>
+        {{ form.resumo }}
+      </div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">{{ form.tipo_contato.label }}</label>
+          {{ form.tipo_contato }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.resultado.label }}</label>
+          {{ form.resultado }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.proxima_acao.label }}</label>
+          {{ form.proxima_acao }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.data_proxima_acao.label }}</label>
+          {{ form.data_proxima_acao }}
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-concluir-container').innerHTML=''">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Registrar e concluir</button>
+      </div>
+    </form>
+  </div>
+</div>
