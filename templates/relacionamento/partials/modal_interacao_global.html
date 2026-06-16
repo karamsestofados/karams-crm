@@ -9,6 +9,7 @@
           hx-post="{% url 'atividade:interacao_nova' %}"
           hx-target="#cockpit-main"
           hx-swap="innerHTML"
+          data-google-calendar-on-save
           hx-on::after-request="if(event.detail.successful) document.getElementById('modal-interacao-global-container').innerHTML=''">
       {% csrf_token %}
       {% if form.non_field_errors %}

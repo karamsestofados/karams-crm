@@ -12,6 +12,7 @@
           hx-post="{% url 'atividade:concluir_followup' atividade.pk %}"
           hx-target="#cockpit-main"
           hx-swap="innerHTML"
+          data-google-calendar-on-save
           hx-on::after-request="if(event.detail.successful) document.getElementById('modal-concluir-container').innerHTML=''">
       {% csrf_token %}
       {% if form.non_field_errors %}

@@ -3,6 +3,7 @@
       hx-post="{% url 'clientes:atividade_nova' cliente_selecionado.pk %}"
       hx-target="#relacionamento-tab-content"
       hx-swap="innerHTML"
+      data-google-calendar-on-save
       hx-on::after-request="if(event.detail.successful) document.getElementById('modal-interacao')?.classList.remove('open')">
   {% csrf_token %}
   <div class="form-grid" style="grid-template-columns:1fr 1fr;">

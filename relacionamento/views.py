@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from django.contrib import messages
@@ -62,19 +63,25 @@ def _render_cockpit_main(request, calendar_url=None):
 
 def _interacao_success_message(calendar_url=None):
     if calendar_url:
-        return 'Interação registrada com sucesso. Use o botão abaixo para salvar no Google Agenda.'
+        return 'Interação registrada com sucesso. Abrindo Google Agenda em nova guia.'
     return 'Interação registrada com sucesso.'
 
 
 def _concluir_success_message(calendar_url=None):
     if calendar_url:
-        return 'Resultado registrado. Use o botão abaixo para salvar no Google Agenda.'
+        return 'Resultado registrado. Abrindo Google Agenda em nova guia.'
     return 'Resultado registrado e nova atividade gerada.'
+
+
+def _attach_calendar_trigger(response, calendar_url):
+    if calendar_url:
+        response['HX-Trigger'] = json.dumps({'openGoogleCalendar': calendar_url})
+    return response
 
 
 def _finalize_interacao_response(request, calendar_url, render_response, redirect_url):
     if request.headers.get('HX-Request'):
-        return render_response
+        return _attach_calendar_trigger(render_response, calendar_url)
     if calendar_url:
         request.session['pending_calendar_url'] = calendar_url
     return redirect(redirect_url)
@@ -283,10 +290,13 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                 if request.headers.get('HX-Request'):
                     ctx = _cliente_tab_context(cliente)
                     ctx['google_calendar_url'] = calendar_url
-                    return render(
-                        request,
-                        'relacionamento/partials/relacionamento_tab.html',
-                        ctx,
+                    return _attach_calendar_trigger(
+                        render(
+                            request,
+                            'relacionamento/partials/relacionamento_tab.html',
+                            ctx,
+                        ),
+                        calendar_url,
                     )
                 if calendar_url:
                     request.session['pending_calendar_url'] = calendar_url

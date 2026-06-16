@@ -862,6 +862,29 @@ h2, h3 {
   }
 }
 
+.calendar-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  z-index: 950;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  color: var(--text);
+  font-size: 0.875rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.calendar-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ─── CRM Clientes ─── */
 .crm-page-header {
   display: flex;

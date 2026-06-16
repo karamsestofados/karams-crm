@@ -1,3 +1,4 @@
+import json
 from datetime import date, time
 from decimal import Decimal
 
@@ -156,3 +157,28 @@ class CalendarHtmxTests(TestCase):
         self.assertContains(response, 'Salvar no Google Agenda')
         self.assertContains(response, 'calendar.google.com')
         self.assertContains(response, 'action=TEMPLATE')
+        trigger = json.loads(response['HX-Trigger'])
+        self.assertIn('openGoogleCalendar', trigger)
+        self.assertIn('calendar.google.com', trigger['openGoogleCalendar'])
+        self.assertIn('action=TEMPLATE', trigger['openGoogleCalendar'])
+
+    def test_interacao_sem_agendamento_nao_dispara_trigger(self):
+        self.client.login(username='vendedor_htmx', password='testpass123')
+        response = self.client.post(
+            '/atividade-diaria/interacao/nova/',
+            {
+                'cliente': self.cliente.pk,
+                'tipo_contato': TipoContato.WHATSAPP,
+                'assunto': '',
+                'resumo': 'Contato rápido',
+                'resultado': Resultado.CONTATO_REALIZADO,
+                'humor_cliente': '',
+                'produto_relacionado': '',
+                'proxima_acao': ProximaAcao.SEM_ACAO,
+                'data_proxima_acao': '',
+                'hora_proxima_acao': '',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('HX-Trigger', response)
