@@ -1,0 +1,66 @@
+<div class="client-panel-section-header">
+  <h3 class="client-panel-section-title">
+    <svg class="client-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    Produtos Vinculados
+  </h3>
+  {% if produtos_disponiveis_count %}
+  <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vincular-produto-form').classList.toggle('open')">
+    + Vincular Produto
+  </button>
+  {% endif %}
+</div>
+
+{% if produtos_disponiveis_count %}
+<div id="vincular-produto-form" class="vincular-produto-form">
+  <form method="post"
+        action="{% url 'clientes:produto_vincular' cliente_selecionado.pk %}"
+        hx-post="{% url 'clientes:produto_vincular' cliente_selecionado.pk %}"
+        hx-target="#produtos-vinculados"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+    <div class="vincular-produto-grid">
+      <div>{{ vinculo_form.produto }}</div>
+      <div>{{ vinculo_form.observacoes }}</div>
+      <button type="submit" class="btn btn-primary btn-sm">Vincular</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
+{% if cliente_selecionado.vinculos_produto.all %}
+<div class="produtos-vinculados-table-wrap">
+  <table class="data-table produtos-vinculados-table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Tipo</th>
+        <th>Data vínculo</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vinculo in cliente_selecionado.vinculos_produto.all %}
+      <tr>
+        <td>{{ vinculo.produto.nome }}</td>
+        <td><span class="badge badge-produto badge-produto-{{ vinculo.produto.tipo_produto|lower }}">{{ vinculo.produto.get_tipo_produto_display }}</span></td>
+        <td>{{ vinculo.data_inicio|date:"d/m/Y" }}</td>
+        <td>
+          <form method="post"
+                action="{% url 'clientes:produto_remover' cliente_selecionado.pk vinculo.pk %}"
+                hx-post="{% url 'clientes:produto_remover' cliente_selecionado.pk vinculo.pk %}"
+                hx-target="#produtos-vinculados"
+                hx-swap="innerHTML"
+                hx-confirm="Remover vínculo com {{ vinculo.produto.nome }}?"
+                style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="client-panel-empty">Nenhum produto vinculado.</p>
+{% endif %}

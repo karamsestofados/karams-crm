@@ -2,13 +2,19 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Cliente, HistoricoInteracao, Produto
+from .models import (
+    Cliente,
+    ClienteProduto,
+    HistoricoInteracao,
+    Produto,
+    ProdutoExclusividade,
+)
 
 
 class ProdutoResource(resources.ModelResource):
     class Meta:
         model = Produto
-        fields = ('id', 'nome', 'categoria', 'novo')
+        fields = ('id', 'nome', 'descricao', 'categoria', 'tipo_produto', 'ativo')
 
 
 class ClienteResource(resources.ModelResource):
@@ -18,8 +24,15 @@ class ClienteResource(resources.ModelResource):
             'id', 'vendedor', 'categoria', 'nome', 'tipo_cliente', 'modalidade_cliente', 'segmento',
             'origem_lead', 'status_funil', 'regiao_atuacao', 'cidade', 'estado',
             'cep', 'telefone', 'responsavel', 'instagram', 'endereco',
-            'data_primeiro_contato', 'feedback_original', 'ativo_no_sistema', 'legacy_id',
+            'data_primeiro_contato', 'feedback_original', 'legacy_id',
         )
+
+
+class ClienteProdutoInline(admin.TabularInline):
+    model = ClienteProduto
+    extra = 0
+    fields = ('produto', 'data_inicio', 'observacoes')
+    autocomplete_fields = ['produto']
 
 
 class HistoricoInteracaoInline(admin.TabularInline):
@@ -29,12 +42,27 @@ class HistoricoInteracaoInline(admin.TabularInline):
     autocomplete_fields = ['vendedor']
 
 
+class ProdutoExclusividadeInline(admin.TabularInline):
+    model = ProdutoExclusividade
+    extra = 0
+    fields = ('regiao', 'data_inicio', 'data_fim', 'observacoes')
+
+
 @admin.register(Produto)
 class ProdutoAdmin(ImportExportModelAdmin):
     resource_class = ProdutoResource
-    list_display = ('nome', 'categoria', 'novo')
-    list_filter = ('novo', 'categoria')
-    search_fields = ('nome',)
+    list_display = ('nome', 'tipo_produto', 'categoria', 'ativo', 'data_criacao')
+    list_filter = ('tipo_produto', 'ativo', 'categoria')
+    search_fields = ('nome', 'descricao', 'categoria')
+    inlines = [ProdutoExclusividadeInline]
+
+
+@admin.register(ClienteProduto)
+class ClienteProdutoAdmin(admin.ModelAdmin):
+    list_display = ('cliente', 'produto', 'data_inicio')
+    list_filter = ('produto__tipo_produto', 'data_inicio')
+    search_fields = ('cliente__nome', 'produto__nome')
+    autocomplete_fields = ['cliente', 'produto']
 
 
 @admin.register(Cliente)
@@ -42,15 +70,14 @@ class ClienteAdmin(ImportExportModelAdmin):
     resource_class = ClienteResource
     list_display = (
         'nome', 'tipo_cliente', 'modalidade_cliente', 'segmento', 'status_funil', 'categoria',
-        'cidade', 'estado', 'vendedor', 'ativo_no_sistema',
+        'cidade', 'estado', 'vendedor',
     )
     list_filter = (
         'tipo_cliente', 'modalidade_cliente', 'segmento', 'origem_lead', 'status_funil', 'regiao_atuacao',
-        'categoria', 'estado', 'ativo_no_sistema', 'vendedor',
+        'categoria', 'estado', 'vendedor',
     )
     search_fields = ('nome', 'cidade', 'telefone', 'cep', 'legacy_id')
-    filter_horizontal = ('produtos_exclusivos',)
-    inlines = [HistoricoInteracaoInline]
+    inlines = [ClienteProdutoInline, HistoricoInteracaoInline]
     autocomplete_fields = ['vendedor']
 
 
@@ -61,3 +88,11 @@ class HistoricoInteracaoAdmin(admin.ModelAdmin):
     search_fields = ('cliente__nome', 'observacao')
     filter_horizontal = ('produtos',)
     autocomplete_fields = ['cliente', 'vendedor']
+
+
+@admin.register(ProdutoExclusividade)
+class ProdutoExclusividadeAdmin(admin.ModelAdmin):
+    list_display = ('produto', 'regiao', 'data_inicio', 'data_fim')
+    list_filter = ('regiao',)
+    search_fields = ('produto__nome',)
+    autocomplete_fields = ['produto']

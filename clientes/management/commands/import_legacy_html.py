@@ -78,7 +78,6 @@ class Command(BaseCommand):
                         'endereco': item.get('endereco', '').strip(),
                         'data_primeiro_contato': data_contato,
                         'feedback_original': item.get('feedback', '').strip(),
-                        'ativo_no_sistema': True,
                     },
                 )
 
@@ -94,12 +93,22 @@ class Command(BaseCommand):
                 produto_objs = []
                 for nome_prod in nomes_produtos:
                     if nome_prod not in produtos_cache:
-                        prod, _ = Produto.objects.get_or_create(nome=nome_prod)
+                        prod, created_prod = Produto.objects.get_or_create(nome=nome_prod)
+                        if created_prod:
+                            from clientes.models import TipoProduto
+                            prod.tipo_produto = TipoProduto.EXCLUSIVO
+                            prod.save(update_fields=['tipo_produto'])
                         produtos_cache[nome_prod] = prod
                     produto_objs.append(produtos_cache[nome_prod])
 
                 if produto_objs:
-                    cliente.produtos_exclusivos.set(produto_objs)
+                    from clientes.services.produtos import vincular_produto
+                    for prod in produto_objs:
+                        if not cliente.vinculos_produto.filter(produto=prod).exists():
+                            try:
+                                vincular_produto(cliente, prod)
+                            except Exception:
+                                pass
 
         self._ensure_meta_equipe()
 

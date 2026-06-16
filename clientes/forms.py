@@ -2,7 +2,12 @@ from django import forms
 
 from accounts.models import Papel, Usuario
 
-from .models import Cliente, Produto
+from .models import (
+    CategoriaCliente,
+    Cliente,
+    Produto,
+    TipoProduto,
+)
 from .utils import (
     normalizar_cep,
     normalizar_instagram,
@@ -10,6 +15,16 @@ from .utils import (
     validar_cep,
     validar_telefone,
 )
+
+CATEGORIAS_REATIVACAO = [
+    (CategoriaCliente.ATIVO, 'Ativo'),
+    (CategoriaCliente.ADORMECIDO, 'Adormecido'),
+    (CategoriaCliente.PROSPECCAO, 'Prospecção'),
+]
+
+CATEGORIAS_FORM = [
+    c for c in CategoriaCliente.choices if c[0] != CategoriaCliente.INATIVO
+]
 
 
 class ClienteForm(forms.ModelForm):
@@ -19,7 +34,7 @@ class ClienteForm(forms.ModelForm):
             'vendedor', 'nome', 'tipo_cliente', 'segmento', 'modalidade_cliente',
             'categoria', 'status_funil', 'origem_lead', 'regiao_atuacao', 'cidade', 'estado',
             'cep', 'telefone', 'responsavel', 'instagram', 'data_primeiro_contato', 'endereco',
-            'feedback_original', 'produtos_exclusivos', 'ativo_no_sistema',
+            'feedback_original',
         ]
         widgets = {
             'vendedor': forms.Select(attrs={'class': 'form-input'}),
@@ -55,15 +70,13 @@ class ClienteForm(forms.ModelForm):
                 attrs={'class': 'form-input', 'type': 'date'},
             ),
             'feedback_original': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
-            'produtos_exclusivos': forms.CheckboxSelectMultiple(),
-            'ativo_no_sistema': forms.CheckboxInput(),
         }
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        self.fields['produtos_exclusivos'].queryset = Produto.objects.order_by('nome')
         self.fields['estado'].widget.attrs['placeholder'] = 'UF'
+        self.fields['categoria'].choices = CATEGORIAS_FORM
 
         optional_selects = (
             'tipo_cliente', 'segmento', 'modalidade_cliente', 'origem_lead', 'regiao_atuacao',
@@ -75,6 +88,9 @@ class ClienteForm(forms.ModelForm):
         self.fields['tipo_cliente'].label = 'Perfil do Cliente'
         self.fields['modalidade_cliente'].label = 'Tipo Cliente'
 
+        if self.instance and self.instance.pk and self.instance.categoria == CategoriaCliente.INATIVO:
+            self.fields.pop('categoria', None)
+
         if user and not user.is_admin:
             self.fields['vendedor'].widget = forms.HiddenInput()
             self.fields['vendedor'].initial = user.pk
@@ -82,6 +98,14 @@ class ClienteForm(forms.ModelForm):
             self.fields['vendedor'].queryset = Usuario.objects.filter(
                 ativo=True,
             ).order_by('first_name', 'username')
+
+    def clean_categoria(self):
+        categoria = self.cleaned_data.get('categoria')
+        if categoria == CategoriaCliente.INATIVO:
+            raise forms.ValidationError(
+                'Use o botão Inativar na ficha do cliente para definir como Inativo.'
+            )
+        return categoria
 
     def clean_cep(self):
         cep = normalizar_cep(self.cleaned_data.get('cep', ''))
@@ -104,5 +128,44 @@ class ClienteForm(forms.ModelForm):
             instance.vendedor = self.user
         if commit:
             instance.save()
-            self.save_m2m()
         return instance
+
+
+class ClienteReativarForm(forms.Form):
+    categoria = forms.ChoiceField(
+        choices=CATEGORIAS_REATIVACAO,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label='Nova categoria',
+    )
+
+
+class ProdutoForm(forms.ModelForm):
+    class Meta:
+        model = Produto
+        fields = ['nome', 'descricao', 'categoria', 'tipo_produto', 'ativo']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-input'}),
+            'descricao': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
+            'categoria': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ex: Estofados, Poltronas...'}),
+            'tipo_produto': forms.Select(attrs={'class': 'form-input'}),
+            'ativo': forms.CheckboxInput(),
+        }
+
+
+class VinculoProdutoForm(forms.Form):
+    produto = forms.ModelChoiceField(
+        queryset=Produto.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label='Produto',
+    )
+    observacoes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 2, 'placeholder': 'Observações opcionais'}),
+        label='Observações',
+    )
+
+    def __init__(self, *args, cliente=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if cliente:
+            from .services.produtos import produtos_disponiveis_para
+            self.fields['produto'].queryset = produtos_disponiveis_para(cliente)

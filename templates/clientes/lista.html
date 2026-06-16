@@ -14,7 +14,7 @@
     <form class="crm-search" method="get"
           hx-get="{% url 'clientes:lista' %}"
           hx-target="#lista-clientes"
-          hx-trigger="keyup changed delay:300ms from:#busca-input, change from:select, change from:input[type=checkbox]"
+          hx-trigger="keyup changed delay:300ms from:#busca-input, change from:select"
           hx-push-url="true">
       <input type="search" id="busca-input" name="q" value="{{ busca }}"
              class="form-input" placeholder="Buscar nome, cidade, telefone, CEP...">
@@ -68,10 +68,6 @@
         </select>
       </div>
       {% endif %}
-      <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--text-muted);padding:0 0 0.5rem;">
-        <input type="checkbox" name="inativos" value="1" {% if inativos %}checked{% endif %}>
-        Mostrar inativos
-      </label>
     </form>
 
     <div id="lista-clientes">
@@ -80,119 +76,7 @@
   </aside>
 
   <section class="crm-detail">
-    {% if cliente_selecionado %}
-    <div class="crm-detail-header">
-      <div>
-        <h2 class="crm-detail-title">{{ cliente_selecionado.nome }}</h2>
-        <p style="color:var(--text-muted);font-size:0.8125rem;margin-top:0.25rem;">
-          {{ cliente_selecionado.cidade|default:"—" }}{% if cliente_selecionado.estado %}, {{ cliente_selecionado.estado }}{% endif %}
-          {% if cliente_selecionado.cep %} · CEP {{ cliente_selecionado.cep }}{% endif %}
-        </p>
-        <div class="crm-detail-badges">
-          <span class="badge badge-funil badge-funil-{{ cliente_selecionado.status_funil|lower }}">
-            {{ cliente_selecionado.get_status_funil_display }}
-          </span>
-          {% if cliente_selecionado.tipo_cliente %}
-          <span class="badge badge-segmento">{{ cliente_selecionado.get_tipo_cliente_display }}</span>
-          {% endif %}
-          {% if cliente_selecionado.modalidade_cliente %}
-          <span class="badge badge-modalidade badge-modalidade-{{ cliente_selecionado.modalidade_cliente|lower }}">{{ cliente_selecionado.get_modalidade_cliente_display }}</span>
-          {% endif %}
-          {% if cliente_selecionado.segmento %}
-          <span class="badge badge-segmento">{{ cliente_selecionado.get_segmento_display }}</span>
-          {% endif %}
-          <span class="badge badge-{{ cliente_selecionado.categoria }}">{{ cliente_selecionado.get_categoria_display }}</span>
-          {% if not cliente_selecionado.ativo_no_sistema %}
-          <span class="badge" style="background:rgba(248,113,113,0.15);color:var(--danger);">Inativo</span>
-          {% endif %}
-        </div>
-      </div>
-      <div class="crm-detail-actions">
-        <a href="{% url 'clientes:editar' cliente_selecionado.pk %}" class="btn btn-primary">Editar</a>
-        {% if cliente_selecionado.ativo_no_sistema %}
-        <form method="post" action="{% url 'clientes:inativar' cliente_selecionado.pk %}"
-              onsubmit="return confirm('Inativar este cliente?');" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Inativar</button>
-        </form>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="crm-detail-grid">
-      <div class="crm-field">
-        <label>Telefone</label>
-        <span>{{ cliente_selecionado.telefone|default:"—" }}</span>
-      </div>
-      <div class="crm-field">
-        <label>Responsável</label>
-        <span>{{ cliente_selecionado.responsavel|default:"—" }}</span>
-      </div>
-      <div class="crm-field">
-        <label>Instagram</label>
-        <span>
-          {% if cliente_selecionado.instagram %}
-          <a href="{{ cliente_selecionado.instagram_url }}" target="_blank" rel="noopener" style="color:var(--primary-glow);">@{{ cliente_selecionado.instagram }}</a>
-          {% else %}—{% endif %}
-        </span>
-      </div>
-      <div class="crm-field">
-        <label>Vendedor</label>
-        <span>{{ cliente_selecionado.vendedor.get_full_name|default:cliente_selecionado.vendedor.username }}</span>
-      </div>
-      <div class="crm-field">
-        <label>Tipo Cliente</label>
-        <span>{% if cliente_selecionado.modalidade_cliente %}{{ cliente_selecionado.get_modalidade_cliente_display }}{% else %}—{% endif %}</span>
-      </div>
-      <div class="crm-field">
-        <label>Perfil do Cliente</label>
-        <span>{% if cliente_selecionado.tipo_cliente %}{{ cliente_selecionado.get_tipo_cliente_display }}{% else %}—{% endif %}</span>
-      </div>
-      <div class="crm-field">
-        <label>Origem do Lead</label>
-        <span>{% if cliente_selecionado.origem_lead %}{{ cliente_selecionado.get_origem_lead_display }}{% else %}—{% endif %}</span>
-      </div>
-      <div class="crm-field">
-        <label>Região de Atuação</label>
-        <span>{% if cliente_selecionado.regiao_atuacao %}{{ cliente_selecionado.get_regiao_atuacao_display }}{% else %}—{% endif %}</span>
-      </div>
-      <div class="crm-field full-width" style="grid-column:1/-1;">
-        <label>Endereço</label>
-        <span>{{ cliente_selecionado.endereco|default:"—"|linebreaksbr }}</span>
-      </div>
-      {% if cliente_selecionado.data_primeiro_contato %}
-      <div class="crm-field">
-        <label>Primeiro contato</label>
-        <span>{{ cliente_selecionado.data_primeiro_contato|date:"d/m/Y" }}</span>
-      </div>
-      {% endif %}
-    </div>
-
-    {% if cliente_selecionado.produtos_exclusivos.exists %}
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="section-title">Produtos exclusivos</div>
-      <div class="produtos-chips">
-        {% for produto in cliente_selecionado.produtos_exclusivos.all %}
-        <span class="produto-chip">{{ produto.nome }}</span>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    {% if cliente_selecionado.feedback_original %}
-    <div class="card">
-      <div class="section-title">Histórico original</div>
-      <p style="font-size:0.875rem;line-height:1.6;color:var(--text-muted);">{{ cliente_selecionado.feedback_original }}</p>
-    </div>
-    {% endif %}
-
-    {% else %}
-    <div class="empty-state">
-      <p style="font-size:1rem;margin-bottom:0.5rem;">Selecione um cliente</p>
-      <p style="font-size:0.8125rem;">Escolha na lista ao lado ou cadastre um novo.</p>
-      <a href="{% url 'clientes:novo' %}" class="btn btn-primary" style="margin-top:1rem;">+ Novo Cliente</a>
-    </div>
-    {% endif %}
+    {% include 'clientes/partials/detalhe_cliente.html' %}
   </section>
 </div>
 {% endblock %}

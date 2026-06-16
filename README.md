@@ -138,6 +138,22 @@ python manage.py import_legacy_html   # importa para o banco
 
 Comando `import_excel` será adicionado quando o arquivo `CLIENTES_E_PRODUTOS.xlsx` estiver disponível.
 
+## Módulo de Produtos
+
+O CRM trata produtos como base para exclusividades comerciais, não apenas catálogo.
+
+- **Tipos:** Padrão (qualquer cliente), Exclusivo (vários clientes com vínculo manual), Único (máximo 1 cliente)
+- **Vínculos:** tabela `ClienteProduto` com data de início e observações
+- **Exclusividade territorial:** model `ProdutoExclusividade` preparado para alertas de renovação
+
+### Extensões futuras (arquitetura preparada)
+
+- Rotina diária por produto (`Produto` + `ClienteProduto`)
+- Follow-up e campanhas comerciais (`ProdutoExclusividade`, datas de vigência)
+- Histórico de vendas por produto (`comissoes.Venda.produtos` já vinculado)
+- Comissões por produto
+- Dashboard: produtos exclusivos/únicos, clientes por produto, produtos sem cliente (`ProdutoQuerySet.sem_cliente()`)
+
 ## Roadmap
 
 - [x] **Fase 1** — Base: modelos, auth, admin, deploy Railway

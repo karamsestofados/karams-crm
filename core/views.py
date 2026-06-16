@@ -15,7 +15,7 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         user = self.request.user
         hoje = timezone.localdate()
 
-        clientes = Cliente.objects.para_usuario(user).ativos_no_sistema()
+        clientes = Cliente.objects.para_usuario(user).ativos()
         ativos = clientes.filter(categoria='ativo').count()
         adormecidos = clientes.filter(categoria='adormecido').count()
         prospeccao = clientes.filter(categoria='prospeccao').count()

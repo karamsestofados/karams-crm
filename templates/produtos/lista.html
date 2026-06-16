@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos — Karams CRM{% endblock %}
+{% block nav_produtos %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Produtos</h1>
+  <a href="{% url 'produtos:novo' %}" class="btn btn-primary">+ Novo Produto</a>
+</div>
+
+<div class="page-body">
+  <form method="get" class="crm-search" style="margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+    <input type="search" name="q" value="{{ busca }}" class="form-input" placeholder="Buscar produto..." style="flex:1;min-width:200px;">
+    <select name="tipo" class="form-input" style="width:auto;">
+      {% for val, label in tipos_produto %}
+      <option value="{{ val }}" {% if tipo_atual == val %}selected{% endif %}>{% if val == 'todos' %}Tipo: Todos{% else %}{{ label }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    <select name="ativo" class="form-input" style="width:auto;">
+      <option value="todos" {% if ativo_atual == 'todos' %}selected{% endif %}>Status: Todos</option>
+      <option value="1" {% if ativo_atual == '1' %}selected{% endif %}>Ativos</option>
+      <option value="0" {% if ativo_atual == '0' %}selected{% endif %}>Inativos</option>
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+  </form>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>Categoria</th>
+          <th>Clientes</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produto in produtos %}
+        <tr>
+          <td>{{ produto.nome }}</td>
+          <td><span class="badge badge-produto badge-produto-{{ produto.tipo_produto|lower }}">{{ produto.get_tipo_produto_display }}</span></td>
+          <td>{{ produto.categoria|default:"—" }}</td>
+          <td>{{ produto.total_clientes }}</td>
+          <td>{% if produto.ativo %}<span class="badge badge-ativo">Ativo</span>{% else %}<span class="badge badge-inativo">Inativo</span>{% endif %}</td>
+          <td><a href="{% url 'produtos:editar' produto.pk %}" class="btn btn-secondary btn-sm">Editar</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum produto cadastrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

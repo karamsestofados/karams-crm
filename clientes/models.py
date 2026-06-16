@@ -1,10 +1,51 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Count
+from django.utils import timezone
+
+
+class TipoProduto(models.TextChoices):
+    PADRAO = 'PADRAO', 'Padrão'
+    EXCLUSIVO = 'EXCLUSIVO', 'Exclusivo'
+    UNICO = 'UNICO', 'Único'
+
+
+class ProdutoQuerySet(models.QuerySet):
+    def exclusivos(self):
+        return self.filter(tipo_produto=TipoProduto.EXCLUSIVO)
+
+    def unicos(self):
+        return self.filter(tipo_produto=TipoProduto.UNICO)
+
+    def padrao(self):
+        return self.filter(tipo_produto=TipoProduto.PADRAO)
+
+    def ativos(self):
+        return self.filter(ativo=True)
+
+    def sem_cliente(self):
+        return self.ativos().annotate(
+            total_clientes=Count('vinculos_cliente'),
+        ).filter(total_clientes=0)
+
+    def com_total_clientes(self):
+        return self.annotate(total_clientes=Count('vinculos_cliente'))
 
 
 class Produto(models.Model):
-    nome = models.CharField(max_length=100, unique=True)
+    nome = models.CharField(max_length=150, unique=True)
+    descricao = models.TextField(blank=True)
     categoria = models.CharField(max_length=100, blank=True)
+    tipo_produto = models.CharField(
+        max_length=20,
+        choices=TipoProduto.choices,
+        default=TipoProduto.PADRAO,
+    )
+    ativo = models.BooleanField(default=True)
+    data_criacao = models.DateTimeField(default=timezone.now)
     novo = models.BooleanField(default=False)
+
+    objects = ProdutoQuerySet.as_manager()
 
     class Meta:
         ordering = ['nome']
@@ -19,6 +60,7 @@ class CategoriaCliente(models.TextChoices):
     ATIVO = 'ativo', 'Ativo'
     ADORMECIDO = 'adormecido', 'Adormecido'
     PROSPECCAO = 'prospeccao', 'Prospecção'
+    INATIVO = 'inativo', 'Inativo'
 
 
 class TipoCliente(models.TextChoices):
@@ -91,8 +133,8 @@ class ClienteQuerySet(models.QuerySet):
             return self
         return self.filter(vendedor=usuario)
 
-    def ativos_no_sistema(self):
-        return self.filter(ativo_no_sistema=True)
+    def ativos(self):
+        return self.exclude(categoria=CategoriaCliente.INATIVO)
 
 
 class Cliente(models.Model):
@@ -153,12 +195,6 @@ class Cliente(models.Model):
     endereco = models.TextField(blank=True)
     data_primeiro_contato = models.DateField(null=True, blank=True)
     feedback_original = models.TextField(blank=True)
-    produtos_exclusivos = models.ManyToManyField(
-        Produto,
-        blank=True,
-        related_name='clientes_exclusivos',
-    )
-    ativo_no_sistema = models.BooleanField(default=True)
     legacy_id = models.CharField(max_length=20, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -172,6 +208,10 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def is_inativo(self):
+        return self.categoria == CategoriaCliente.INATIVO
 
     @property
     def instagram_url(self):
@@ -194,6 +234,73 @@ class Cliente(models.Model):
     @property
     def compra_unica(self):
         return self.historico.filter(tipo=TipoInteracao.VENDA).count() == 1
+
+
+class ClienteProduto(models.Model):
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.CASCADE,
+        related_name='vinculos_produto',
+    )
+    produto = models.ForeignKey(
+        Produto,
+        on_delete=models.PROTECT,
+        related_name='vinculos_cliente',
+    )
+    data_inicio = models.DateField(auto_now_add=True)
+    observacoes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('cliente', 'produto')]
+        ordering = ['-data_inicio']
+        verbose_name = 'vínculo cliente-produto'
+        verbose_name_plural = 'vínculos cliente-produto'
+
+    def __str__(self):
+        return f'{self.cliente.nome} — {self.produto.nome}'
+
+    def clean(self):
+        if self.produto.tipo_produto == TipoProduto.UNICO:
+            existing = ClienteProduto.objects.filter(produto=self.produto)
+            if self.pk:
+                existing = existing.exclude(pk=self.pk)
+            if existing.exists():
+                outro = existing.select_related('cliente').first()
+                raise ValidationError(
+                    f'Produto único "{self.produto.nome}" já está vinculado a '
+                    f'"{outro.cliente.nome}". Não é possível vincular a outro cliente.'
+                )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class ProdutoExclusividade(models.Model):
+    """Base para controle territorial e alertas de renovação de exclusividade."""
+    produto = models.ForeignKey(
+        Produto,
+        on_delete=models.CASCADE,
+        related_name='exclusividades',
+    )
+    regiao = models.CharField(
+        max_length=20,
+        choices=RegiaoAtuacao.choices,
+        blank=True,
+    )
+    data_inicio = models.DateField()
+    data_fim = models.DateField(null=True, blank=True)
+    observacoes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data_inicio']
+        verbose_name = 'exclusividade de produto'
+        verbose_name_plural = 'exclusividades de produto'
+
+    def __str__(self):
+        return f'{self.produto.nome} — {self.get_regiao_display() or "Geral"}'
 
 
 class TipoInteracao(models.TextChoices):
