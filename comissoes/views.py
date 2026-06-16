@@ -1,9 +1,11 @@
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, View
 
 from accounts.mixins import AdminRequiredMixin
+from accounts.models import Papel, Usuario
 
 from .forms import MetaMensalForm
 from .models import MetaMensal
@@ -15,7 +17,48 @@ class MetaListView(AdminRequiredMixin, ListView):
     context_object_name = 'metas'
 
     def get_queryset(self):
-        return MetaMensal.objects.select_related('vendedor').order_by('-ano', '-mes', 'vendedor__first_name')
+        qs = MetaMensal.objects.select_related('vendedor').order_by('-ano', '-mes', 'vendedor__first_name')
+        mes = self.request.GET.get('mes')
+        ano = self.request.GET.get('ano')
+        vendedor = self.request.GET.get('vendedor')
+        ativo = self.request.GET.get('ativo')
+
+        if mes:
+            try:
+                qs = qs.filter(mes=int(mes))
+            except ValueError:
+                pass
+        if ano:
+            try:
+                qs = qs.filter(ano=int(ano))
+            except ValueError:
+                pass
+        if vendedor == 'equipe':
+            qs = qs.filter(vendedor__isnull=True)
+        elif vendedor:
+            try:
+                qs = qs.filter(vendedor_id=int(vendedor))
+            except ValueError:
+                pass
+        if ativo == '1':
+            qs = qs.filter(ativo=True)
+        elif ativo == '0':
+            qs = qs.filter(ativo=False)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filtros'] = {
+            'mes': self.request.GET.get('mes', ''),
+            'ano': self.request.GET.get('ano', ''),
+            'vendedor': self.request.GET.get('vendedor', ''),
+            'ativo': self.request.GET.get('ativo', ''),
+        }
+        context['vendedores'] = Usuario.objects.filter(
+            papel=Papel.VENDEDOR, ativo=True,
+        ).order_by('first_name')
+        return context
 
 
 class MetaCreateView(AdminRequiredMixin, CreateView):

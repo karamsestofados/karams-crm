@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ titulo }} — Karams CRM{% endblock %}
 {% block nav_metas %}active{% endblock %}
 
 {% block content %}
@@ -9,6 +8,13 @@
   <p class="page-subtitle">Defina metas mensais por vendedor ou para a equipe</p>
 
   <div class="card">
+    {% if form.non_field_errors %}
+    <ul class="messages" style="margin-bottom:1rem;">
+      {% for error in form.non_field_errors %}
+      <li class="message message-error">{{ error }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
     <form method="post">
       {% csrf_token %}
       {% for field in form %}

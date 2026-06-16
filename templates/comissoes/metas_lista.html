@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% block title %}Metas Comerciais — Karams CRM{% endblock %}
 {% block nav_metas %}active{% endblock %}
 
 {% block content %}
@@ -10,6 +9,37 @@
 </div>
 
 <div class="page-body">
+  <form method="get" class="crm-search" style="margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Mês</label>
+      <input type="number" name="mes" value="{{ filtros.mes }}" min="1" max="12" class="form-input" placeholder="Todos" style="width:5rem;">
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Ano</label>
+      <input type="number" name="ano" value="{{ filtros.ano }}" min="2020" max="2100" class="form-input" placeholder="Todos" style="width:6rem;">
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Vendedor</label>
+      <select name="vendedor" class="form-input">
+        <option value="">Todos</option>
+        <option value="equipe" {% if filtros.vendedor == 'equipe' %}selected{% endif %}>Equipe (geral)</option>
+        {% for v in vendedores %}
+        <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Status</label>
+      <select name="ativo" class="form-input">
+        <option value="">Todos</option>
+        <option value="1" {% if filtros.ativo == '1' %}selected{% endif %}>Ativas</option>
+        <option value="0" {% if filtros.ativo == '0' %}selected{% endif %}>Inativas</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    <a href="{% url 'comissoes:metas_lista' %}" class="btn btn-secondary">Limpar</a>
+  </form>
+
   <div class="table-card">
     <table class="data-table">
       <thead>
@@ -28,7 +58,7 @@
       <tbody>
         {% for meta in metas %}
         <tr>
-          <td>{{ meta.vendedor.get_full_name|default:meta.vendedor.username|default:"Equipe" }}</td>
+          <td>{% if meta.vendedor %}{{ meta.vendedor.get_full_name|default:meta.vendedor.username }}{% else %}Equipe{% endif %}</td>
           <td>{{ meta.mes|stringformat:"02d" }}/{{ meta.ano }}</td>
           <td>{{ meta.meta_contatos }}</td>
           <td>{{ meta.meta_clientes_novos }}</td>
@@ -46,7 +76,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhuma meta cadastrada.</td>
+          <td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum registro encontrado.</td>
         </tr>
         {% endfor %}
       </tbody>

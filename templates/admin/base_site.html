@@ -1,10 +1,13 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Karams CRM{% endblock %}
+{% block title %}Karams CRM{% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
+<link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="32x32">
+<link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
 <link rel="stylesheet" href="{% static 'css/admin_karams.css' %}">
 {% endblock %}
 

@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Dashboard — Karams CRM{% endblock %}
 {% block nav_dashboard %}active{% endblock %}
 
 {% block extra_head %}
@@ -157,7 +156,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" style="text-align:center;color:var(--text-muted);">Nenhum cliente cadastrado.</td>
+          <td colspan="5" style="text-align:center;color:var(--text-muted);">Nenhum registro encontrado.</td>
         </tr>
         {% endfor %}
       </tbody>

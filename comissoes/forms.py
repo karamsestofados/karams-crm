@@ -36,3 +36,19 @@ class MetaMensalForm(forms.ModelForm):
         self.fields['vendedor'].required = False
         self.fields['vendedor'].empty_label = 'Equipe (geral)'
         self.fields['meta_vendas'].label = 'Meta de Vendas (R$)'
+
+    def clean(self):
+        cleaned = super().clean()
+        vendedor = cleaned.get('vendedor')
+        mes = cleaned.get('mes')
+        ano = cleaned.get('ano')
+        if mes and ano:
+            qs = MetaMensal.objects.filter(vendedor=vendedor, mes=mes, ano=ano)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                alvo = vendedor.get_full_name() if vendedor else 'Equipe'
+                raise forms.ValidationError(
+                    f'Já existe uma meta para {alvo} em {mes:02d}/{ano}.'
+                )
+        return cleaned

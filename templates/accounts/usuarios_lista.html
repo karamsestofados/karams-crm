@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% block title %}Usuários — Karams CRM{% endblock %}
 {% block nav_usuarios %}active{% endblock %}
 
 {% block content %}
@@ -51,7 +50,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum usuário cadastrado.</td>
+          <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum registro encontrado.</td>
         </tr>
         {% endfor %}
       </tbody>

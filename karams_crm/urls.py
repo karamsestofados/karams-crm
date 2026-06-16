@@ -9,7 +9,12 @@ def permission_denied_view(request, exception):
     return render(request, '403.html', status=403)
 
 
+def server_error_view(request):
+    return render(request, '500.html', status=500)
+
+
 handler403 = permission_denied_view
+handler500 = server_error_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
