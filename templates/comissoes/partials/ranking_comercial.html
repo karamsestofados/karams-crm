@@ -1,0 +1,16 @@
+<div class="card ranking-card">
+  <div class="section-title">Ranking Comercial — {{ mes_label }}</div>
+  <div class="ranking-list">
+    {% for item in ranking_comercial %}
+    <div class="ranking-item rank-{{ item.posicao }}">
+      <span class="ranking-pos">{% if item.posicao == 1 %}1º{% elif item.posicao == 2 %}2º{% elif item.posicao == 3 %}3º{% else %}{{ item.posicao }}º{% endif %}</span>
+      <div class="ranking-info">
+        <span class="ranking-nome">{{ item.usuario.get_full_name|default:item.usuario.username }}</span>
+        <span class="ranking-pct">{{ item.pontuacao }}%</span>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--text-muted);padding:1rem 0;">Nenhum vendedor com desempenho registrado.</p>
+    {% endfor %}
+  </div>
+</div>

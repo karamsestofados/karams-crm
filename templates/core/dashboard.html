@@ -59,6 +59,16 @@
       <div class="kpi-value-lg">{% if meta_mensal %}R$ {{ meta_mensal.meta_vendas|floatformat:0 }}{% else %}R$ 80.000{% endif %}</div>
       <div class="kpi-value-sub">objetivo mensal da equipe</div>
     </div>
+  </div>
+
+  {% include 'comissoes/partials/meu_desempenho.html' %}
+
+  {% if user_is_admin %}
+  <div class="dashboard-admin-grid">
+    {% include 'comissoes/partials/equipe_comercial.html' %}
+    {% include 'comissoes/partials/ranking_comercial.html' %}
+  </div>
+  {% endif %}
 
   <div class="kpi-row" style="margin-top:0;">
     <div class="kpi-card-modern">

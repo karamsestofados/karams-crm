@@ -1,7 +1,6 @@
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, View
@@ -47,9 +46,11 @@ def get_cliente_queryset(user):
     )
 
 
-def get_cliente_or_404(user, pk):
-    qs = Cliente.objects.para_usuario(user)
-    return get_object_or_404(qs, pk=pk)
+def get_cliente_or_403(user, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if not user.is_admin and cliente.vendedor_id != user.pk:
+        raise PermissionDenied('Acesso não autorizado.')
+    return cliente
 
 
 def aplicar_filtros_clientes(qs, request):
@@ -121,13 +122,10 @@ class ClienteListView(VendedorRequiredMixin, ListView):
 
         cliente_id = request.GET.get('id')
         if cliente_id:
-            try:
-                cliente = get_cliente_or_404(user, cliente_id)
-                context['cliente_selecionado'] = cliente
-                context['vinculo_form'] = VinculoProdutoForm(cliente=cliente)
-                context['produtos_disponiveis_count'] = produtos_disponiveis_para(cliente).count()
-            except Http404:
-                context['cliente_selecionado'] = None
+            cliente = get_cliente_or_403(user, cliente_id)
+            context['cliente_selecionado'] = cliente
+            context['vinculo_form'] = VinculoProdutoForm(cliente=cliente)
+            context['produtos_disponiveis_count'] = produtos_disponiveis_para(cliente).count()
         elif context['clientes']:
             cliente = context['clientes'][0]
             context['cliente_selecionado'] = cliente
@@ -196,6 +194,8 @@ class ClienteCreateView(VendedorRequiredMixin, CreateView):
     def form_valid(self, form):
         messages.success(self.request, f'Cliente "{form.instance.nome}" cadastrado com sucesso.')
         self.object = form.save()
+        from comissoes.services.produtividade import avaliar_conquistas
+        avaliar_conquistas(self.request.user)
         qs = build_filtros_query(self.request)
         url = reverse('clientes:lista') + f'?id={self.object.pk}'
         if qs:
@@ -230,7 +230,7 @@ class ClienteUpdateView(VendedorRequiredMixin, UpdateView):
 
 class ClienteInativarView(VendedorRequiredMixin, View):
     def post(self, request, pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         cliente.categoria = CategoriaCliente.INATIVO
         cliente.save(update_fields=['categoria', 'updated_at'])
         messages.success(request, f'Cliente "{cliente.nome}" inativado.')
@@ -243,7 +243,7 @@ class ClienteInativarView(VendedorRequiredMixin, View):
 
 class ClienteReativarView(VendedorRequiredMixin, View):
     def post(self, request, pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         form = ClienteReativarForm(request.POST)
         if not form.is_valid():
             messages.error(request, 'Selecione uma categoria válida para reativar.')
@@ -267,7 +267,7 @@ class ClienteReativarView(VendedorRequiredMixin, View):
 
 class ClienteProdutoVincularView(VendedorRequiredMixin, View):
     def post(self, request, pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         form = VinculoProdutoForm(request.POST, cliente=cliente)
         if form.is_valid():
             try:
@@ -293,7 +293,7 @@ class ClienteProdutoVincularView(VendedorRequiredMixin, View):
 
 class ClienteProdutoRemoverView(VendedorRequiredMixin, View):
     def post(self, request, pk, vinculo_pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         vinculo = get_object_or_404(ClienteProduto, pk=vinculo_pk, cliente=cliente)
         desvincular_produto(vinculo)
         messages.success(request, 'Vínculo removido.')

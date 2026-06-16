@@ -183,4 +183,6 @@ def contexto_cockpit_completo(usuario, ano=None, mes=None, dia_selecionado=None)
     from relacionamento.services.insights import gerar_insights_cockpit
     ctx['insights'] = gerar_insights_cockpit(usuario)
     ctx['ultimas_interacoes'] = ultimas_interacoes(usuario)
+    from comissoes.services.produtividade import meta_do_dia
+    ctx['meta_dia'] = meta_do_dia(usuario)
     return ctx

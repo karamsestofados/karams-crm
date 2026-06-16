@@ -1,4 +1,35 @@
+from django.conf import settings
 from django.db import models
+
+from core.audit import get_current_user
+
+
+class AuditMixin(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        user = get_current_user()
+        if user and user.is_authenticated:
+            if not self.pk and not self.created_by_id:
+                self.created_by = user
+            self.updated_by = user
+        super().save(*args, **kwargs)
 
 
 class TipoBackup(models.TextChoices):

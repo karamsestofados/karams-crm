@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models import Count
 from django.utils import timezone
 
+from core.models import AuditMixin
+
 
 class TipoProduto(models.TextChoices):
     PADRAO = 'PADRAO', 'Padrão'
@@ -32,7 +34,7 @@ class ProdutoQuerySet(models.QuerySet):
         return self.annotate(total_clientes=Count('vinculos_cliente'))
 
 
-class Produto(models.Model):
+class Produto(AuditMixin, models.Model):
     nome = models.CharField(max_length=150, unique=True)
     descricao = models.TextField(blank=True)
     categoria = models.CharField(max_length=100, blank=True)
@@ -44,6 +46,13 @@ class Produto(models.Model):
     ativo = models.BooleanField(default=True)
     data_criacao = models.DateTimeField(default=timezone.now)
     novo = models.BooleanField(default=False)
+    usuario_responsavel = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='produtos_responsaveis',
+    )
 
     objects = ProdutoQuerySet.as_manager()
 
@@ -137,11 +146,12 @@ class ClienteQuerySet(models.QuerySet):
         return self.exclude(categoria=CategoriaCliente.INATIVO)
 
 
-class Cliente(models.Model):
+class Cliente(AuditMixin, models.Model):
     vendedor = models.ForeignKey(
         'accounts.Usuario',
         on_delete=models.PROTECT,
         related_name='clientes',
+        verbose_name='vendedor responsável',
     )
     categoria = models.CharField(
         max_length=20,

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtividade Comercial — Karams CRM{% endblock %}
+{% block nav_relatorios %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Produtividade Comercial</h1>
+</div>
+
+<div class="page-body">
+  <form method="get" class="crm-search" style="margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">De</label>
+      <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Até</label>
+      <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+    </div>
+    {% if user_is_admin and vendedores %}
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Vendedor</label>
+      <select name="vendedor" class="form-input">
+        <option value="">Todos</option>
+        {% for v in vendedores %}
+        <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Produto</label>
+      <select name="produto" class="form-input">
+        <option value="">Todos</option>
+        {% for p in produtos %}
+        <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label class="form-label">Região</label>
+      <select name="regiao" class="form-input">
+        {% for val, label in regioes %}
+        <option value="{{ val }}" {% if filtros.regiao == val or not filtros.regiao and val == 'todos' %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </form>
+
+  <div class="kpi-row">
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Total de Contatos</span></div>
+      <div class="kpi-value-lg">{{ realizado.contatos }}</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Clientes Novos</span></div>
+      <div class="kpi-value-lg">{{ realizado.clientes_novos }}</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Total Interações</span></div>
+      <div class="kpi-value-lg">{{ realizado.total_interacoes }}</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Propostas</span></div>
+      <div class="kpi-value-lg">{{ realizado.propostas }}</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Taxa de Conversão</span></div>
+      <div class="kpi-value-lg">{{ conversao.taxa_pct }}%</div>
+      <div class="kpi-value-sub">{{ conversao.convertidos }} / {{ conversao.prospectados }} prospectados</div>
+    </div>
+    <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Vendas (R$)</span></div>
+      <div class="kpi-value-lg">R$ {{ realizado.vendas_valor|floatformat:0 }}</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem;">
+    <div class="section-title">Clientes sem contato há mais de 30 dias</div>
+    <div class="table-card" style="margin-top:1rem;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Dias sem contato</th>
+            {% if user_is_admin %}<th>Vendedor</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in clientes_sem_contato %}
+          <tr>
+            <td><a href="{% url 'clientes:lista' %}?id={{ item.cliente.pk }}">{{ item.cliente.nome }}</a></td>
+            <td>{{ item.dias_sem_contato }}</td>
+            {% if user_is_admin %}<td>{{ item.cliente.vendedor.get_full_name|default:item.cliente.vendedor.username }}</td>{% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if user_is_admin %}3{% else %}2{% endif %}" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum cliente nesta situação.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

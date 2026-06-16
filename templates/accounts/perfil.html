@@ -24,6 +24,19 @@
   </div>
 
   <div class="card">
+    <div class="section-title">Conquistas</div>
+    {% if conquistas %}
+    <div class="conquistas-grid">
+      {% for c in conquistas %}
+      <span class="badge badge-conquista">{{ c.get_tipo_display }}{% if c.mes %} · {{ c.mes|stringformat:"02d" }}/{{ c.ano }}{% endif %}</span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.5rem;">Nenhuma conquista ainda. Continue registrando interações e batendo metas!</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
     <div class="section-title">Alterar senha</div>
     <form method="post" action="{% url 'accounts:alterar_senha' %}">
       {% csrf_token %}

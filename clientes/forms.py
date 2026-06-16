@@ -87,6 +87,7 @@ class ClienteForm(forms.ModelForm):
 
         self.fields['tipo_cliente'].label = 'Perfil do Cliente'
         self.fields['modalidade_cliente'].label = 'Tipo Cliente'
+        self.fields['vendedor'].label = 'Vendedor Responsável'
 
         if self.instance and self.instance.pk and self.instance.categoria == CategoriaCliente.INATIVO:
             self.fields.pop('categoria', None)
@@ -96,6 +97,7 @@ class ClienteForm(forms.ModelForm):
             self.fields['vendedor'].initial = user.pk
         else:
             self.fields['vendedor'].queryset = Usuario.objects.filter(
+                papel=Papel.VENDEDOR,
                 ativo=True,
             ).order_by('first_name', 'username')
 

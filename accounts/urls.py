@@ -14,4 +14,9 @@ urlpatterns = [
     path('perfil/senha/', views.alterar_senha, name='alterar_senha'),
     path('perfil/backup/gerar/', BackupGerarView.as_view(), name='backup_gerar'),
     path('perfil/backup/restaurar/', BackupRestaurarView.as_view(), name='backup_restaurar'),
+    path('usuarios/', views.UsuarioListView.as_view(), name='usuarios_lista'),
+    path('usuarios/novo/', views.UsuarioCreateView.as_view(), name='usuarios_novo'),
+    path('usuarios/<int:pk>/editar/', views.UsuarioUpdateView.as_view(), name='usuarios_editar'),
+    path('usuarios/<int:pk>/desativar/', views.UsuarioDesativarView.as_view(), name='usuarios_desativar'),
+    path('usuarios/<int:pk>/resetar-senha/', views.UsuarioResetSenhaView.as_view(), name='usuarios_reset_senha'),
 ]

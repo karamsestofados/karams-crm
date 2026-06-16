@@ -1,0 +1,19 @@
+<div class="card meta-dia-card">
+  <div class="section-title">Meta do Dia</div>
+  <div class="meta-dia-body">
+    <div class="meta-dia-label">Meta de Contatos</div>
+    <div class="meta-dia-valores">
+      <span class="meta-dia-meta">{{ meta_dia.meta_contatos }}</span>
+      <span class="meta-dia-realizado">Realizado: {{ meta_dia.realizado_contatos }} / {{ meta_dia.meta_contatos }}</span>
+      <span class="desempenho-pct">{{ meta_dia.percentual_display }}</span>
+      {% if meta_dia.status == 'superada' %}
+      <span class="badge badge-meta-superada">Meta Superada</span>
+      {% elif meta_dia.status == 'atingida' %}
+      <span class="badge badge-meta-atingida">Meta Atingida</span>
+      {% endif %}
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width: {% if meta_dia.percentual %}{% if meta_dia.percentual > 100 %}100{% else %}{{ meta_dia.percentual }}{% endif %}{% else %}0{% endif %}%;"></div>
+    </div>
+  </div>
+</div>

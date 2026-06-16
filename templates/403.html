@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso não autorizado — Karams CRM{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:32rem;margin:4rem auto;text-align:center;">
+  <h1 class="page-title font-display">Acesso não autorizado</h1>
+  <p class="page-subtitle">Você não tem permissão para acessar este recurso.</p>
+  <a href="{% url 'core:dashboard' %}" class="btn btn-primary" style="margin-top:1.5rem;">Voltar ao Dashboard</a>
+</div>
+{% endblock %}

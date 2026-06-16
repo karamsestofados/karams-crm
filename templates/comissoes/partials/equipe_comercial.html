@@ -1,0 +1,40 @@
+<div class="card desempenho-card">
+  <div class="section-title">Equipe Comercial — {{ mes_label }}</div>
+  <div class="table-card">
+    <table class="data-table data-table-compact">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Contatos</th>
+          <th>Clientes</th>
+          <th>Propostas</th>
+          <th>Visitas</th>
+          <th>Vendas</th>
+          <th>% Geral</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in equipe_comercial %}
+        <tr>
+          <td>{{ item.usuario.get_full_name|default:item.usuario.username }}</td>
+          {% for p in item.progresso %}
+          <td>
+            {% if p.is_moeda %}
+            {{ p.realizado|floatformat:0 }}/{{ p.meta|floatformat:0 }}
+            {% else %}
+            {{ p.realizado }}/{{ p.meta }}
+            {% endif %}
+            <span class="desempenho-pct-sm">{{ p.percentual_display }}</span>
+          </td>
+          {% endfor %}
+          <td><strong>{{ item.pontuacao }}%</strong></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem;">Sem dados de equipe.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from core.models import AuditMixin
+
 
 class TipoContato(models.TextChoices):
     LIGACAO = 'LIGACAO', 'Ligação'
@@ -82,7 +84,7 @@ class AtividadeClienteQuerySet(models.QuerySet):
         return self.order_by('data_proxima_acao', 'hora_proxima_acao', 'cliente__nome')
 
 
-class AtividadeCliente(models.Model):
+class AtividadeCliente(AuditMixin, models.Model):
     cliente = models.ForeignKey(
         'clientes.Cliente',
         on_delete=models.CASCADE,

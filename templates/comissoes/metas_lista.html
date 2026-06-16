@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Metas Comerciais — Karams CRM{% endblock %}
+{% block nav_metas %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">Metas Comerciais</h1>
+  <a href="{% url 'comissoes:metas_nova' %}" class="btn btn-primary">+ Nova Meta</a>
+</div>
+
+<div class="page-body">
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Período</th>
+          <th>Contatos</th>
+          <th>Clientes</th>
+          <th>Propostas</th>
+          <th>Visitas</th>
+          <th>Vendas (R$)</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for meta in metas %}
+        <tr>
+          <td>{{ meta.vendedor.get_full_name|default:meta.vendedor.username|default:"Equipe" }}</td>
+          <td>{{ meta.mes|stringformat:"02d" }}/{{ meta.ano }}</td>
+          <td>{{ meta.meta_contatos }}</td>
+          <td>{{ meta.meta_clientes_novos }}</td>
+          <td>{{ meta.meta_propostas }}</td>
+          <td>{{ meta.meta_visitas }}</td>
+          <td>R$ {{ meta.meta_vendas|floatformat:0 }}</td>
+          <td>{% if meta.ativo %}<span class="badge badge-ativo">Ativa</span>{% else %}<span class="badge badge-inativo">Inativa</span>{% endif %}</td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'comissoes:metas_editar' meta.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+            <form method="post" action="{% url 'comissoes:metas_desativar' meta.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary btn-sm">{% if meta.ativo %}Desativar{% else %}Ativar{% endif %}</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhuma meta cadastrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

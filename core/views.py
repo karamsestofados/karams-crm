@@ -9,7 +9,14 @@ from django.views.generic import TemplateView
 
 from accounts.mixins import AdminRequiredMixin, VendedorRequiredMixin
 from clientes.models import Cliente
-from comissoes.models import MetaMensal
+from comissoes.services.produtividade import (
+    avaliar_conquistas,
+    avaliar_conquistas_equipe,
+    desempenho_usuario,
+    equipe_comercial,
+    obter_meta,
+    ranking_mensal,
+)
 from relacionamento.services.dashboard import kpis_relacionamento
 
 from .forms import RestaurarBackupForm
@@ -38,17 +45,7 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         context['papel'] = user.get_papel_display()
         context['mes_label'] = f'{hoje.month:02d}/{hoje.year}'
 
-        meta = MetaMensal.objects.filter(
-            vendedor=user if not user.is_admin else None,
-            mes=hoje.month,
-            ano=hoje.year,
-        ).first()
-        if not meta and user.is_admin:
-            meta = MetaMensal.objects.filter(
-                vendedor__isnull=True,
-                mes=hoje.month,
-                ano=hoje.year,
-            ).first()
+        meta = obter_meta(user, hoje.month, hoje.year)
         context['meta_mensal'] = meta
 
         estados_qs = (
@@ -66,35 +63,40 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
             'values': [e['total'] for e in estados_qs],
         }
         context['sparkline_clientes'] = [prospeccao, adormecidos, ativos, total]
+
+        rel_kpis = kpis_relacionamento(user)
+        context.update(rel_kpis)
+
+        desemp = desempenho_usuario(user, hoje.month, hoje.year)
+        context['meu_desempenho'] = desemp['progresso']
+        context['pontuacao_geral'] = desemp['pontuacao']
+
+        avaliar_conquistas(user, hoje.month, hoje.year)
+        if user.is_admin:
+            avaliar_conquistas_equipe(hoje.month, hoje.year)
+            context['equipe_comercial'] = equipe_comercial(hoje.month, hoje.year)
+            context['ranking_comercial'] = ranking_mensal(hoje.month, hoje.year, limit=3)
+
+        realizado_contatos = desemp['realizado']['contatos']
+        meta_contatos = meta.meta_contatos if meta else 60
         context['sparkline_contatos'] = [
             0,
-            meta.meta_contatos // 4 if meta else 15,
-            meta.meta_contatos // 2 if meta else 30,
-            meta.meta_contatos if meta else 60,
+            max(realizado_contatos // 4, meta_contatos // 4),
+            max(realizado_contatos // 2, meta_contatos // 2),
+            max(realizado_contatos, meta_contatos),
         ]
         meta_vendas = float(meta.meta_vendas) if meta else 80000
+        realizado_vendas = float(desemp['realizado']['vendas_valor'])
         context['sparkline_vendas'] = [
             0,
-            int(meta_vendas * 0.25) if meta else 20000,
-            int(meta_vendas * 0.5) if meta else 40000,
-            int(meta_vendas) if meta else 80000,
+            int(max(realizado_vendas * 0.25, meta_vendas * 0.25)),
+            int(max(realizado_vendas * 0.5, meta_vendas * 0.5)),
+            int(max(realizado_vendas, meta_vendas)),
         ]
         context['top_clientes'] = clientes.filter(categoria='ativo').order_by('nome')[:8]
 
         pct_ativos = round(ativos / total * 100) if total else 0
         context['pct_ativos'] = pct_ativos
-
-        rel_kpis = kpis_relacionamento(user)
-        context.update(rel_kpis)
-
-        realizado_contatos = rel_kpis['contatos_hoje']
-        meta_contatos = meta.meta_contatos if meta else 60
-        context['sparkline_contatos'] = [
-            0,
-            max(realizado_contatos, meta_contatos // 4),
-            max(rel_kpis['interacoes_semana'] // 2, meta_contatos // 2),
-            max(rel_kpis['interacoes_semana'], meta_contatos),
-        ]
 
         return context
 

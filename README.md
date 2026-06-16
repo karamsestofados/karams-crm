@@ -61,6 +61,79 @@ python manage.py seed_usuarios --com-admin
 
 Credenciais demo com `--com-admin`: `admin` / `admin123` · vendedor: `vendedor` / `vendedor123`
 
+## Multiusuário (Fase 1)
+
+O CRM usa o model customizado `accounts.Usuario` (estende `AbstractUser`) com papéis **Administrador** e **Vendedor**.
+
+| Papel | Acesso |
+|-------|--------|
+| **Administrador** | Visão global, gestão de usuários, reatribuição de clientes, filtros por vendedor |
+| **Vendedor** | Apenas sua carteira (`Cliente.vendedor`), interações e atividades dos seus clientes |
+
+### Gestão de usuários
+
+Em **Configurações → Usuários** (somente admin):
+
+- Criar, editar, ativar/desativar usuários
+- Resetar senha
+- Listagem com total de clientes e último acesso
+
+### Segurança
+
+- Login bloqueado para contas inativas (`Usuario.ativo=False`)
+- Vendedores não acessam `/admin/` (Django Admin)
+- Acesso a clientes de outro vendedor retorna **403 — Acesso não autorizado**
+- Escopo aplicado nas views via `Cliente.objects.para_usuario()` e `get_cliente_or_403()`
+
+### Auditoria
+
+Models principais possuem `created_by` e `updated_by` preenchidos automaticamente pelo usuário logado.
+
+### Criar vendedores de teste
+
+```bash
+python manage.py seed_usuarios
+```
+
+## Metas e Produtividade (Fase 2)
+
+Módulo de gestão comercial baseado em metas mensais e acompanhamento de performance.
+
+### Metas Comerciais
+
+Em **Configurações → Metas Comerciais** (admin):
+
+- Criar/editar metas por vendedor ou equipe (mês/ano)
+- Dimensões: contatos, clientes novos, propostas, visitas, vendas (R$)
+
+### Dashboard
+
+- **Meu Desempenho** — progresso com barras e badges (Meta Atingida / Meta Superada)
+- **Equipe Comercial** (admin) — tabela comparativa por vendedor
+- **Ranking Comercial** (admin) — top 3 do mês por pontuação ponderada
+
+### Atividade Diária
+
+- Card **Meta do Dia** — meta de contatos diária vs realizado
+
+### Relatórios → Produtividade Comercial
+
+Filtros: período, vendedor, produto, região. Indicadores: contatos, clientes, propostas, conversão, vendas e clientes sem contato 30+ dias.
+
+### Regras de cálculo
+
+| Indicador | Fonte |
+|-----------|-------|
+| Contatos | Interações tipo Ligação, WhatsApp, E-mail, Visita |
+| Clientes novos | `Cliente.created_at` no período |
+| Propostas | `resultado = PROPOSTA_ENVIADA` |
+| Visitas | `tipo_contato = VISITA` |
+| Vendas | Soma `Venda.valor` (estrutura pronta para comissões) |
+
+### Gamificação
+
+Conquistas exibidas no perfil: Primeira Venda, 100 Contatos, Meta Batida, Top do Mês, Maior Crescimento.
+
 ## Deploy no Railway — projeto "CRM Karams"
 
 ### 1. Repositório GitHub
@@ -207,8 +280,8 @@ Services reutilizáveis para BI futuro: `relacionamento/services/cockpit.py`, `i
 
 ## Roadmap
 
-- [x] **Fase 1** — Base: modelos, auth, admin, deploy Railway
-- [x] **Fase 2** — CRM de clientes (lista, ficha 360°, filtros HTMX)
+- [x] **Fase 1** — Base: modelos, auth multiusuário, permissões por vendedor, deploy Railway
+- [x] **Fase 2** — CRM de clientes, metas comerciais, produtividade e ranking
 - [x] **Fase 3** — Atividade diária + dashboard KPIs de relacionamento
 - [ ] **Fase 4** — Calendário de relacionamento
 - [ ] **Fase 5** — Comissões e relatórios (Excel/PDF)

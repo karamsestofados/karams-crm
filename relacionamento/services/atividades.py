@@ -43,6 +43,10 @@ def registrar_interacao(
     )
     atividade.full_clean()
     atividade.save()
+
+    from comissoes.services.produtividade import avaliar_conquistas
+    avaliar_conquistas(usuario)
+
     return atividade
 
 

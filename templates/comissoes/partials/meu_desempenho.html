@@ -1,0 +1,28 @@
+<div class="card desempenho-card">
+  <div class="section-title">Meu Desempenho — {{ mes_label }}</div>
+  <div class="desempenho-grid">
+    {% for item in meu_desempenho %}
+    <div class="desempenho-item">
+      <div class="desempenho-item-header">
+        <span class="desempenho-label">{{ item.label }}</span>
+        {% if item.status == 'superada' %}
+        <span class="badge badge-meta-superada">Meta Superada</span>
+        {% elif item.status == 'atingida' %}
+        <span class="badge badge-meta-atingida">Meta Atingida</span>
+        {% endif %}
+      </div>
+      <div class="desempenho-valores">
+        {% if item.is_moeda %}
+        <span>R$ {{ item.realizado|floatformat:0 }} / R$ {{ item.meta|floatformat:0 }}</span>
+        {% else %}
+        <span>{{ item.realizado }} / {{ item.meta }}</span>
+        {% endif %}
+        <span class="desempenho-pct">{{ item.percentual_display }}</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width: {% if item.percentual %}{% if item.percentual > 100 %}100{% else %}{{ item.percentual }}{% endif %}{% else %}0{% endif %}%;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

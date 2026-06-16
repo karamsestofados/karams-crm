@@ -10,7 +10,7 @@ from django.views.generic import TemplateView, View
 from accounts.mixins import VendedorRequiredMixin
 from accounts.models import Papel, Usuario
 from clientes.models import Cliente, Produto
-from clientes.views import get_cliente_or_404
+from clientes.views import get_cliente_or_403
 
 from .constants import TIMELINE_FILTROS
 from .forms import AtividadeClienteForm, ConcluirFollowupForm, InteracaoGlobalForm
@@ -122,7 +122,7 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
         cliente_id = request.GET.get('cliente')
         cliente = None
         if cliente_id:
-            cliente = get_cliente_or_404(request.user, cliente_id)
+            cliente = get_cliente_or_403(request.user, cliente_id)
 
         form = InteracaoGlobalForm(
             user=request.user,
@@ -216,7 +216,7 @@ class RelatorioRelacionamentoView(VendedorRequiredMixin, TemplateView):
 
 class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
     def post(self, request, pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         form = AtividadeClienteForm(request.POST, cliente=cliente)
         if form.is_valid():
             try:
@@ -265,6 +265,6 @@ def _cliente_tab_context(cliente, form=None, tipo_filtro=''):
 
 class ClienteTimelinePartialView(VendedorRequiredMixin, View):
     def get(self, request, pk):
-        cliente = get_cliente_or_404(request.user, pk)
+        cliente = get_cliente_or_403(request.user, pk)
         tipo_filtro = request.GET.get('tipo', '')
         return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, tipo_filtro=tipo_filtro))

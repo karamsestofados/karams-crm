@@ -1,7 +1,15 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import include, path
+
+
+def permission_denied_view(request, exception):
+    return render(request, '403.html', status=403)
+
+
+handler403 = permission_denied_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -10,6 +18,8 @@ urlpatterns = [
     path('produtos/', include('clientes.urls_produtos')),
     path('atividade-diaria/', include('relacionamento.urls_atividade')),
     path('relacionamento/', include('relacionamento.urls')),
+    path('comissoes/', include('comissoes.urls')),
+    path('relatorios/', include('relatorios.urls')),
     path('', include('core.urls')),
 ]
 

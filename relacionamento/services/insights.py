@@ -1,7 +1,6 @@
 from django.urls import reverse
 from django.utils import timezone
 
-from comissoes.models import MetaMensal
 from relacionamento.services.cockpit import clientes_sem_contato, resumo_dia
 from relacionamento.services.rotina_diaria import rotina_diaria_para_usuario
 
@@ -87,29 +86,17 @@ def gerar_insights_cockpit(usuario, limit=6):
             acao_url=reverse('clientes:lista') + f'?id={atv.cliente.pk}&tab=historico',
         ))
 
-    meta = MetaMensal.objects.filter(
-        vendedor=usuario if not usuario.is_admin else None,
-        mes=hoje.month,
-        ano=hoje.year,
-    ).first()
-    if not meta and usuario.is_admin:
-        meta = MetaMensal.objects.filter(
-            vendedor__isnull=True,
-            mes=hoje.month,
-            ano=hoje.year,
-        ).first()
-
-    if meta and meta.meta_semanal_contatos:
-        meta_dia = max(1, meta.meta_semanal_contatos // 5)
-        if resumo['interacoes_hoje'] < meta_dia and len(insights) < limit:
-            insights.append(_insight(
-                'info',
-                'Meta de contatos do dia',
-                f'Você registrou {resumo["interacoes_hoje"]} interação{"ões" if resumo["interacoes_hoje"] != 1 else ""} hoje. Meta sugerida: {meta_dia}.',
-                acao_label='Registrar interação',
-                acao_hx_get=reverse('atividade:interacao_nova'),
-                acao_hx_target='#modal-interacao-global-container',
-            ))
+    meta_dia = meta_do_dia(usuario)
+    if meta_dia['realizado_contatos'] < meta_dia['meta_contatos'] and len(insights) < limit:
+        contatos_hoje = meta_dia['realizado_contatos']
+        insights.append(_insight(
+            'info',
+            'Meta de contatos do dia',
+            f'Você registrou {contatos_hoje} contato{"s" if contatos_hoje != 1 else ""} hoje. Meta: {meta_dia["meta_contatos"]}.',
+            acao_label='Registrar interação',
+            acao_hx_get=reverse('atividade:interacao_nova'),
+            acao_hx_target='#modal-interacao-global-container',
+        ))
 
     if not insights and resumo['interacoes_hoje'] == 0:
         insights.append(_insight(
