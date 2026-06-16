@@ -103,3 +103,7 @@ METAS_PADRAO_VENDAS = 80000
 
 # Taxas de comissão disponíveis
 TAXAS_COMISSAO = [0.5, 0.8, 1.0]
+
+# Backup / restore (upload de arquivo completo do sistema)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600

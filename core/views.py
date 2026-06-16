@@ -1,11 +1,20 @@
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db.models import Count
+from django.http import FileResponse
+from django.shortcuts import redirect
 from django.utils import timezone
+from django.views import View
 from django.views.generic import TemplateView
 
-from accounts.mixins import VendedorRequiredMixin
+from accounts.mixins import AdminRequiredMixin, VendedorRequiredMixin
 from clientes.models import Cliente
 from comissoes.models import MetaMensal
 from relacionamento.services.dashboard import kpis_relacionamento
+
+from .forms import RestaurarBackupForm
+from .models import BackupLog, TipoBackup
+from .services.backup import gerar_arquivo_backup, restaurar_arquivo_backup
 
 
 class DashboardView(VendedorRequiredMixin, TemplateView):
@@ -88,3 +97,48 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         ]
 
         return context
+
+
+class BackupGerarView(AdminRequiredMixin, View):
+    def get(self, request):
+        try:
+            buffer, filename = gerar_arquivo_backup()
+            BackupLog.objects.create(
+                usuario=request.user,
+                tipo=TipoBackup.BACKUP,
+                observacao=f'Backup gerado: {filename}',
+            )
+            response = FileResponse(buffer, as_attachment=True, filename=filename)
+            response['Content-Type'] = 'application/zip'
+            return response
+        except Exception as exc:
+            messages.error(request, f'Erro ao gerar backup: {exc}')
+            return redirect('accounts:perfil')
+
+
+class BackupRestaurarView(AdminRequiredMixin, View):
+    def post(self, request):
+        form = RestaurarBackupForm(request.POST, request.FILES)
+        if not form.is_valid():
+            for error in form.errors.values():
+                messages.error(request, error[0])
+            return redirect('accounts:perfil')
+
+        try:
+            restaurar_arquivo_backup(form.cleaned_data['arquivo'])
+            BackupLog.objects.create(
+                usuario=None,
+                tipo=TipoBackup.RESTORE,
+                observacao=f'Restauração via {form.cleaned_data["arquivo"].name}',
+            )
+            messages.success(
+                request,
+                'Backup restaurado com sucesso. Faça login novamente com as credenciais do backup.',
+            )
+            return redirect('accounts:login')
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0] if exc.messages else str(exc))
+        except Exception as exc:
+            messages.error(request, f'Erro ao restaurar backup: {exc}')
+
+        return redirect('accounts:perfil')

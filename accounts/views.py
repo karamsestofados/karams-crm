@@ -11,6 +11,9 @@ from .mixins import VendedorRequiredMixin
 from .models import Usuario
 from .setup import definir_senha_admin, precisa_configuracao_inicial
 
+from core.forms import RestaurarBackupForm
+from core.models import BackupLog, TipoBackup
+
 
 class LoginView(AuthLoginView):
     template_name = 'accounts/login.html'
@@ -42,6 +45,9 @@ class PerfilView(VendedorRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['senha_form'] = SenhaForm(self.request.user)
+        if self.request.user.is_admin:
+            context['backup_form'] = RestaurarBackupForm()
+            context['ultimo_backup'] = BackupLog.objects.filter(tipo=TipoBackup.BACKUP).first()
         return context
 
     def form_valid(self, form):
@@ -71,7 +77,11 @@ def alterar_senha(request):
         form.save()
         messages.success(request, 'Senha alterada com sucesso.')
         return redirect('accounts:perfil')
-    return render(request, 'accounts/perfil.html', {
+    ctx = {
         'form': PerfilForm(instance=request.user),
         'senha_form': form,
-    })
+    }
+    if request.user.is_admin:
+        ctx['backup_form'] = RestaurarBackupForm()
+        ctx['ultimo_backup'] = BackupLog.objects.filter(tipo=TipoBackup.BACKUP).first()
+    return render(request, 'accounts/perfil.html', ctx)

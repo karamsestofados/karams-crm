@@ -180,6 +180,15 @@ A migration `relacionamento.0001_initial` migra automaticamente:
 
 Models legados permanecem read-only no admin.
 
+## Backup e restauração
+
+Disponível em **Configurações** (somente administradores):
+
+- **Gerar backup** — exporta todo o banco de dados (clientes, produtos, atividades, usuários, etc.) e arquivos de mídia em um arquivo `.karamsbackup.zip` para download
+- **Restaurar backup** — substitui todos os dados atuais pelo conteúdo do arquivo (ação irreversível; exige confirmação)
+
+Guarde os arquivos de backup em local seguro fora do servidor para recuperação em emergências.
+
 ## Roadmap
 
 - [x] **Fase 1** — Base: modelos, auth, admin, deploy Railway
@@ -187,7 +196,7 @@ Models legados permanecem read-only no admin.
 - [x] **Fase 3** — Atividade diária + dashboard KPIs de relacionamento
 - [ ] **Fase 4** — Calendário de relacionamento
 - [ ] **Fase 5** — Comissões e relatórios (Excel/PDF)
-- [ ] **Fase 6** — Backup/restore e polish UI
+- [x] **Fase 6** — Backup/restore e polish UI (backup implementado)
 
 ## Referência legada
 
