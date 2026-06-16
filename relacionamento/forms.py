@@ -9,8 +9,37 @@ from .models import (
     Resultado,
     TipoContato,
 )
+from .services.external_calendar.policy import (
+    HORA_PADRAO_FOLLOWUP,
+    normalize_hora,
+    validar_followup_obrigatorio,
+)
 
 _FORM_INPUT = {'class': 'form-input'}
+
+
+def _apply_followup_clean(cleaned, form):
+    proxima = cleaned.get('proxima_acao')
+    data = cleaned.get('data_proxima_acao')
+    resultado = cleaned.get('resultado')
+
+    msg = validar_followup_obrigatorio(resultado, proxima, data)
+    if msg:
+        form.add_error(None, msg)
+
+    if proxima and proxima != ProximaAcao.SEM_ACAO and not data:
+        form.add_error('data_proxima_acao', 'Informe a data da próxima ação.')
+
+    if proxima == ProximaAcao.SEM_ACAO:
+        cleaned['data_proxima_acao'] = None
+        cleaned['hora_proxima_acao'] = None
+    elif data and not cleaned.get('hora_proxima_acao'):
+        cleaned['hora_proxima_acao'] = HORA_PADRAO_FOLLOWUP
+
+    if cleaned.get('hora_proxima_acao'):
+        cleaned['hora_proxima_acao'] = normalize_hora(cleaned['hora_proxima_acao'])
+
+    return cleaned
 
 
 class AtividadeClienteForm(forms.ModelForm):
@@ -53,13 +82,7 @@ class AtividadeClienteForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        proxima = cleaned.get('proxima_acao')
-        data = cleaned.get('data_proxima_acao')
-        if proxima and proxima != ProximaAcao.SEM_ACAO and not data:
-            self.add_error('data_proxima_acao', 'Informe a data da próxima ação.')
-        if proxima == ProximaAcao.SEM_ACAO:
-            cleaned['data_proxima_acao'] = None
-            cleaned['hora_proxima_acao'] = None
+        cleaned = _apply_followup_clean(cleaned, self)
         resumo = cleaned.get('resumo', '')
         if not resumo or not resumo.strip():
             self.add_error('resumo', 'O resumo é obrigatório.')
@@ -112,13 +135,7 @@ class ConcluirFollowupForm(forms.Form):
 
     def clean(self):
         cleaned = super().clean()
-        proxima = cleaned.get('proxima_acao')
-        data = cleaned.get('data_proxima_acao')
-        if proxima and proxima != ProximaAcao.SEM_ACAO and not data:
-            self.add_error('data_proxima_acao', 'Informe a data da próxima ação.')
-        if proxima == ProximaAcao.SEM_ACAO:
-            cleaned['data_proxima_acao'] = None
-            cleaned['hora_proxima_acao'] = None
+        cleaned = _apply_followup_clean(cleaned, self)
         resultado = cleaned.get('resultado')
         valor_venda = cleaned.get('valor_venda')
         if resultado == Resultado.PEDIDO_FECHADO and (valor_venda is None or valor_venda <= 0):

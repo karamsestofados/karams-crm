@@ -14,6 +14,13 @@
           hx-swap="innerHTML"
           hx-on::after-request="if(event.detail.successful) document.getElementById('modal-concluir-container').innerHTML=''">
       {% csrf_token %}
+      {% if form.non_field_errors %}
+      <ul class="messages" style="margin-bottom:1rem;">
+        {% for error in form.non_field_errors %}
+        <li class="message message-error">{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
       <div class="form-group">
         <label class="form-label">{{ form.resultado.label }}</label>
         {{ form.resultado }}

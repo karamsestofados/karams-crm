@@ -118,5 +118,14 @@
     </div>
   </div>
   {% endblock %}
+  <script>
+    document.body.addEventListener('openExternalCalendar', function(evt) {
+      var url = evt.detail && evt.detail.url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    });
+    {% if pending_calendar_url %}
+    window.open('{{ pending_calendar_url|escapejs }}', '_blank', 'noopener,noreferrer');
+    {% endif %}
+  </script>
 </body>
 </html>

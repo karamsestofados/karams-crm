@@ -1,4 +1,5 @@
 from datetime import date
+import json
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -17,6 +18,7 @@ from .forms import AtividadeClienteForm, ConcluirFollowupForm, InteracaoGlobalFo
 from .models import AtividadeCliente, TipoContato
 from .services.atividades import concluir_followup, registrar_interacao
 from .services.cockpit import contexto_cockpit_completo
+from .services.external_calendar.dispatcher import resolve_calendar_url
 from .services.relatorio import filtrar_atividades, indicadores_por_tipo, ranking_vendedores
 from .services.resumo_cliente import resumo_comercial_cliente
 
@@ -54,6 +56,34 @@ def _cockpit_context(request, dia_selecionado=None):
 
 def _render_cockpit_main(request):
     return render(request, 'relacionamento/partials/cockpit_main.html', _cockpit_context(request))
+
+
+def _interacao_success_message(calendar_url=None):
+    msg = 'Interação registrada com sucesso.'
+    if calendar_url:
+        msg += ' Abrindo Google Agenda...'
+    return msg
+
+
+def _concluir_success_message(calendar_url=None):
+    msg = 'Resultado registrado e nova atividade gerada.'
+    if calendar_url:
+        msg += ' Abrindo Google Agenda...'
+    return msg
+
+
+def _attach_calendar_trigger(response, calendar_url):
+    if calendar_url:
+        response['HX-Trigger'] = json.dumps({'openExternalCalendar': {'url': calendar_url}})
+    return response
+
+
+def _finalize_interacao_response(request, calendar_url, render_response, redirect_url):
+    if request.headers.get('HX-Request'):
+        return _attach_calendar_trigger(render_response, calendar_url)
+    if calendar_url:
+        request.session['pending_calendar_url'] = calendar_url
+    return redirect(redirect_url)
 
 
 class AtividadeDiariaView(VendedorRequiredMixin, TemplateView):
@@ -102,7 +132,16 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
                 )
-                messages.success(request, 'Resultado registrado e nova atividade gerada.')
+                calendar_url = resolve_calendar_url(
+                    atividade.cliente, request.user, form.cleaned_data,
+                )
+                messages.success(request, _concluir_success_message(calendar_url))
+                return _finalize_interacao_response(
+                    request,
+                    calendar_url,
+                    _render_cockpit_main(request),
+                    'atividade:atividade_diaria',
+                )
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
@@ -117,8 +156,6 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                     'form': form,
                 }, status=422)
 
-        if request.headers.get('HX-Request'):
-            return _render_cockpit_main(request)
         return redirect('atividade:atividade_diaria')
 
 
@@ -159,7 +196,14 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
                 )
-                messages.success(request, 'Interação registrada com sucesso.')
+                calendar_url = resolve_calendar_url(cliente, request.user, form.cleaned_data)
+                messages.success(request, _interacao_success_message(calendar_url))
+                return _finalize_interacao_response(
+                    request,
+                    calendar_url,
+                    _render_cockpit_main(request),
+                    'atividade:atividade_diaria',
+                )
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
@@ -172,8 +216,6 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                     'form': form,
                 }, status=422)
 
-        if request.headers.get('HX-Request'):
-            return _render_cockpit_main(request)
         return redirect('atividade:atividade_diaria')
 
 
@@ -241,17 +283,36 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
                 )
-                messages.success(request, 'Interação registrada com sucesso.')
+                calendar_url = resolve_calendar_url(cliente, request.user, form.cleaned_data)
+                messages.success(request, _interacao_success_message(calendar_url))
+                redirect_url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
+                if request.headers.get('HX-Request'):
+                    return _attach_calendar_trigger(
+                        render(
+                            request,
+                            'relacionamento/partials/relacionamento_tab.html',
+                            _cliente_tab_context(cliente),
+                        ),
+                        calendar_url,
+                    )
+                if calendar_url:
+                    request.session['pending_calendar_url'] = calendar_url
+                return redirect(redirect_url)
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, form))
+                    return render(
+                        request,
+                        'relacionamento/partials/relacionamento_tab.html',
+                        _cliente_tab_context(cliente, form),
+                    )
         else:
             if request.headers.get('HX-Request'):
-                return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, form))
-
-        if request.headers.get('HX-Request'):
-            return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente))
+                return render(
+                    request,
+                    'relacionamento/partials/relacionamento_tab.html',
+                    _cliente_tab_context(cliente, form),
+                )
 
         url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
         return redirect(url)
