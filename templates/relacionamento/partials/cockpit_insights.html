@@ -1,0 +1,30 @@
+<div class="cockpit-insights card">
+  <h3 class="section-title">Insights automáticos</h3>
+  <p class="cockpit-panel-sub">Sugestões com base na sua rotina comercial</p>
+  {% if insights %}
+  <ul class="cockpit-insights-list">
+    {% for item in insights %}
+    <li class="cockpit-insight cockpit-insight--{{ item.prioridade }}">
+      <div class="cockpit-insight-body">
+        <strong class="cockpit-insight-title">{{ item.titulo }}</strong>
+        <p class="cockpit-insight-desc">{{ item.descricao }}</p>
+      </div>
+      {% if item.acao_label %}
+      {% if item.acao_hx_get %}
+      <button type="button" class="btn btn-secondary btn-sm"
+              hx-get="{{ item.acao_hx_get }}"
+              hx-target="{{ item.acao_hx_target|default:'#modal-interacao-global-container' }}"
+              hx-swap="innerHTML">
+        {{ item.acao_label }}
+      </button>
+      {% elif item.acao_url %}
+      <a href="{{ item.acao_url }}" class="btn btn-secondary btn-sm">{{ item.acao_label }}</a>
+      {% endif %}
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="client-panel-empty">Tudo em dia — nenhuma ação urgente identificada.</p>
+  {% endif %}
+</div>

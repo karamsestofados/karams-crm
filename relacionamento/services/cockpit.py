@@ -180,6 +180,7 @@ def contexto_cockpit_completo(usuario, ano=None, mes=None, dia_selecionado=None)
     ctx['calendario'] = calendario_mensal(usuario, ano, mes)
     ctx['dia_selecionado'] = dia_selecionado
     ctx['eventos_dia'] = eventos_do_dia(usuario, dia_selecionado)
-    ctx['clientes_sem_contato'] = clientes_sem_contato(usuario)
+    from relacionamento.services.insights import gerar_insights_cockpit
+    ctx['insights'] = gerar_insights_cockpit(usuario)
     ctx['ultimas_interacoes'] = ultimas_interacoes(usuario)
     return ctx

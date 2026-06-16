@@ -1,0 +1,12 @@
+<div class="cockpit-proximas card">
+  <h3 class="section-title atividade-diaria-title atividade-diaria-col--proxima">
+    Próximas <span class="atividade-count">{{ proximas|length }}</span>
+  </h3>
+  <div class="cockpit-proximas-list">
+    {% for item in proximas %}
+    {% include 'relacionamento/partials/atividade_card_compact.html' with atividade=item variant='proxima' %}
+    {% empty %}
+    <p class="client-panel-empty">Nenhuma ação futura agendada.</p>
+    {% endfor %}
+  </div>
+</div>

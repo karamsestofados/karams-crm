@@ -195,14 +195,15 @@ A página **Atividade Diária** (`/atividade-diaria/`) funciona como cockpit de 
 
 - **Resumo do dia** — atividades hoje/atrasadas/futuras, interações e clientes atendidos
 - **Ações rápidas** — registrar interação, ligação, WhatsApp, e-mail, visita ou follow-up (modal global)
-- **Calendário mensal** — indicadores por status (atrasado/hoje/futuro) com horário opcional
-- **Clientes sem contato** — lista de clientes ativos sem interação há 30+ dias
+- **Calendário mensal** — indicadores por status (atrasado/hoje/futuro) e interações registradas
+- **Sidebar Próximas** — follow-ups futuros visíveis ao lado do calendário, sem rolar a página
+- **Insights automáticos** — sugestões por regras (atrasadas, sem contato 30d, negociações, meta do dia)
 - **Últimas interações** — timeline global cross-client
-- **Fila de follow-ups** — cards enriquecidos com ação "Registrar Resultado"
+- **Fila Hoje/Atrasadas** — cards com ação "Registrar Resultado"
 
 No painel do cliente, a aba **Histórico Comercial** exibe resumo expandido, filtros por tipo de contato e timeline cronológica.
 
-Services reutilizáveis para BI futuro: `relacionamento/services/cockpit.py`, `resumo_cliente.py`, `relatorio.py`.
+Services reutilizáveis para BI futuro: `relacionamento/services/cockpit.py`, `insights.py`, `resumo_cliente.py`, `relatorio.py`.
 
 ## Roadmap
 

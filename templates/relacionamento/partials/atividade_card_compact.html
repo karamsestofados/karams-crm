@@ -1,0 +1,25 @@
+<article class="atividade-card atividade-card--compact atividade-card--{{ variant }}">
+  <div class="atividade-card-compact-row">
+    <div class="atividade-card-icon atividade-card-icon--sm">
+      {% include 'relacionamento/partials/icon_tipo_contato.html' with tipo=atividade.proxima_acao %}
+    </div>
+    <div class="atividade-card-compact-body">
+      <span class="atividade-card-tipo">{{ atividade.get_proxima_acao_display }}</span>
+      <strong class="atividade-card-cliente">{{ atividade.cliente.nome }}</strong>
+      <span class="atividade-card-compact-meta">
+        {{ atividade.data_proxima_acao|date:"d/m/Y" }}
+        {% if atividade.hora_proxima_acao %} · {{ atividade.hora_proxima_acao|time:"H:i" }}{% endif %}
+        {% if atividade.produto_relacionado %} · {{ atividade.produto_relacionado.nome }}{% endif %}
+      </span>
+    </div>
+  </div>
+  <div class="atividade-card-actions atividade-card-actions--compact">
+    <a href="{% url 'clientes:lista' %}?id={{ atividade.cliente.pk }}&tab=historico" class="btn btn-secondary btn-sm">Abrir</a>
+    <button type="button" class="btn btn-primary btn-sm"
+            hx-get="{% url 'atividade:concluir_followup' atividade.pk %}"
+            hx-target="#modal-concluir-container"
+            hx-swap="innerHTML">
+      Resultado
+    </button>
+  </div>
+</article>

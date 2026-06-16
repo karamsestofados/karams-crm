@@ -6,17 +6,22 @@
   {% include 'relacionamento/partials/cockpit_acoes_rapidas.html' %}
 </div>
 
-<div class="cockpit-middle-grid">
+<div class="cockpit-hero-grid">
   <div id="cockpit-calendario">
     {% include 'relacionamento/partials/cockpit_calendario.html' %}
   </div>
-  <div id="cockpit-sem-contato">
-    {% include 'relacionamento/partials/cockpit_sem_contato.html' %}
-  </div>
+  <aside class="cockpit-sidebar">
+    <div id="cockpit-proximas">
+      {% include 'relacionamento/partials/cockpit_proximas_sidebar.html' %}
+    </div>
+    <div id="cockpit-insights">
+      {% include 'relacionamento/partials/cockpit_insights.html' %}
+    </div>
+  </aside>
 </div>
 
 <div id="atividade-diaria-content">
-  {% include 'relacionamento/partials/atividade_diaria_listas.html' %}
+  {% include 'relacionamento/partials/atividade_diaria_hoje_atrasadas.html' %}
 </div>
 
 <div id="ultimas-interacoes">
