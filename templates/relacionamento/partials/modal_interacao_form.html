@@ -22,6 +22,10 @@
       <label class="form-label">Resultado</label>
       {{ atividade_form.resultado }}
     </div>
+    <div class="form-group" id="valor-venda-cliente-group" style="display:none;">
+      <label class="form-label">{{ atividade_form.valor_venda.label }}</label>
+      {{ atividade_form.valor_venda }}
+    </div>
     <div class="form-group">
       <label class="form-label">Humor do cliente</label>
       {{ atividade_form.humor_cliente }}
@@ -47,4 +51,14 @@
     <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-interacao').classList.remove('open')">Cancelar</button>
     <button type="submit" class="btn btn-primary">Salvar</button>
   </div>
+  <script>
+  (function() {
+    var sel = document.querySelector('#modal-interacao [name=resultado]');
+    var grp = document.getElementById('valor-venda-cliente-group');
+    if (!sel || !grp) return;
+    function toggle() { grp.style.display = sel.value === 'PEDIDO_FECHADO' ? '' : 'none'; }
+    sel.addEventListener('change', toggle);
+    toggle();
+  })();
+  </script>
 </form>

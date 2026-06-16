@@ -41,26 +41,43 @@
 
     <div class="kpi-card-modern">
       <div class="kpi-card-header">
-        <span class="kpi-card-title">Meta Contatos — {{ mes_label }}</span>
-        <span class="kpi-badge neutral">mensal</span>
+        <span class="kpi-card-title">Giro de Carteira</span>
+        <span class="kpi-badge neutral">últimos {{ giro_carteira.periodo_dias }} dias</span>
       </div>
       <div class="kpi-sparkline"><canvas id="sparkContatos"></canvas></div>
-      <div class="kpi-value-lg">{% if meta_mensal %}{{ meta_mensal.meta_contatos }}{% else %}60{% endif %}</div>
-      <div class="kpi-value-sub">semanal: {% if meta_mensal %}{{ meta_mensal.meta_semanal_contatos }}{% else %}15{% endif %} contatos</div>
+      <div class="kpi-value-lg">{{ giro_carteira.percentual }}%</div>
+      <div class="kpi-value-sub">{{ giro_carteira.clientes_contatados }} de {{ giro_carteira.total_clientes }} clientes · meta {% if meta_mensal %}{{ meta_mensal.meta_contatos }}%{% else %}60%{% endif %}</div>
     </div>
 
     <div class="kpi-card-modern">
       <div class="kpi-card-header">
-        <span class="kpi-card-title">Meta Vendas — {{ mes_label }}</span>
+        <span class="kpi-card-title">{% if user_is_admin %}Meta Vendas Equipe{% else %}Minha Meta Vendas{% endif %} — {{ mes_label }}</span>
         <span class="kpi-badge neutral">R$</span>
       </div>
       <div class="kpi-sparkline"><canvas id="sparkVendas"></canvas></div>
       <div class="kpi-value-lg">{% if meta_mensal %}R$ {{ meta_mensal.meta_vendas|floatformat:0 }}{% else %}R$ 80.000{% endif %}</div>
-      <div class="kpi-value-sub">objetivo mensal da equipe</div>
+      <div class="kpi-value-sub">{% if user_is_admin %}soma das metas dos vendedores{% else %}objetivo mensal individual{% endif %}</div>
     </div>
   </div>
 
   {% include 'comissoes/partials/meu_desempenho.html' %}
+
+  {% if not user_is_admin and meta_equipe %}
+  <div class="card desempenho-card" style="margin-top:1rem;">
+    <div class="section-title">Meta Equipe — {{ mes_label }}</div>
+    <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:0.75rem;">Soma automática das metas dos vendedores</p>
+    <div class="desempenho-grid">
+      <div class="desempenho-item">
+        <span class="desempenho-label">Giro de Carteira</span>
+        <span>{{ meta_equipe.meta_contatos }}%</span>
+      </div>
+      <div class="desempenho-item">
+        <span class="desempenho-label">Vendas</span>
+        <span>R$ {{ meta_equipe.meta_vendas|floatformat:0 }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   {% if user_is_admin %}
   <div class="dashboard-admin-grid">

@@ -36,12 +36,21 @@ class MetaMensalForm(forms.ModelForm):
         self.fields['vendedor'].required = False
         self.fields['vendedor'].empty_label = 'Equipe (geral)'
         self.fields['meta_vendas'].label = 'Meta de Vendas (R$)'
+        self.fields['meta_contatos'].label = 'Giro de Carteira (%)'
 
     def clean(self):
         cleaned = super().clean()
         vendedor = cleaned.get('vendedor')
         mes = cleaned.get('mes')
         ano = cleaned.get('ano')
+        if not vendedor and mes and ano:
+            if MetaMensal.objects.filter(
+                vendedor__isnull=False, mes=mes, ano=ano, ativo=True,
+            ).exists():
+                raise forms.ValidationError(
+                    'A meta da equipe é calculada automaticamente pela soma dos vendedores. '
+                    'Cadastre metas individuais ou remova as existentes para usar meta manual.'
+                )
         if mes and ano:
             qs = MetaMensal.objects.filter(vendedor=vendedor, mes=mes, ano=ano)
             if self.instance.pk:

@@ -3,6 +3,7 @@ from django.urls import reverse
 
 from accounts.models import Papel, Usuario
 from comissoes.models import MetaMensal
+from comissoes.services.produtividade import obter_meta_equipe
 
 
 class MetaMensalTests(TestCase):
@@ -66,3 +67,21 @@ class MetaMensalTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Já existe uma meta')
+
+    def test_obter_meta_equipe_soma_vendedores(self):
+        v2 = Usuario.objects.create_user(
+            username='vendedor2_meta',
+            password='testpass123',
+            papel=Papel.VENDEDOR,
+        )
+        MetaMensal.objects.create(
+            vendedor=self.vendedor, mes=7, ano=2026,
+            meta_contatos=20, meta_vendas=80000, ativo=True,
+        )
+        MetaMensal.objects.create(
+            vendedor=v2, mes=7, ano=2026,
+            meta_contatos=60, meta_vendas=120000, ativo=True,
+        )
+        equipe = obter_meta_equipe(7, 2026)
+        self.assertEqual(equipe.meta_contatos, 80)
+        self.assertEqual(equipe.meta_vendas, 200000)

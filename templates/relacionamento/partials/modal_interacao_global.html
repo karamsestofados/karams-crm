@@ -32,6 +32,10 @@
           <label class="form-label">{{ form.resultado.label }}</label>
           {{ form.resultado }}
         </div>
+        <div class="form-group" id="valor-venda-group" style="display:none;">
+          <label class="form-label">{{ form.valor_venda.label }}</label>
+          {{ form.valor_venda }}
+        </div>
         <div class="form-group">
           <label class="form-label">{{ form.humor_cliente.label }}</label>
           {{ form.humor_cliente }}
@@ -58,5 +62,15 @@
         <button type="submit" class="btn btn-primary">Salvar interação</button>
       </div>
     </form>
+    <script>
+    (function() {
+      var sel = document.getElementById('id_resultado');
+      var grp = document.getElementById('valor-venda-group');
+      if (!sel || !grp) return;
+      function toggle() { grp.style.display = sel.value === 'PEDIDO_FECHADO' ? '' : 'none'; }
+      sel.addEventListener('change', toggle);
+      toggle();
+    })();
+    </script>
   </div>
 </div>

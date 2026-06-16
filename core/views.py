@@ -12,11 +12,14 @@ from clientes.models import Cliente
 from comissoes.services.produtividade import (
     avaliar_conquistas,
     avaliar_conquistas_equipe,
+    desempenho_equipe,
     desempenho_usuario,
     equipe_comercial,
     obter_meta,
+    obter_meta_equipe,
     ranking_mensal,
 )
+from relacionamento.services.giro_carteira import calcular_giro_carteira
 from relacionamento.services.dashboard import kpis_relacionamento
 
 from .forms import RestaurarBackupForm
@@ -45,8 +48,25 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         context['papel'] = user.get_papel_display()
         context['mes_label'] = f'{hoje.month:02d}/{hoje.year}'
 
-        meta = obter_meta(user, hoje.month, hoje.year)
-        context['meta_mensal'] = meta
+        giro = calcular_giro_carteira(user)
+        context['giro_carteira'] = giro
+
+        if user.is_admin:
+            desemp_equipe = desempenho_equipe(hoje.month, hoje.year)
+            meta = desemp_equipe['meta']
+            context['meta_mensal'] = meta
+            context['meta_equipe'] = meta
+            context['meu_desempenho'] = desemp_equipe['progresso']
+            context['pontuacao_geral'] = desemp_equipe['pontuacao']
+            context['desempenho_equipe'] = True
+        else:
+            meta = obter_meta(user, hoje.month, hoje.year)
+            context['meta_mensal'] = meta
+            context['meta_equipe'] = obter_meta_equipe(hoje.month, hoje.year)
+            desemp = desempenho_usuario(user, hoje.month, hoje.year)
+            context['meu_desempenho'] = desemp['progresso']
+            context['pontuacao_geral'] = desemp['pontuacao']
+            context['desempenho_equipe'] = False
 
         estados_qs = (
             clientes.exclude(estado='')
@@ -67,23 +87,22 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         rel_kpis = kpis_relacionamento(user)
         context.update(rel_kpis)
 
-        desemp = desempenho_usuario(user, hoje.month, hoje.year)
-        context['meu_desempenho'] = desemp['progresso']
-        context['pontuacao_geral'] = desemp['pontuacao']
-
         avaliar_conquistas(user, hoje.month, hoje.year)
         if user.is_admin:
             avaliar_conquistas_equipe(hoje.month, hoje.year)
             context['equipe_comercial'] = equipe_comercial(hoje.month, hoje.year)
             context['ranking_comercial'] = ranking_mensal(hoje.month, hoje.year, limit=3)
+            desemp = desempenho_equipe(hoje.month, hoje.year)
+        else:
+            desemp = desempenho_usuario(user, hoje.month, hoje.year)
 
-        realizado_contatos = desemp['realizado']['contatos']
-        meta_contatos = meta.meta_contatos if meta else 60
+        giro_pct = giro['percentual']
+        meta_giro = meta.meta_contatos if meta else 60
         context['sparkline_contatos'] = [
             0,
-            max(realizado_contatos // 4, meta_contatos // 4),
-            max(realizado_contatos // 2, meta_contatos // 2),
-            max(realizado_contatos, meta_contatos),
+            max(giro_pct * 0.25, meta_giro * 0.25),
+            max(giro_pct * 0.5, meta_giro * 0.5),
+            max(giro_pct, meta_giro),
         ]
         meta_vendas = float(meta.meta_vendas) if meta else 80000
         realizado_vendas = float(desemp['realizado']['vendas_valor'])

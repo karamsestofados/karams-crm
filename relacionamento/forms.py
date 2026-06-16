@@ -10,8 +10,19 @@ from .models import (
     TipoContato,
 )
 
+_FORM_INPUT = {'class': 'form-input'}
+
 
 class AtividadeClienteForm(forms.ModelForm):
+    valor_venda = forms.DecimalField(
+        required=False,
+        min_value=0,
+        decimal_places=2,
+        max_digits=12,
+        label='Valor da Venda (R$)',
+        widget=forms.NumberInput(attrs={**_FORM_INPUT, 'step': '0.01', 'placeholder': '0,00'}),
+    )
+
     class Meta:
         model = AtividadeCliente
         fields = [
@@ -52,6 +63,10 @@ class AtividadeClienteForm(forms.ModelForm):
         resumo = cleaned.get('resumo', '')
         if not resumo or not resumo.strip():
             self.add_error('resumo', 'O resumo é obrigatório.')
+        resultado = cleaned.get('resultado')
+        valor_venda = cleaned.get('valor_venda')
+        if resultado == Resultado.PEDIDO_FECHADO and (valor_venda is None or valor_venda <= 0):
+            self.add_error('valor_venda', 'Informe o valor da venda para pedido fechado.')
         return cleaned
 
 
@@ -86,6 +101,14 @@ class ConcluirFollowupForm(forms.Form):
         widget=forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
         label='Hora',
     )
+    valor_venda = forms.DecimalField(
+        required=False,
+        min_value=0,
+        decimal_places=2,
+        max_digits=12,
+        label='Valor da Venda (R$)',
+        widget=forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'placeholder': '0,00'}),
+    )
 
     def clean(self):
         cleaned = super().clean()
@@ -96,6 +119,10 @@ class ConcluirFollowupForm(forms.Form):
         if proxima == ProximaAcao.SEM_ACAO:
             cleaned['data_proxima_acao'] = None
             cleaned['hora_proxima_acao'] = None
+        resultado = cleaned.get('resultado')
+        valor_venda = cleaned.get('valor_venda')
+        if resultado == Resultado.PEDIDO_FECHADO and (valor_venda is None or valor_venda <= 0):
+            self.add_error('valor_venda', 'Informe o valor da venda para pedido fechado.')
         return cleaned
 
 

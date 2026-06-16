@@ -40,13 +40,33 @@
     <a href="{% url 'comissoes:metas_lista' %}" class="btn btn-secondary">Limpar</a>
   </form>
 
+  {% if meta_equipe_calculada and tem_metas_vendedores %}
+  <div class="table-card" style="margin-bottom:1rem;">
+    <table class="data-table">
+      <tbody>
+        <tr style="background:var(--surface-2);">
+          <td><strong>Equipe (calculada)</strong></td>
+          <td>{{ meta_equipe_calculada.mes|stringformat:"02d" }}/{{ meta_equipe_calculada.ano }}</td>
+          <td>{{ meta_equipe_calculada.meta_contatos }}%</td>
+          <td>{{ meta_equipe_calculada.meta_clientes_novos }}</td>
+          <td>{{ meta_equipe_calculada.meta_propostas }}</td>
+          <td>{{ meta_equipe_calculada.meta_visitas }}</td>
+          <td>R$ {{ meta_equipe_calculada.meta_vendas|floatformat:0 }}</td>
+          <td><span class="badge badge-ativo">Soma automática</span></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
   <div class="table-card">
     <table class="data-table">
       <thead>
         <tr>
           <th>Vendedor</th>
           <th>Período</th>
-          <th>Contatos</th>
+          <th>Giro (%)</th>
           <th>Clientes</th>
           <th>Propostas</th>
           <th>Visitas</th>

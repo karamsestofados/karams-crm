@@ -19,7 +19,7 @@ TIPOS_CONTATO_META = (
 )
 
 DIMENSOES = (
-    ('contatos', 'Contatos', 'meta_contatos', int),
+    ('giro_carteira', 'Giro de Carteira', 'meta_contatos', int),
     ('clientes_novos', 'Clientes Novos', 'meta_clientes_novos', int),
     ('propostas', 'Propostas', 'meta_propostas', int),
     ('visitas', 'Visitas', 'meta_visitas', int),
@@ -48,22 +48,70 @@ def obter_meta(usuario, mes, ano):
         ).first()
         if meta:
             return meta
-        meta_equipe = MetaMensal.objects.filter(
-            vendedor__isnull=True, mes=mes, ano=ano, ativo=True,
-        ).first()
-        return meta_equipe or _meta_fallback(mes, ano)
+        meta_equipe = obter_meta_equipe(mes, ano)
+        return meta_equipe
+
+    if usuario and usuario.is_admin:
+        return obter_meta_equipe(mes, ano)
 
     meta = MetaMensal.objects.filter(
-        vendedor=usuario if usuario and not usuario.is_admin else None,
+        vendedor__isnull=True, mes=mes, ano=ano, ativo=True,
+    ).first()
+    return meta or _meta_fallback(mes, ano)
+
+
+def somar_metas_vendedores(mes, ano):
+    qs = MetaMensal.objects.filter(
+        vendedor__isnull=False,
+        vendedor__papel=Papel.VENDEDOR,
+        vendedor__ativo=True,
         mes=mes,
         ano=ano,
         ativo=True,
+    )
+    if not qs.exists():
+        return None
+    agg = qs.aggregate(
+        meta_contatos=Sum('meta_contatos'),
+        meta_clientes_novos=Sum('meta_clientes_novos'),
+        meta_propostas=Sum('meta_propostas'),
+        meta_visitas=Sum('meta_visitas'),
+        meta_vendas=Sum('meta_vendas'),
+    )
+    return MetaMensal(
+        vendedor=None,
+        mes=mes,
+        ano=ano,
+        ativo=True,
+        **agg,
+    )
+
+
+def obter_meta_equipe(mes, ano):
+    somada = somar_metas_vendedores(mes, ano)
+    if somada:
+        return somada
+    manual = MetaMensal.objects.filter(
+        vendedor__isnull=True, mes=mes, ano=ano, ativo=True,
     ).first()
-    if not meta:
-        meta = MetaMensal.objects.filter(
-            vendedor__isnull=True, mes=mes, ano=ano, ativo=True,
-        ).first()
-    return meta or _meta_fallback(mes, ano)
+    return manual or _meta_fallback(mes, ano)
+
+
+def desempenho_equipe(mes, ano):
+    from relacionamento.services.giro_carteira import calcular_giro_carteira
+
+    meta = obter_meta_equipe(mes, ano)
+    realizado = calcular_realizado(None, mes, ano)
+    giro = calcular_giro_carteira(None)
+    realizado['giro_carteira'] = giro['percentual']
+    progresso = calcular_progresso(meta, realizado)
+    return {
+        'meta': meta,
+        'realizado': realizado,
+        'progresso': progresso,
+        'pontuacao': pontuacao_geral(progresso),
+        'giro_carteira': giro,
+    }
 
 
 def _periodo_mes(mes, ano):
@@ -145,8 +193,8 @@ def _percentual(realizado, meta, is_decimal=False):
         meta_val = float(meta or 0)
         real_val = float(realizado or 0)
     else:
-        meta_val = int(meta or 0)
-        real_val = int(realizado or 0)
+        meta_val = float(meta or 0)
+        real_val = float(realizado or 0)
     if meta_val <= 0:
         return None
     return min(round(real_val / meta_val * 100, 1), 999)
@@ -181,8 +229,12 @@ def pontuacao_geral(progresso):
 
 
 def desempenho_usuario(usuario, mes, ano):
+    from relacionamento.services.giro_carteira import calcular_giro_carteira
+
     meta = obter_meta(usuario, mes, ano)
     realizado = calcular_realizado(usuario, mes, ano)
+    giro = calcular_giro_carteira(usuario)
+    realizado['giro_carteira'] = giro['percentual']
     progresso = calcular_progresso(meta, realizado)
     return {
         'usuario': usuario,
@@ -190,6 +242,7 @@ def desempenho_usuario(usuario, mes, ano):
         'realizado': realizado,
         'progresso': progresso,
         'pontuacao': pontuacao_geral(progresso),
+        'giro_carteira': giro,
     }
 
 

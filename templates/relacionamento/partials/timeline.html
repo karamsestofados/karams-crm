@@ -28,8 +28,13 @@
       {% if atividade.humor_cliente %}
       <span><strong>Humor:</strong> {{ atividade.get_humor_cliente_display }}</span>
       {% endif %}
+      {% if atividade.valor_venda %}
+      <span><strong>Venda:</strong> R$ {{ atividade.valor_venda|floatformat:2 }}</span>
+      {% endif %}
       {% if atividade.proxima_acao != 'SEM_ACAO' and atividade.data_proxima_acao %}
       <span><strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }} · {{ atividade.data_proxima_acao|date:"d/m/Y" }}{% if atividade.hora_proxima_acao %} {{ atividade.hora_proxima_acao|time:"H:i" }}{% endif %}</span>
+      {% elif atividade.proxima_acao == 'SEM_ACAO' %}
+      <span><strong>Atendimento encerrado</strong></span>
       {% endif %}
     </div>
     {% if atividade.produto_relacionado %}

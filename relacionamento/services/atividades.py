@@ -1,7 +1,62 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from relacionamento.models import AtividadeCliente, ProximaAcao, Resultado, TipoContato
+from clientes.models import StatusFunil
+from comissoes.models import Venda
+from relacionamento.models import AtividadeCliente, ProximaAcao, Resultado
+
+RESULTADO_PARA_FUNIL = {
+    Resultado.PEDIDO_FECHADO: StatusFunil.PEDIDO_FECHADO,
+    Resultado.PROPOSTA_ENVIADA: StatusFunil.PROPOSTA_ENVIADA,
+    Resultado.SEM_INTERESSE: StatusFunil.CLIENTE_PERDIDO,
+    Resultado.SEM_RESPOSTA: StatusFunil.EM_CONTATO,
+    Resultado.CONTATO_REALIZADO: StatusFunil.EM_CONTATO,
+    Resultado.PENDENTE: StatusFunil.EM_CONTATO,
+    Resultado.INTERESSADO: StatusFunil.NEGOCIACAO,
+    Resultado.AGUARDANDO_RETORNO: StatusFunil.AGUARDANDO_RETORNO,
+    Resultado.POS_VENDA: StatusFunil.CLIENTE_ATIVO,
+}
+
+
+def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_relacionado=None):
+    venda = Venda.objects.create(
+        cliente=cliente,
+        vendedor=usuario,
+        data=timezone.localdate(),
+        valor=valor_venda,
+        produtos_texto=(assunto or resumo[:500]),
+    )
+    if produto_relacionado:
+        venda.produtos.add(produto_relacionado)
+    return venda
+
+
+def finalizar_atendimento(cliente, resultado, valor_venda=None, assunto='', resumo='', produto_relacionado=None, usuario=None):
+    """Atualiza funil e dados do cliente quando o atendimento é encerrado."""
+    hoje = timezone.localdate()
+    update_fields = []
+
+    if not cliente.data_primeiro_contato:
+        cliente.data_primeiro_contato = hoje
+        update_fields.append('data_primeiro_contato')
+
+    novo_status = RESULTADO_PARA_FUNIL.get(resultado)
+    if novo_status and cliente.status_funil != novo_status:
+        cliente.status_funil = novo_status
+        update_fields.append('status_funil')
+
+    if resultado == Resultado.PEDIDO_FECHADO and cliente.status_funil == StatusFunil.PEDIDO_FECHADO:
+        cliente.status_funil = StatusFunil.CLIENTE_ATIVO
+        if 'status_funil' not in update_fields:
+            update_fields.append('status_funil')
+
+    if update_fields:
+        cliente.save(update_fields=update_fields)
+
+    if resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0 and usuario:
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado)
 
 
 def registrar_interacao(
@@ -16,6 +71,7 @@ def registrar_interacao(
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
     hora_proxima_acao=None,
+    valor_venda=None,
 ):
     if not resumo or not resumo.strip():
         raise ValidationError('O resumo é obrigatório.')
@@ -26,6 +82,14 @@ def registrar_interacao(
     if proxima_acao == ProximaAcao.SEM_ACAO:
         data_proxima_acao = None
         hora_proxima_acao = None
+
+    if resultado == Resultado.PEDIDO_FECHADO:
+        if valor_venda is None or valor_venda <= 0:
+            raise ValidationError('Informe o valor da venda para pedido fechado.')
+
+    valor_atividade = None
+    if valor_venda and valor_venda > 0:
+        valor_atividade = valor_venda
 
     atividade = AtividadeCliente(
         cliente=cliente,
@@ -40,9 +104,23 @@ def registrar_interacao(
         data_proxima_acao=data_proxima_acao,
         hora_proxima_acao=hora_proxima_acao,
         concluida=proxima_acao == ProximaAcao.SEM_ACAO,
+        valor_venda=valor_atividade,
     )
     atividade.full_clean()
     atividade.save()
+
+    if proxima_acao == ProximaAcao.SEM_ACAO:
+        finalizar_atendimento(
+            cliente,
+            resultado,
+            valor_venda=valor_venda,
+            assunto=assunto,
+            resumo=resumo,
+            produto_relacionado=produto_relacionado,
+            usuario=usuario,
+        )
+    elif resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0:
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado)
 
     from comissoes.services.produtividade import avaliar_conquistas
     avaliar_conquistas(usuario)
@@ -62,6 +140,7 @@ def concluir_followup(
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
     hora_proxima_acao=None,
+    valor_venda=None,
 ):
     if not atividade_pendente.tem_followup_pendente:
         raise ValidationError('Esta atividade não possui follow-up pendente.')
@@ -84,4 +163,5 @@ def concluir_followup(
         proxima_acao=proxima_acao,
         data_proxima_acao=data_proxima_acao,
         hora_proxima_acao=hora_proxima_acao,
+        valor_venda=valor_venda,
     )

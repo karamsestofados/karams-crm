@@ -59,6 +59,11 @@ def _render_cockpit_main(request):
 class AtividadeDiariaView(VendedorRequiredMixin, TemplateView):
     template_name = 'relacionamento/atividade_diaria.html'
 
+    def get(self, request, *args, **kwargs):
+        if request.headers.get('HX-Request'):
+            return _render_cockpit_main(request)
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(_cockpit_context(self.request))
@@ -95,6 +100,7 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
+                    valor_venda=form.cleaned_data.get('valor_venda'),
                 )
                 messages.success(request, 'Resultado registrado e nova atividade gerada.')
             except ValidationError as exc:
@@ -151,6 +157,7 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
+                    valor_venda=form.cleaned_data.get('valor_venda'),
                 )
                 messages.success(request, 'Interação registrada com sucesso.')
             except ValidationError as exc:
@@ -232,6 +239,7 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
+                    valor_venda=form.cleaned_data.get('valor_venda'),
                 )
                 messages.success(request, 'Interação registrada com sucesso.')
             except ValidationError as exc:

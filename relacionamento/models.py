@@ -128,6 +128,13 @@ class AtividadeCliente(AuditMixin, models.Model):
     data_proxima_acao = models.DateField(null=True, blank=True)
     hora_proxima_acao = models.TimeField(null=True, blank=True)
     concluida = models.BooleanField(default=False)
+    valor_venda = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='valor da venda',
+    )
     data_criacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

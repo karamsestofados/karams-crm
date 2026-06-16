@@ -5,7 +5,7 @@
       <thead>
         <tr>
           <th>Vendedor</th>
-          <th>Contatos</th>
+          <th>Giro</th>
           <th>Clientes</th>
           <th>Propostas</th>
           <th>Visitas</th>
@@ -21,6 +21,8 @@
           <td>
             {% if p.is_moeda %}
             {{ p.realizado|floatformat:0 }}/{{ p.meta|floatformat:0 }}
+            {% elif p.key == 'giro_carteira' %}
+            {{ p.realizado }}%/{{ p.meta }}%
             {% else %}
             {{ p.realizado }}/{{ p.meta }}
             {% endif %}

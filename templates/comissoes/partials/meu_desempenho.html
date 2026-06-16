@@ -1,5 +1,5 @@
 <div class="card desempenho-card">
-  <div class="section-title">Meu Desempenho — {{ mes_label }}</div>
+  <div class="section-title">{% if desempenho_equipe %}Desempenho da Equipe{% else %}Meu Desempenho{% endif %} — {{ mes_label }}</div>
   <div class="desempenho-grid">
     {% for item in meu_desempenho %}
     <div class="desempenho-item">
@@ -14,6 +14,8 @@
       <div class="desempenho-valores">
         {% if item.is_moeda %}
         <span>R$ {{ item.realizado|floatformat:0 }} / R$ {{ item.meta|floatformat:0 }}</span>
+        {% elif item.key == 'giro_carteira' %}
+        <span>{{ item.realizado }}% / {{ item.meta }}%</span>
         {% else %}
         <span>{{ item.realizado }} / {{ item.meta }}</span>
         {% endif %}

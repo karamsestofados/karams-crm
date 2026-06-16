@@ -9,6 +9,7 @@ from accounts.models import Papel, Usuario
 
 from .forms import MetaMensalForm
 from .models import MetaMensal
+from .services.produtividade import obter_meta_equipe, somar_metas_vendedores
 
 
 class MetaListView(AdminRequiredMixin, ListView):
@@ -58,6 +59,15 @@ class MetaListView(AdminRequiredMixin, ListView):
         context['vendedores'] = Usuario.objects.filter(
             papel=Papel.VENDEDOR, ativo=True,
         ).order_by('first_name')
+        mes = self.request.GET.get('mes')
+        ano = self.request.GET.get('ano')
+        if mes and ano:
+            try:
+                mes_i, ano_i = int(mes), int(ano)
+                context['meta_equipe_calculada'] = obter_meta_equipe(mes_i, ano_i)
+                context['tem_metas_vendedores'] = somar_metas_vendedores(mes_i, ano_i) is not None
+            except ValueError:
+                pass
         return context
 
 
