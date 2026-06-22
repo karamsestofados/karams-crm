@@ -2,7 +2,7 @@
 <div class="card desempenho-card meta-equipe-vendedor-card">
   <div class="section-title">Meta Equipe — {{ mes_label }}</div>
   <p class="meta-equipe-vendedor-hint">Referência da equipe (média de giro · soma das metas de vendas)</p>
-  <div class="desempenho-grid">
+  <div class="meta-equipe-grid">
     {% for item in meta_equipe_progresso %}
     {% if item.key == 'giro_carteira' or item.key == 'vendas_valor' %}
     <div class="desempenho-item">

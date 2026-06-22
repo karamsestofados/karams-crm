@@ -100,6 +100,7 @@ class InteracaoTests(TestCase):
             resumo='Sem interesse',
             resultado=Resultado.SEM_INTERESSE,
             proxima_acao=ProximaAcao.SEM_ACAO,
+            motivo_perda='PRECO',
         )
         self.cliente.refresh_from_db()
         self.assertEqual(self.cliente.status_funil, StatusFunil.CLIENTE_PERDIDO)

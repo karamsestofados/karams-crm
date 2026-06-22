@@ -34,5 +34,18 @@
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-mask="cep"]').forEach(maskCep);
     document.querySelectorAll('[data-mask="telefone"]').forEach(maskTelefone);
+
+    var statusFunil = document.querySelector('[name="status_funil"]');
+    var grpMotivo = document.getElementById('motivo-perda-cliente-group');
+    var grpDetalhe = document.getElementById('motivo-perda-detalhe-cliente-group');
+    if (statusFunil && grpMotivo) {
+      function toggleMotivo() {
+        var show = statusFunil.value === 'CLIENTE_PERDIDO';
+        grpMotivo.style.display = show ? '' : 'none';
+        if (grpDetalhe) grpDetalhe.style.display = show ? '' : 'none';
+      }
+      statusFunil.addEventListener('change', toggleMotivo);
+      toggleMotivo();
+    }
   });
 })();

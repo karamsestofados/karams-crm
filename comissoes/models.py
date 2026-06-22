@@ -83,6 +83,9 @@ class TipoConquista(models.TextChoices):
     META_BATIDA = 'meta_batida', 'Meta Batida'
     TOP_MES = 'top_mes', 'Top do Mês'
     MAIOR_CRESCIMENTO = 'maior_crescimento', 'Maior Crescimento'
+    REI_WHATSAPP = 'rei_whatsapp', 'Rei do WhatsApp'
+    MESTRE_FOLLOWUP = 'mestre_followup', 'Mestre do Follow-up'
+    STREAK_META_7 = 'streak_meta_7', '7 Dias de Meta'
 
 
 class ConquistaVendedor(models.Model):

@@ -25,6 +25,7 @@ urlpatterns = [
     path('relacionamento/', include('relacionamento.urls')),
     path('comissoes/', include('comissoes.urls')),
     path('relatorios/', include('relatorios.urls')),
+    path('powerup/', include('powerup.urls')),
     path('', include('core.urls')),
 ]
 

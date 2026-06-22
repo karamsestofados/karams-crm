@@ -8,6 +8,7 @@ from accounts.mixins import VendedorRequiredMixin
 from accounts.models import Papel, Usuario
 from clientes.models import (
     CategoriaCliente,
+    Cliente,
     ModalidadeCliente,
     OrigemLead,
     Produto,
@@ -23,6 +24,25 @@ from comissoes.services.produtividade import (
 )
 from relacionamento.services.cockpit import clientes_sem_contato
 
+UFS_BRASIL = (
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
+    'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+)
+
+
+def _ufs_disponiveis():
+    cadastradas = set(
+        Cliente.objects.exclude(estado='').values_list('estado', flat=True).distinct()
+    )
+    cadastradas = {u.upper() for u in cadastradas if u}
+    opcoes = [('todos', 'Todas')]
+    for uf in UFS_BRASIL:
+        if uf in cadastradas:
+            opcoes.append((uf, uf))
+    for uf in sorted(cadastradas - set(UFS_BRASIL)):
+        opcoes.append((uf, uf))
+    return opcoes
+
 
 def _parse_filtros_cliente(request):
     return {
@@ -33,6 +53,7 @@ def _parse_filtros_cliente(request):
         'origem_lead': request.GET.get('origem_lead', 'todos'),
         'status_funil': request.GET.get('status_funil', 'todos'),
         'regiao_atuacao': request.GET.get('regiao_atuacao', 'todos'),
+        'estado': request.GET.get('estado', 'todos'),
         'com_pedido_fechado': request.GET.get('com_pedido_fechado', ''),
     }
 
@@ -132,6 +153,7 @@ def build_produtividade_context(request):
         'segmentos': [('todos', 'Todos')] + list(SegmentoCliente.choices),
         'origens_lead': [('todos', 'Todas')] + list(OrigemLead.choices),
         'status_funil_opcoes': [('todos', 'Todos')] + list(StatusFunil.choices),
+        'ufs': _ufs_disponiveis(),
     }
     if user.is_admin:
         context['vendedores'] = Usuario.objects.filter(

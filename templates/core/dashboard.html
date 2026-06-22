@@ -68,20 +68,22 @@
     </div>
   </div>
 
-  {% include 'comissoes/partials/meu_desempenho.html' %}
+  <div class="dashboard-sections">
+    {% include 'comissoes/partials/meu_desempenho.html' %}
 
-  {% if not user_is_admin and meta_equipe %}
-  {% include 'comissoes/partials/meta_equipe_vendedor.html' %}
-  {% endif %}
+    {% if not user_is_admin and meta_equipe %}
+    {% include 'comissoes/partials/meta_equipe_vendedor.html' %}
+    {% endif %}
 
-  {% if user_is_admin %}
-  <div class="dashboard-admin-grid">
-    {% include 'comissoes/partials/equipe_comercial.html' %}
-    {% include 'comissoes/partials/ranking_comercial.html' %}
+    {% if user_is_admin %}
+    <div class="dashboard-admin-grid">
+      {% include 'comissoes/partials/equipe_comercial.html' %}
+      {% include 'comissoes/partials/ranking_comercial.html' %}
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
-  <div class="kpi-row" style="margin-top:0;">
+  <div class="kpi-row">
     <div class="kpi-card-modern">
       <div class="kpi-card-header">
         <span class="kpi-card-title">Contatos Hoje</span>
@@ -174,6 +176,8 @@
       </tbody>
     </table>
   </div>
+
+  {% include 'core/partials/clientes_quentes.html' %}
 </div>
 
 {{ chart_categorias|json_script:"chart-categorias-data" }}

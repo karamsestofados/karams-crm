@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from clientes.models import StatusFunil
+from clientes.models import MotivoPerda, StatusFunil
 from comissoes.models import Venda
 from relacionamento.models import AtividadeCliente, ProximaAcao, Resultado
 
@@ -33,7 +33,10 @@ def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_r
     return venda
 
 
-def finalizar_atendimento(cliente, resultado, valor_venda=None, assunto='', resumo='', produto_relacionado=None, usuario=None):
+def finalizar_atendimento(
+    cliente, resultado, valor_venda=None, assunto='', resumo='',
+    produto_relacionado=None, usuario=None, motivo_perda=None, motivo_perda_detalhe='',
+):
     """Atualiza funil e dados do cliente quando o atendimento é encerrado."""
     hoje = timezone.localdate()
     update_fields = []
@@ -51,6 +54,11 @@ def finalizar_atendimento(cliente, resultado, valor_venda=None, assunto='', resu
         cliente.status_funil = StatusFunil.CLIENTE_ATIVO
         if 'status_funil' not in update_fields:
             update_fields.append('status_funil')
+
+    if resultado == Resultado.SEM_INTERESSE and motivo_perda:
+        cliente.motivo_perda = motivo_perda
+        cliente.motivo_perda_detalhe = motivo_perda_detalhe or ''
+        update_fields.extend(['motivo_perda', 'motivo_perda_detalhe'])
 
     if update_fields:
         cliente.save(update_fields=update_fields)
@@ -72,9 +80,14 @@ def registrar_interacao(
     data_proxima_acao=None,
     hora_proxima_acao=None,
     valor_venda=None,
+    motivo_perda=None,
+    motivo_perda_detalhe='',
 ):
     if not resumo or not resumo.strip():
         raise ValidationError('O resumo é obrigatório.')
+
+    if resultado == Resultado.SEM_INTERESSE and not motivo_perda:
+        raise ValidationError('Informe o motivo da perda.')
 
     if proxima_acao != ProximaAcao.SEM_ACAO and not data_proxima_acao:
         raise ValidationError('Informe a data da próxima ação.')
@@ -118,6 +131,8 @@ def registrar_interacao(
             resumo=resumo,
             produto_relacionado=produto_relacionado,
             usuario=usuario,
+            motivo_perda=motivo_perda,
+            motivo_perda_detalhe=motivo_perda_detalhe,
         )
     elif resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0:
         _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado)
@@ -141,6 +156,8 @@ def concluir_followup(
     data_proxima_acao=None,
     hora_proxima_acao=None,
     valor_venda=None,
+    motivo_perda=None,
+    motivo_perda_detalhe='',
 ):
     if not atividade_pendente.tem_followup_pendente:
         raise ValidationError('Esta atividade não possui follow-up pendente.')
@@ -164,4 +181,6 @@ def concluir_followup(
         data_proxima_acao=data_proxima_acao,
         hora_proxima_acao=hora_proxima_acao,
         valor_venda=valor_venda,
+        motivo_perda=motivo_perda,
+        motivo_perda_detalhe=motivo_perda_detalhe,
     )

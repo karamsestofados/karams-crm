@@ -5,7 +5,9 @@ from accounts.models import Papel, Usuario
 from .models import (
     CategoriaCliente,
     Cliente,
+    MotivoPerda,
     Produto,
+    StatusFunil,
     TipoProduto,
 )
 from .utils import (
@@ -32,7 +34,8 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = [
             'vendedor', 'nome', 'tipo_cliente', 'segmento', 'modalidade_cliente',
-            'categoria', 'status_funil', 'origem_lead', 'regiao_atuacao', 'cidade', 'estado',
+            'categoria', 'status_funil', 'motivo_perda', 'motivo_perda_detalhe',
+            'origem_lead', 'regiao_atuacao', 'cidade', 'estado',
             'cep', 'telefone', 'responsavel', 'instagram', 'data_primeiro_contato', 'endereco',
             'feedback_original',
         ]
@@ -44,6 +47,8 @@ class ClienteForm(forms.ModelForm):
             'modalidade_cliente': forms.Select(attrs={'class': 'form-input'}),
             'categoria': forms.Select(attrs={'class': 'form-input'}),
             'status_funil': forms.Select(attrs={'class': 'form-input'}),
+            'motivo_perda': forms.Select(attrs={'class': 'form-input'}),
+            'motivo_perda_detalhe': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Descreva se escolheu Outro'}),
             'origem_lead': forms.Select(attrs={'class': 'form-input'}),
             'regiao_atuacao': forms.Select(attrs={'class': 'form-input'}),
             'cidade': forms.TextInput(attrs={'class': 'form-input'}),
@@ -88,6 +93,9 @@ class ClienteForm(forms.ModelForm):
         self.fields['tipo_cliente'].label = 'Perfil do Cliente'
         self.fields['modalidade_cliente'].label = 'Tipo Cliente'
         self.fields['vendedor'].label = 'Vendedor Responsável'
+        self.fields['motivo_perda'].required = False
+        self.fields['motivo_perda'].empty_label = '— Selecione —'
+        self.fields['motivo_perda_detalhe'].required = False
 
         if self.instance and self.instance.pk and self.instance.categoria == CategoriaCliente.INATIVO:
             self.fields.pop('categoria', None)
@@ -123,6 +131,23 @@ class ClienteForm(forms.ModelForm):
 
     def clean_instagram(self):
         return normalizar_instagram(self.cleaned_data.get('instagram', ''))
+
+    def clean_estado(self):
+        estado = (self.cleaned_data.get('estado') or '').strip().upper()
+        if estado and len(estado) != 2:
+            raise forms.ValidationError('Informe a sigla do estado com 2 letras (ex: PR, SP).')
+        return estado
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('status_funil') == StatusFunil.CLIENTE_PERDIDO:
+            if not cleaned.get('motivo_perda'):
+                self.add_error('motivo_perda', 'Informe o motivo da perda.')
+            elif cleaned.get('motivo_perda') == MotivoPerda.OUTRO and not (
+                cleaned.get('motivo_perda_detalhe') or ''
+            ).strip():
+                self.add_error('motivo_perda_detalhe', 'Descreva o motivo.')
+        return cleaned
 
     def save(self, commit=True):
         instance = super().save(commit=False)

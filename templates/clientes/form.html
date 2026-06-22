@@ -70,6 +70,17 @@
           {{ form.status_funil }}
         </div>
 
+        <div class="form-group" id="motivo-perda-cliente-group" style="display:none;">
+          <label class="form-label" for="{{ form.motivo_perda.id_for_label }}">Motivo da perda *</label>
+          {{ form.motivo_perda }}
+          {% if form.motivo_perda.errors %}<p class="field-error">{{ form.motivo_perda.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="form-group" id="motivo-perda-detalhe-cliente-group" style="display:none;">
+          <label class="form-label" for="{{ form.motivo_perda_detalhe.id_for_label }}">Detalhe do motivo</label>
+          {{ form.motivo_perda_detalhe }}
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="{{ form.origem_lead.id_for_label }}">Origem do Lead</label>
           {{ form.origem_lead }}

@@ -22,6 +22,7 @@ from comissoes.services.produtividade import (
     ranking_mensal,
 )
 from relacionamento.services.giro_carteira import calcular_giro_carteira
+from relacionamento.services.clientes_quentes import listar_clientes_quentes
 from relacionamento.services.dashboard import kpis_relacionamento
 
 from .forms import RestaurarBackupForm
@@ -127,6 +128,7 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
 
         pct_ativos = round(ativos / total * 100) if total else 0
         context['pct_ativos'] = pct_ativos
+        context['clientes_quentes'] = listar_clientes_quentes(user, limit=6)
 
         return context
 

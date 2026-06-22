@@ -11,96 +11,110 @@
 <div class="page-body">
   <form method="get" class="crm-search produtividade-filtros" style="margin-bottom:1.5rem;">
     <div class="produtividade-filtros-grid">
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">De</label>
-        <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+      <div class="produtividade-filtros-row">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">De</label>
+          <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Até</label>
+          <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+        </div>
+        {% if user_is_admin and vendedores %}
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Vendedor</label>
+          <select name="vendedor" class="form-input">
+            <option value="">Todos</option>
+            {% for v in vendedores %}
+            <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Produto</label>
+          <select name="produto" class="form-input">
+            <option value="">Todos</option>
+            {% for p in produtos %}
+            <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Região</label>
+          <select name="regiao" class="form-input">
+            {% for val, label in regioes %}
+            <option value="{{ val }}" {% if filtros.regiao == val or not filtros.regiao and val == 'todos' %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">UF</label>
+          <select name="estado" class="form-input">
+            {% for val, label in ufs %}
+            <option value="{{ val }}" {% if filtros.estado == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Até</label>
-        <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+      <div class="produtividade-filtros-row">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Categoria</label>
+          <select name="categoria" class="form-input">
+            {% for val, label in categorias %}
+            <option value="{{ val }}" {% if filtros.categoria == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Perfil</label>
+          <select name="tipo_cliente" class="form-input">
+            {% for val, label in tipos_cliente %}
+            <option value="{{ val }}" {% if filtros.tipo_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Modalidade</label>
+          <select name="modalidade_cliente" class="form-input">
+            {% for val, label in modalidades_cliente %}
+            <option value="{{ val }}" {% if filtros.modalidade_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Segmento</label>
+          <select name="segmento" class="form-input">
+            {% for val, label in segmentos %}
+            <option value="{{ val }}" {% if filtros.segmento == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Origem lead</label>
+          <select name="origem_lead" class="form-input">
+            {% for val, label in origens_lead %}
+            <option value="{{ val }}" {% if filtros.origem_lead == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Status funil</label>
+          <select name="status_funil" class="form-input">
+            {% for val, label in status_funil_opcoes %}
+            <option value="{{ val }}" {% if filtros.status_funil == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-      {% if user_is_admin and vendedores %}
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Vendedor</label>
-        <select name="vendedor" class="form-input">
-          <option value="">Todos</option>
-          {% for v in vendedores %}
-          <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      {% endif %}
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Produto</label>
-        <select name="produto" class="form-input">
-          <option value="">Todos</option>
-          {% for p in produtos %}
-          <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Região</label>
-        <select name="regiao" class="form-input">
-          {% for val, label in regioes %}
-          <option value="{{ val }}" {% if filtros.regiao == val or not filtros.regiao and val == 'todos' %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Categoria</label>
-        <select name="categoria" class="form-input">
-          {% for val, label in categorias %}
-          <option value="{{ val }}" {% if filtros.categoria == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Perfil</label>
-        <select name="tipo_cliente" class="form-input">
-          {% for val, label in tipos_cliente %}
-          <option value="{{ val }}" {% if filtros.tipo_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Modalidade</label>
-        <select name="modalidade_cliente" class="form-input">
-          {% for val, label in modalidades_cliente %}
-          <option value="{{ val }}" {% if filtros.modalidade_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Segmento</label>
-        <select name="segmento" class="form-input">
-          {% for val, label in segmentos %}
-          <option value="{{ val }}" {% if filtros.segmento == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Origem lead</label>
-        <select name="origem_lead" class="form-input">
-          {% for val, label in origens_lead %}
-          <option value="{{ val }}" {% if filtros.origem_lead == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Status funil</label>
-        <select name="status_funil" class="form-input">
-          {% for val, label in status_funil_opcoes %}
-          <option value="{{ val }}" {% if filtros.status_funil == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group" style="margin:0;">
-        <label class="form-label">Com pedido fechado</label>
-        <select name="com_pedido_fechado" class="form-input">
-          <option value="">Todos</option>
-          <option value="1" {% if filtros.com_pedido_fechado == '1' %}selected{% endif %}>Sim</option>
-        </select>
+      <div class="produtividade-filtros-row" style="grid-template-columns: repeat(6, 1fr);">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Com pedido fechado</label>
+          <select name="com_pedido_fechado" class="form-input">
+            <option value="">Todos</option>
+            <option value="1" {% if filtros.com_pedido_fechado == '1' %}selected{% endif %}>Sim</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="produtividade-filtros-actions">

@@ -1,0 +1,15 @@
+<div class="card clientes-quentes-card" style="margin-top:1.5rem;">
+  <div class="section-title">🔥 Clientes Quentes</div>
+  <p class="meta-equipe-vendedor-hint">Baseado nas últimas interações e estágio do funil.</p>
+  <div class="clientes-quentes-grid">
+    {% for item in clientes_quentes %}
+    <a href="{% url 'clientes:lista' %}?id={{ item.cliente.pk }}&tab=historico" class="cliente-quente-card">
+      <div class="cliente-quente-nome">{{ item.cliente.nome }}</div>
+      <div class="cliente-quente-meta">Último contato: {{ item.ultimo_contato_label }}</div>
+      <div class="cliente-quente-contexto">{{ item.contexto }}</div>
+    </a>
+    {% empty %}
+    <p style="color:var(--text-muted);grid-column:1/-1;padding:1rem 0;">Nenhum cliente quente no momento.</p>
+    {% endfor %}
+  </div>
+</div>

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'comissoes',
     'relacionamento',
     'relatorios',
+    'powerup',
 ]
 
 MIDDLEWARE = [

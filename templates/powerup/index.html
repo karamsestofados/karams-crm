@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block nav_powerup %}active{% endblock %}
+
+{% block content %}
+<div class="crm-page-header">
+  <h1 class="crm-page-title">PowerUP</h1>
+  <p class="hero-subtitle" style="margin-top:0.25rem;">Insights comerciais para direcionar sua carteira</p>
+</div>
+
+<div class="page-body">
+  <form method="get" class="crm-search produtividade-filtros" style="margin-bottom:1.5rem;">
+    <div class="produtividade-filtros-row" style="max-width:32rem;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">De</label>
+        <input type="date" name="de" value="{{ periodo.de }}" class="form-input">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Até</label>
+        <input type="date" name="ate" value="{{ periodo.ate }}" class="form-input">
+      </div>
+      <div class="form-group" style="margin:0;display:flex;align-items:flex-end;">
+        <button type="submit" class="btn btn-primary">Atualizar</button>
+      </div>
+    </div>
+  </form>
+
+  <nav class="powerup-nav">
+    <a href="#funil">Funil</a>
+    <a href="#conversao">Conversão</a>
+    <a href="#tempo">Tempo Fechamento</a>
+    <a href="#perdas">Motivo Perda</a>
+    <a href="#radar">Radar</a>
+    <a href="#gamificacao">Gamificação</a>
+    <a href="#saude">Saúde Carteira</a>
+  </nav>
+
+  <section id="funil" class="card powerup-section">
+    <div class="section-title">🚀 Funil Visual</div>
+    <div class="funil-visual">
+      {% for etapa in funil %}
+      <div class="funil-etapa" style="width:{{ etapa.largura_pct }}%;min-width:8rem;">
+        <div class="funil-etapa-valor">{{ etapa.total }}</div>
+        <div class="funil-etapa-label">{{ etapa.label }}</div>
+      </div>
+      {% if not forloop.last %}<div class="funil-seta">↓</div>{% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="conversao" class="card powerup-section">
+    <div class="section-title">📈 Taxa de Conversão por Vendedor</div>
+    <div class="table-card" style="margin-top:1rem;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Vendedor</th>
+            <th>Leads</th>
+            <th>Orçamentos</th>
+            <th>Fechamentos</th>
+            <th>Conversão</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for linha in conversao_vendedores %}
+          <tr>
+            <td>{{ linha.nome }}</td>
+            <td>{{ linha.leads }}</td>
+            <td>{{ linha.orcamentos }}</td>
+            <td>{{ linha.fechamentos }}</td>
+            <td><strong>{{ linha.taxa_pct }}%</strong></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Sem dados no período.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tempo" class="card powerup-section">
+    <div class="section-title">📈 Tempo Médio de Fechamento</div>
+    <div class="kpi-row" style="margin-top:1rem;">
+      {% for item in tempo_fechamento %}
+      <div class="kpi-card-modern">
+        <div class="kpi-card-header"><span class="kpi-card-title">{{ item.nome }}</span></div>
+        <div class="kpi-value-lg">{% if item.dias_medio is not None %}{{ item.dias_medio }} dias{% else %}—{% endif %}</div>
+        <div class="kpi-value-sub">{{ item.total_fechamentos }} fechamento{{ item.total_fechamentos|pluralize:"s" }}</div>
+      </div>
+      {% empty %}
+      <p style="color:var(--text-muted);">Sem fechamentos no período.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="perdas" class="card powerup-section">
+    <div class="section-title">📉 Motivo de Perda</div>
+    {% if motivo_perda.total %}
+    <p class="meta-equipe-vendedor-hint">{{ motivo_perda.total }} cliente{{ motivo_perda.total|pluralize:"s" }} perdido{{ motivo_perda.total|pluralize:"s" }} no período</p>
+    <div class="motivo-perda-bars">
+      {% for item in motivo_perda.itens %}
+      <div class="motivo-perda-row">
+        <span class="motivo-perda-label">{{ item.label }}</span>
+        <div class="progress-bar-wrap" style="flex:1;">
+          <div class="progress-bar-fill" style="width:{{ item.pct }}%;"></div>
+        </div>
+        <span class="motivo-perda-pct">{{ item.pct }}%</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);margin-top:1rem;">Nenhum cliente perdido com motivo registrado no período.</p>
+    {% endif %}
+  </section>
+
+  <section id="radar" class="card powerup-section">
+    <div class="section-title">🧠 Radar Comercial</div>
+    <p class="meta-equipe-vendedor-hint">Quem precisa da sua atenção agora?</p>
+    <div class="radar-grid">
+      {% for faixa in radar %}
+      <div class="radar-card radar-{{ faixa.nivel }}">
+        <div class="radar-titulo">{{ faixa.icone }} {{ faixa.titulo }}</div>
+        {% if faixa.clientes %}
+        <ul class="radar-clientes">
+          {% for c in faixa.clientes %}
+          <li><a href="{% url 'clientes:lista' %}?id={{ c.pk }}&tab=historico" class="data-table-link">{{ c.nome }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="gamificacao" class="card powerup-section">
+    <div class="section-title">🏆 Gamificação Comercial</div>
+    {% if gamificacao.destaques %}
+    <div class="kpi-row" style="margin-top:1rem;">
+      {% for d in gamificacao.destaques %}
+      <div class="kpi-card-modern">
+        <div class="kpi-value-lg">{{ d.emoji }}</div>
+        <div class="kpi-card-title">{{ d.vendedor }}</div>
+        <div class="kpi-value-sub">{{ d.titulo }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% for bloco in gamificacao.blocos %}
+    <div style="margin-top:1rem;">
+      <strong>{{ bloco.nome }}</strong>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;">
+        {% for c in bloco.conquistas %}
+        <span class="badge badge-ativo">{{ c.get_tipo_display }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--text-muted);margin-top:1rem;">Conquistas aparecem conforme metas e atividades do mês.</p>
+    {% endfor %}
+  </section>
+
+  <section id="saude" class="card powerup-section">
+    <div class="section-title">📈 Índice de Saúde da Carteira</div>
+    {% with m=saude.propria %}
+    <div class="saude-resumo">
+      <div class="saude-gauge">
+        <div class="saude-gauge-valor">🟢 {{ m.pct_saudavel }}%</div>
+        <div class="saude-gauge-label">saudável</div>
+      </div>
+      <div class="saude-breakdown">
+        <div><span>{{ m.pct_sem_contato }}%</span> sem contato</div>
+        <div><span>{{ m.pct_perdidos }}%</span> perdidos</div>
+        <div><span>{{ m.pct_negociacao_atrasada }}%</span> negociações atrasadas</div>
+      </div>
+    </div>
+    {% endwith %}
+    {% if user_is_admin and saude.por_vendedor %}
+    <div class="table-card" style="margin-top:1.5rem;">
+      <table class="data-table data-table-compact">
+        <thead>
+          <tr>
+            <th>Vendedor</th>
+            <th>Saudável</th>
+            <th>Sem contato</th>
+            <th>Perdidos</th>
+            <th>Atrasadas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in saude.por_vendedor %}
+          <tr>
+            <td>{{ v.nome }}</td>
+            <td>{{ v.pct_saudavel }}%</td>
+            <td>{{ v.pct_sem_contato }}%</td>
+            <td>{{ v.pct_perdidos }}%</td>
+            <td>{{ v.pct_negociacao_atrasada }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -128,6 +128,15 @@ class StatusFunil(models.TextChoices):
     CLIENTE_PERDIDO = 'CLIENTE_PERDIDO', 'Cliente Perdido'
 
 
+class MotivoPerda(models.TextChoices):
+    PRECO = 'PRECO', 'Preço'
+    PRAZO = 'PRAZO', 'Prazo'
+    CONCORRENTE = 'CONCORRENTE', 'Concorrente'
+    SEM_RETORNO = 'SEM_RETORNO', 'Sem retorno'
+    PRODUTO_INADEQUADO = 'PRODUTO_INADEQUADO', 'Produto inadequado'
+    OUTRO = 'OUTRO', 'Outro'
+
+
 class RegiaoAtuacao(models.TextChoices):
     NORTE = 'NORTE', 'Norte'
     NORDESTE = 'NORDESTE', 'Nordeste'
@@ -190,6 +199,12 @@ class Cliente(AuditMixin, models.Model):
         choices=StatusFunil.choices,
         default=StatusFunil.LEAD_NOVO,
     )
+    motivo_perda = models.CharField(
+        max_length=30,
+        choices=MotivoPerda.choices,
+        blank=True,
+    )
+    motivo_perda_detalhe = models.CharField(max_length=255, blank=True)
     regiao_atuacao = models.CharField(
         max_length=20,
         choices=RegiaoAtuacao.choices,

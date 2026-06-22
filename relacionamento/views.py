@@ -133,6 +133,8 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
+                    motivo_perda=form.cleaned_data.get('motivo_perda') or None,
+                    motivo_perda_detalhe=form.cleaned_data.get('motivo_perda_detalhe', ''),
                 )
                 calendar_url = resolve_calendar_url(
                     atividade.cliente, request.user, form.cleaned_data,
@@ -197,6 +199,8 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
+                    motivo_perda=form.cleaned_data.get('motivo_perda') or None,
+                    motivo_perda_detalhe=form.cleaned_data.get('motivo_perda_detalhe', ''),
                 )
                 calendar_url = resolve_calendar_url(cliente, request.user, form.cleaned_data)
                 messages.success(request, _interacao_success_message(calendar_url))
@@ -284,6 +288,8 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
                     valor_venda=form.cleaned_data.get('valor_venda'),
+                    motivo_perda=form.cleaned_data.get('motivo_perda') or None,
+                    motivo_perda_detalhe=form.cleaned_data.get('motivo_perda_detalhe', ''),
                 )
                 calendar_url = resolve_calendar_url(cliente, request.user, form.cleaned_data)
                 messages.success(request, _interacao_success_message(calendar_url))

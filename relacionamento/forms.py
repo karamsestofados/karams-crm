@@ -1,6 +1,6 @@
 from django import forms
 
-from clientes.models import Produto
+from clientes.models import MotivoPerda, Produto
 
 from .models import (
     AtividadeCliente,
@@ -51,6 +51,17 @@ class AtividadeClienteForm(forms.ModelForm):
         label='Valor da Venda (R$)',
         widget=forms.NumberInput(attrs={**_FORM_INPUT, 'step': '0.01', 'placeholder': '0,00'}),
     )
+    motivo_perda = forms.ChoiceField(
+        required=False,
+        choices=[('', '— Selecione —')] + list(MotivoPerda.choices),
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label='Motivo da perda',
+    )
+    motivo_perda_detalhe = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Descreva se escolheu Outro'}),
+        label='Detalhe do motivo',
+    )
 
     class Meta:
         model = AtividadeCliente
@@ -90,6 +101,12 @@ class AtividadeClienteForm(forms.ModelForm):
         valor_venda = cleaned.get('valor_venda')
         if resultado == Resultado.PEDIDO_FECHADO and (valor_venda is None or valor_venda <= 0):
             self.add_error('valor_venda', 'Informe o valor da venda para pedido fechado.')
+        if resultado == Resultado.SEM_INTERESSE:
+            motivo = cleaned.get('motivo_perda')
+            if not motivo:
+                self.add_error('motivo_perda', 'Informe o motivo da perda.')
+            elif motivo == MotivoPerda.OUTRO and not (cleaned.get('motivo_perda_detalhe') or '').strip():
+                self.add_error('motivo_perda_detalhe', 'Descreva o motivo.')
         return cleaned
 
 

@@ -9,7 +9,7 @@ from django.utils import timezone
 from accounts.models import Papel, Usuario
 from clientes.models import Cliente
 from comissoes.models import ConquistaVendedor, MetaMensal, TipoConquista, Venda
-from relacionamento.models import AtividadeCliente, Resultado, TipoContato
+from relacionamento.models import AtividadeCliente, ProximaAcao, Resultado, TipoContato
 
 TIPOS_CONTATO_META = (
     TipoContato.LIGACAO,
@@ -143,6 +143,9 @@ def _aplicar_filtros_cliente(qs, filtros=None, prefix=''):
         val = filtros.get(field)
         if val and val != 'todos':
             qs = qs.filter(**{f'{p}{field}': val})
+    estado = filtros.get('estado')
+    if estado and estado != 'todos':
+        qs = qs.filter(**{f'{p}estado__iexact': estado.upper()})
     if filtros.get('com_pedido_fechado') == '1':
         if prefix:
             qs = qs.filter(
@@ -456,6 +459,74 @@ def avaliar_conquistas(usuario, mes=None, ano=None):
         crescimentos.sort(key=lambda x: x[1], reverse=True)
         if crescimentos and crescimentos[0][0].pk == usuario.pk and crescimentos[0][1] > 0:
             _conceder_conquista(usuario, TipoConquista.MAIOR_CRESCIMENTO, mes=mes, ano=ano)
+
+    _avaliar_conquistas_mensais_extras(usuario, mes, ano)
+
+
+def _avaliar_conquistas_mensais_extras(usuario, mes, ano):
+    from datetime import timedelta
+
+    inicio = date(ano, mes, 1)
+    ultimo = calendar.monthrange(ano, mes)[1]
+    fim = date(ano, mes, ultimo)
+
+    whatsapp_count = (
+        AtividadeCliente.objects.ativas()
+        .filter(
+            usuario=usuario,
+            tipo_contato=TipoContato.WHATSAPP,
+            data_criacao__date__gte=inicio,
+            data_criacao__date__lte=fim,
+        )
+        .count()
+    )
+    followups = (
+        AtividadeCliente.objects.ativas()
+        .filter(
+            usuario=usuario,
+            concluida=True,
+            data_criacao__date__gte=inicio,
+            data_criacao__date__lte=fim,
+        )
+        .exclude(proxima_acao=ProximaAcao.SEM_ACAO)
+        .count()
+    )
+
+    vendedores = list(Usuario.objects.filter(papel=Papel.VENDEDOR, ativo=True))
+    if vendedores:
+        whatsapp_rank = sorted(
+            vendedores,
+            key=lambda u: AtividadeCliente.objects.ativas().filter(
+                usuario=u, tipo_contato=TipoContato.WHATSAPP,
+                data_criacao__date__gte=inicio, data_criacao__date__lte=fim,
+            ).count(),
+            reverse=True,
+        )
+        if whatsapp_rank and whatsapp_rank[0].pk == usuario.pk and whatsapp_count > 0:
+            _conceder_conquista(usuario, TipoConquista.REI_WHATSAPP, mes=mes, ano=ano)
+
+        follow_rank = sorted(
+            vendedores,
+            key=lambda u: AtividadeCliente.objects.ativas().filter(
+                usuario=u, concluida=True,
+                data_criacao__date__gte=inicio, data_criacao__date__lte=fim,
+            ).exclude(proxima_acao=ProximaAcao.SEM_ACAO).count(),
+            reverse=True,
+        )
+        if follow_rank and follow_rank[0].pk == usuario.pk and followups > 0:
+            _conceder_conquista(usuario, TipoConquista.MESTRE_FOLLOWUP, mes=mes, ano=ano)
+
+    streak = 0
+    dia = timezone.localdate()
+    while streak < 7:
+        meta = meta_do_dia(usuario, dia)
+        if meta['realizado_contatos'] >= meta['meta_contatos']:
+            streak += 1
+        else:
+            break
+        dia -= timedelta(days=1)
+    if streak >= 7:
+        _conceder_conquista(usuario, TipoConquista.STREAK_META_7, mes=mes, ano=ano)
 
 
 def avaliar_conquistas_equipe(mes=None, ano=None):
