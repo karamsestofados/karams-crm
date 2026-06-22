@@ -12,7 +12,14 @@
 </div>
 
 <div class="client-panel-section">
-  <h3 class="client-panel-section-title">Histórico Comercial</h3>
+  <div class="client-panel-section-header">
+    <h3 class="client-panel-section-title">Histórico Comercial</h3>
+    <a href="{% url 'clientes:historico_pdf' cliente_selecionado.pk %}{% if tipo_filtro %}?tipo={{ tipo_filtro }}{% endif %}"
+       class="btn btn-secondary btn-sm"
+       target="_blank">
+      Exportar PDF
+    </a>
+  </div>
   {% include 'relacionamento/partials/timeline_filtros.html' %}
   <div id="timeline-cliente">
     {% include 'relacionamento/partials/timeline.html' %}

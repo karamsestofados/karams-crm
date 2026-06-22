@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load karams_formats %}
 
 {% block nav_metas %}active{% endblock %}
 
@@ -47,12 +48,12 @@
         <tr style="background:var(--surface-2);">
           <td><strong>Equipe (calculada)</strong></td>
           <td>{{ meta_equipe_calculada.mes|stringformat:"02d" }}/{{ meta_equipe_calculada.ano }}</td>
-          <td>{{ meta_equipe_calculada.meta_contatos }}%</td>
+          <td>{{ meta_equipe_calculada.meta_contatos }}% <span class="badge badge-ativo" style="font-size:0.65rem;">média</span></td>
           <td>{{ meta_equipe_calculada.meta_clientes_novos }}</td>
           <td>{{ meta_equipe_calculada.meta_propostas }}</td>
           <td>{{ meta_equipe_calculada.meta_visitas }}</td>
-          <td>R$ {{ meta_equipe_calculada.meta_vendas|floatformat:0 }}</td>
-          <td><span class="badge badge-ativo">Soma automática</span></td>
+          <td>{{ meta_equipe_calculada.meta_vendas|brl_int }}</td>
+          <td><span class="badge badge-ativo">Média giro · soma demais</span></td>
           <td></td>
         </tr>
       </tbody>
@@ -84,7 +85,7 @@
           <td>{{ meta.meta_clientes_novos }}</td>
           <td>{{ meta.meta_propostas }}</td>
           <td>{{ meta.meta_visitas }}</td>
-          <td>R$ {{ meta.meta_vendas|floatformat:0 }}</td>
+          <td>{{ meta.meta_vendas|brl_int }}</td>
           <td>{% if meta.ativo %}<span class="badge badge-ativo">Ativa</span>{% else %}<span class="badge badge-inativo">Inativa</span>{% endif %}</td>
           <td style="white-space:nowrap;">
             <a href="{% url 'comissoes:metas_editar' meta.pk %}" class="btn btn-secondary btn-sm">Editar</a>

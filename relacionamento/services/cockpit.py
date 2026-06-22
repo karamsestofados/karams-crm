@@ -54,14 +54,40 @@ def resumo_dia(usuario):
     }
 
 
-def clientes_sem_contato(usuario, dias=30, limit=20):
+def _dias_sem_contato_cliente(cliente, hoje=None):
+    hoje = hoje or timezone.localdate()
+    dias = cliente.dias_desde_ultimo_contato
+    if dias is not None:
+        return dias
+    created = cliente.created_at
+    if created:
+        ref = created.date() if hasattr(created, 'date') else created
+        return (hoje - ref).days
+    return None
+
+
+def _data_ultimo_contato(cliente, ultima_atividade):
+    if ultima_atividade:
+        dt = ultima_atividade.data_criacao
+        if hasattr(dt, 'date'):
+            return dt.date()
+        return dt
+    return None
+
+
+def clientes_sem_contato(usuario, dias=30, limit=20, filtros_cliente=None):
+    from comissoes.services.produtividade import _aplicar_filtros_cliente
+
+    hoje = timezone.localdate()
     limite = timezone.now() - timezone.timedelta(days=dias)
     clientes = Cliente.objects.para_usuario(usuario).ativos().exclude(
         categoria=CategoriaCliente.INATIVO,
-    ).select_related('vendedor').order_by('nome')
+    ).select_related('vendedor')
+    if filtros_cliente:
+        clientes = _aplicar_filtros_cliente(clientes, filtros_cliente)
 
     sem_contato = []
-    for cliente in clientes:
+    for cliente in clientes.iterator():
         ultima = (
             AtividadeCliente.objects.ativas()
             .filter(cliente=cliente)
@@ -70,17 +96,17 @@ def clientes_sem_contato(usuario, dias=30, limit=20):
         )
         if ultima and ultima.data_criacao >= limite:
             continue
-        dias_sem = cliente.dias_desde_ultimo_contato
+        dias_sem = _dias_sem_contato_cliente(cliente, hoje)
         if dias_sem is None or dias_sem >= dias:
             sem_contato.append({
                 'cliente': cliente,
                 'ultima_atividade': ultima,
-                'dias_sem_contato': dias_sem if dias_sem is not None else '—',
+                'data_ultimo_contato': _data_ultimo_contato(cliente, ultima),
+                'dias_sem_contato': dias_sem if dias_sem is not None else 0,
             })
-        if len(sem_contato) >= limit:
-            break
 
-    return sem_contato
+    sem_contato.sort(key=lambda x: x['dias_sem_contato'], reverse=True)
+    return sem_contato[:limit]
 
 
 def ultimas_interacoes(usuario, limit=15):

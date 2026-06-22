@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { size: A4; margin: 1.2cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #e8e8e8; background: #1a1d24; }
+    .header { border-bottom: 3px solid #FF9220; padding-bottom: 10px; margin-bottom: 14px; }
+    h1 { color: #FF9220; font-size: 16px; margin: 0; }
+    .sub { color: #aaa; font-size: 9px; }
+    .resumo { background: #252830; padding: 10px; margin-bottom: 14px; border-left: 4px solid #FF9220; }
+    .resumo-row { margin-bottom: 4px; }
+    .resumo-label { color: #FF9220; font-weight: bold; }
+    .atividade { background: #252830; padding: 10px; margin-bottom: 10px; border-radius: 4px; page-break-inside: avoid; }
+    .atividade h3 { color: #FF9220; margin: 0 0 4px; font-size: 12px; }
+    .meta { color: #bbb; font-size: 9px; margin-top: 6px; }
+    p { margin: 4px 0; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Histórico Comercial — {{ cliente_selecionado.nome }}</h1>
+    <p class="sub">
+      {{ cliente_selecionado.cidade|default:"" }}{% if cliente_selecionado.estado %}, {{ cliente_selecionado.estado }}{% endif %}
+      · Vendedor: {{ cliente_selecionado.vendedor.get_full_name|default:cliente_selecionado.vendedor.username }}
+      · Exportado em {{ exportado_em|date:"d/m/Y H:i" }}
+    </p>
+  </div>
+
+  <div class="resumo">
+    <div class="resumo-row"><span class="resumo-label">Interações:</span> {{ resumo_comercial.total_interacoes }}</div>
+    <div class="resumo-row"><span class="resumo-label">Propostas:</span> {{ resumo_comercial.total_propostas }}</div>
+    <div class="resumo-row"><span class="resumo-label">Negociações:</span> {{ resumo_comercial.total_negociacoes }}</div>
+    <div class="resumo-row"><span class="resumo-label">Pedidos fechados:</span> {{ resumo_comercial.total_pedidos_fechados }}</div>
+    <div class="resumo-row"><span class="resumo-label">Humor médio:</span> {{ resumo_comercial.humor_medio_label }}</div>
+  </div>
+
+  {% for atividade in atividades %}
+  <div class="atividade">
+    <h3>{{ atividade.get_tipo_contato_display }} — {{ atividade.data_criacao|date:"d/m/Y H:i" }}</h3>
+    {% if atividade.assunto %}<p><strong>Assunto:</strong> {{ atividade.assunto }}</p>{% endif %}
+    <p><strong>Resumo:</strong> {{ atividade.resumo }}</p>
+    <div class="meta">
+      <strong>Resultado:</strong> {{ atividade.get_resultado_display }}
+      {% if atividade.humor_cliente %} · <strong>Humor:</strong> {{ atividade.get_humor_cliente_display }}{% endif %}
+      {% if atividade.produto_relacionado %} · <strong>Produto:</strong> {{ atividade.produto_relacionado.nome }}{% endif %}
+      {% if atividade.proxima_acao != 'SEM_ACAO' and atividade.data_proxima_acao %}
+      · <strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }} {{ atividade.data_proxima_acao|date:"d/m/Y" }}
+      {% endif %}
+    </div>
+    <p class="meta">Registrado por: {{ atividade.usuario.get_full_name|default:atividade.usuario.username }}</p>
+  </div>
+  {% empty %}
+  <p>Nenhuma interação registrada.</p>
+  {% endfor %}
+</body>
+</html>

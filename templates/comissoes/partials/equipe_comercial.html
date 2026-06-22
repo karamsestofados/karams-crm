@@ -1,3 +1,4 @@
+{% load karams_formats %}
 <div class="card desempenho-card">
   <div class="section-title">Equipe Comercial — {{ mes_label }}</div>
   <div class="table-card">
@@ -20,7 +21,7 @@
           {% for p in item.progresso %}
           <td>
             {% if p.is_moeda %}
-            {{ p.realizado|floatformat:0 }}/{{ p.meta|floatformat:0 }}
+            {{ p.realizado|brl_int }}/{{ p.meta|brl_int }}
             {% elif p.key == 'giro_carteira' %}
             {{ p.realizado }}%/{{ p.meta }}%
             {% else %}

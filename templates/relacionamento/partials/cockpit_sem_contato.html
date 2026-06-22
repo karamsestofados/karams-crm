@@ -16,8 +16,8 @@
         {% for item in clientes_sem_contato %}
         <tr>
           <td>{{ item.cliente.nome }}</td>
-          <td>{% if item.ultima_atividade %}{{ item.ultima_atividade.data_criacao|date:"d/m/Y" }}{% else %}—{% endif %}</td>
-          <td>{{ item.dias_sem_contato }}{% if item.dias_sem_contato != '—' %} dias{% endif %}</td>
+          <td>{% if item.data_ultimo_contato %}{{ item.data_ultimo_contato|date:"d/m/Y" }}{% else %}Nunca{% endif %}</td>
+          <td>{{ item.dias_sem_contato }} dias</td>
           <td>
             <button type="button" class="btn btn-primary btn-sm"
                     hx-get="{% url 'atividade:interacao_nova' %}?cliente={{ item.cliente.pk }}"

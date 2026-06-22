@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { size: A4; margin: 1.5cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
+    h1 { color: #FF9220; font-size: 18px; margin: 0 0 4px; }
+    .sub { color: #666; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th { background: #FF9220; color: #fff; padding: 6px 8px; text-align: left; font-size: 10px; }
+    td { border-bottom: 1px solid #e5e5e5; padding: 6px 8px; }
+    .kpi-grid { margin: 12px 0; }
+    .kpi { margin-bottom: 6px; }
+    .kpi strong { color: #FF9220; }
+  </style>
+</head>
+<body>
+  <h1>Produtividade Comercial — CRM Karams</h1>
+  <p class="sub">Período: {{ filtros.de }} a {{ filtros.ate }}</p>
+  <div class="kpi-grid">
+    <div class="kpi"><strong>Contatos:</strong> {{ realizado.contatos }}</div>
+    <div class="kpi"><strong>Clientes novos:</strong> {{ realizado.clientes_novos }}</div>
+    <div class="kpi"><strong>Interações:</strong> {{ realizado.total_interacoes }}</div>
+    <div class="kpi"><strong>Propostas / Orçamentos:</strong> {{ realizado.propostas }}</div>
+    <div class="kpi"><strong>Conversão prospecção:</strong> {{ conversao.taxa_pct }}% ({{ conversao.convertidos }}/{{ conversao.prospectados }})</div>
+    <div class="kpi"><strong>Conversão orçamentos:</strong> {{ conversao_orcamentos.taxa_pct }}% ({{ conversao_orcamentos.fechados }}/{{ conversao_orcamentos.enviados }})</div>
+    <div class="kpi"><strong>Vendas:</strong> R$ {{ realizado.vendas_valor }}</div>
+  </div>
+  <h2 style="font-size:14px;color:#FF9220;">Clientes sem contato 30+ dias</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Último contato</th>
+        <th>Dias</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in clientes_sem_contato %}
+      <tr>
+        <td>{{ item.cliente.nome }}</td>
+        <td>{% if item.data_ultimo_contato %}{{ item.data_ultimo_contato|date:"d/m/Y" }}{% else %}Nunca{% endif %}</td>
+        <td>{{ item.dias_sem_contato }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">Nenhum registro.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

@@ -12,9 +12,11 @@ from clientes.models import Cliente
 from comissoes.services.produtividade import (
     avaliar_conquistas,
     avaliar_conquistas_equipe,
+    calcular_progresso,
     desempenho_equipe,
     desempenho_usuario,
     equipe_comercial,
+    falta_para_meta_vendas,
     obter_meta,
     obter_meta_equipe,
     ranking_mensal,
@@ -62,11 +64,20 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         else:
             meta = obter_meta(user, hoje.month, hoje.year)
             context['meta_mensal'] = meta
-            context['meta_equipe'] = obter_meta_equipe(hoje.month, hoje.year)
+            meta_equipe = obter_meta_equipe(hoje.month, hoje.year)
+            context['meta_equipe'] = meta_equipe
             desemp = desempenho_usuario(user, hoje.month, hoje.year)
             context['meu_desempenho'] = desemp['progresso']
             context['pontuacao_geral'] = desemp['pontuacao']
             context['desempenho_equipe'] = False
+            context['falta_meta_vendas'] = falta_para_meta_vendas(
+                meta.meta_vendas, desemp['realizado']['vendas_valor'],
+            )
+            realizado_equipe = {
+                'giro_carteira': desemp['giro_carteira']['percentual'],
+                'vendas_valor': desemp['realizado']['vendas_valor'],
+            }
+            context['meta_equipe_progresso'] = calcular_progresso(meta_equipe, realizado_equipe)
 
         estados_qs = (
             clientes.exclude(estado='')

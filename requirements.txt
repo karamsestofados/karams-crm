@@ -7,3 +7,4 @@ whitenoise>=6.6
 Pillow>=10.0
 django-import-export>=4.0
 openpyxl>=3.1
+xhtml2pdf>=0.2.16

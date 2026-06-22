@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load karams_formats %}
 
 {% block nav_relatorios %}active{% endblock %}
 
@@ -8,44 +9,105 @@
 </div>
 
 <div class="page-body">
-  <form method="get" class="crm-search" style="margin-bottom:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
-    <div class="form-group" style="margin:0;">
-      <label class="form-label">De</label>
-      <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+  <form method="get" class="crm-search produtividade-filtros" style="margin-bottom:1.5rem;">
+    <div class="produtividade-filtros-grid">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">De</label>
+        <input type="date" name="de" value="{{ filtros.de }}" class="form-input">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Até</label>
+        <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+      </div>
+      {% if user_is_admin and vendedores %}
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Vendedor</label>
+        <select name="vendedor" class="form-input">
+          <option value="">Todos</option>
+          {% for v in vendedores %}
+          <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Produto</label>
+        <select name="produto" class="form-input">
+          <option value="">Todos</option>
+          {% for p in produtos %}
+          <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Região</label>
+        <select name="regiao" class="form-input">
+          {% for val, label in regioes %}
+          <option value="{{ val }}" {% if filtros.regiao == val or not filtros.regiao and val == 'todos' %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Categoria</label>
+        <select name="categoria" class="form-input">
+          {% for val, label in categorias %}
+          <option value="{{ val }}" {% if filtros.categoria == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Perfil</label>
+        <select name="tipo_cliente" class="form-input">
+          {% for val, label in tipos_cliente %}
+          <option value="{{ val }}" {% if filtros.tipo_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Modalidade</label>
+        <select name="modalidade_cliente" class="form-input">
+          {% for val, label in modalidades_cliente %}
+          <option value="{{ val }}" {% if filtros.modalidade_cliente == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Segmento</label>
+        <select name="segmento" class="form-input">
+          {% for val, label in segmentos %}
+          <option value="{{ val }}" {% if filtros.segmento == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Origem lead</label>
+        <select name="origem_lead" class="form-input">
+          {% for val, label in origens_lead %}
+          <option value="{{ val }}" {% if filtros.origem_lead == val %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Status funil</label>
+        <select name="status_funil" class="form-input">
+          {% for val, label in status_funil_opcoes %}
+          <option value="{{ val }}" {% if filtros.status_funil == val %}selected{% endif %}>{% if val == 'todos' %}Todos{% else %}{{ label }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Com pedido fechado</label>
+        <select name="com_pedido_fechado" class="form-input">
+          <option value="">Todos</option>
+          <option value="1" {% if filtros.com_pedido_fechado == '1' %}selected{% endif %}>Sim</option>
+        </select>
+      </div>
     </div>
-    <div class="form-group" style="margin:0;">
-      <label class="form-label">Até</label>
-      <input type="date" name="ate" value="{{ filtros.ate }}" class="form-input">
+    <div class="produtividade-filtros-actions">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+      <a href="{% url 'relatorios:produtividade_export_xlsx' %}?{{ request.GET.urlencode }}" class="btn btn-secondary">Exportar Excel</a>
+      <a href="{% url 'relatorios:produtividade_export_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-secondary" target="_blank">Exportar PDF</a>
     </div>
-    {% if user_is_admin and vendedores %}
-    <div class="form-group" style="margin:0;">
-      <label class="form-label">Vendedor</label>
-      <select name="vendedor" class="form-input">
-        <option value="">Todos</option>
-        {% for v in vendedores %}
-        <option value="{{ v.pk }}" {% if filtros.vendedor == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.get_full_name|default:v.username }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    {% endif %}
-    <div class="form-group" style="margin:0;">
-      <label class="form-label">Produto</label>
-      <select name="produto" class="form-input">
-        <option value="">Todos</option>
-        {% for p in produtos %}
-        <option value="{{ p.pk }}" {% if filtros.produto == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.nome }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="form-group" style="margin:0;">
-      <label class="form-label">Região</label>
-      <select name="regiao" class="form-input">
-        {% for val, label in regioes %}
-        <option value="{{ val }}" {% if filtros.regiao == val or not filtros.regiao and val == 'todos' %}selected{% endif %}>{% if val == 'todos' %}Todas{% else %}{{ label }}{% endif %}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Filtrar</button>
   </form>
 
   <div class="kpi-row">
@@ -62,17 +124,22 @@
       <div class="kpi-value-lg">{{ realizado.total_interacoes }}</div>
     </div>
     <div class="kpi-card-modern">
-      <div class="kpi-card-header"><span class="kpi-card-title">Propostas</span></div>
+      <div class="kpi-card-header"><span class="kpi-card-title">Propostas / Orçamentos</span></div>
       <div class="kpi-value-lg">{{ realizado.propostas }}</div>
     </div>
     <div class="kpi-card-modern">
-      <div class="kpi-card-header"><span class="kpi-card-title">Taxa de Conversão</span></div>
+      <div class="kpi-card-header"><span class="kpi-card-title">Conversão Prospecção</span></div>
       <div class="kpi-value-lg">{{ conversao.taxa_pct }}%</div>
       <div class="kpi-value-sub">{{ conversao.convertidos }} / {{ conversao.prospectados }} prospectados</div>
     </div>
     <div class="kpi-card-modern">
+      <div class="kpi-card-header"><span class="kpi-card-title">Conversão Orçamentos</span></div>
+      <div class="kpi-value-lg">{{ conversao_orcamentos.taxa_pct }}%</div>
+      <div class="kpi-value-sub">{{ conversao_orcamentos.fechados }} / {{ conversao_orcamentos.enviados }} orçamentos</div>
+    </div>
+    <div class="kpi-card-modern">
       <div class="kpi-card-header"><span class="kpi-card-title">Vendas (R$)</span></div>
-      <div class="kpi-value-lg">R$ {{ realizado.vendas_valor|floatformat:0 }}</div>
+      <div class="kpi-value-lg">{{ realizado.vendas_valor|brl }}</div>
     </div>
   </div>
 
@@ -83,6 +150,7 @@
         <thead>
           <tr>
             <th>Cliente</th>
+            <th>Último contato</th>
             <th>Dias sem contato</th>
             {% if user_is_admin %}<th>Vendedor</th>{% endif %}
           </tr>
@@ -90,13 +158,14 @@
         <tbody>
           {% for item in clientes_sem_contato %}
           <tr>
-            <td><a href="{% url 'clientes:lista' %}?id={{ item.cliente.pk }}">{{ item.cliente.nome }}</a></td>
-            <td>{{ item.dias_sem_contato }}</td>
+            <td><a href="{% url 'clientes:lista' %}?id={{ item.cliente.pk }}" class="data-table-link">{{ item.cliente.nome }}</a></td>
+            <td>{% if item.data_ultimo_contato %}{{ item.data_ultimo_contato|date:"d/m/Y" }}{% else %}Nunca{% endif %}</td>
+            <td>{{ item.dias_sem_contato }} dias</td>
             {% if user_is_admin %}<td>{{ item.cliente.vendedor.get_full_name|default:item.cliente.vendedor.username }}</td>{% endif %}
           </tr>
           {% empty %}
           <tr>
-            <td colspan="{% if user_is_admin %}3{% else %}2{% endif %}" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum cliente nesta situação.</td>
+            <td colspan="{% if user_is_admin %}4{% else %}3{% endif %}" style="text-align:center;color:var(--text-muted);padding:2rem;">Nenhum cliente nesta situação.</td>
           </tr>
           {% endfor %}
         </tbody>

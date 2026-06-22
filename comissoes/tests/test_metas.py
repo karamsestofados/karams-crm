@@ -68,6 +68,20 @@ class MetaMensalTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Já existe uma meta')
 
+    def test_obter_meta_equipe_media_giro_cap_100(self):
+        for i, pct in enumerate((90, 90), start=1):
+            v = Usuario.objects.create_user(
+                username=f'v_cap_{i}',
+                password='testpass123',
+                papel=Papel.VENDEDOR,
+            )
+            MetaMensal.objects.create(
+                vendedor=v, mes=8, ano=2026,
+                meta_contatos=pct, meta_vendas=50000, ativo=True,
+            )
+        equipe = obter_meta_equipe(8, 2026)
+        self.assertEqual(equipe.meta_contatos, 90)
+
     def test_obter_meta_equipe_soma_vendedores(self):
         v2 = Usuario.objects.create_user(
             username='vendedor2_meta',
@@ -83,5 +97,5 @@ class MetaMensalTests(TestCase):
             meta_contatos=60, meta_vendas=120000, ativo=True,
         )
         equipe = obter_meta_equipe(7, 2026)
-        self.assertEqual(equipe.meta_contatos, 80)
+        self.assertEqual(equipe.meta_contatos, 40)
         self.assertEqual(equipe.meta_vendas, 200000)

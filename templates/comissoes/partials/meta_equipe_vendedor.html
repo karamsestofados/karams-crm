@@ -1,8 +1,10 @@
 {% load karams_formats %}
-<div class="card desempenho-card">
-  <div class="section-title">{% if desempenho_equipe %}Desempenho da Equipe{% else %}Meu Desempenho{% endif %} — {{ mes_label }}</div>
+<div class="card desempenho-card meta-equipe-vendedor-card">
+  <div class="section-title">Meta Equipe — {{ mes_label }}</div>
+  <p class="meta-equipe-vendedor-hint">Referência da equipe (média de giro · soma das metas de vendas)</p>
   <div class="desempenho-grid">
-    {% for item in meu_desempenho %}
+    {% for item in meta_equipe_progresso %}
+    {% if item.key == 'giro_carteira' or item.key == 'vendas_valor' %}
     <div class="desempenho-item">
       <div class="desempenho-item-header">
         <span class="desempenho-label">{{ item.label }}</span>
@@ -14,9 +16,9 @@
       </div>
       <div class="desempenho-valores">
         {% if item.is_moeda %}
-        <span>{{ item.realizado|brl_int }} / {{ item.meta|brl_int }}</span>
+        <span>Seu: {{ item.realizado|brl_int }} / Equipe: {{ item.meta|brl_int }}</span>
         {% elif item.key == 'giro_carteira' %}
-        <span>{{ item.realizado }}% / {{ item.meta }}%</span>
+        <span>Seu: {{ item.realizado }}% / Equipe: {{ item.meta }}%</span>
         {% else %}
         <span>{{ item.realizado }} / {{ item.meta }}</span>
         {% endif %}
@@ -26,6 +28,7 @@
         <div class="progress-bar-fill" style="width: {% if item.percentual %}{% if item.percentual > 100 %}100{% else %}{{ item.percentual }}{% endif %}{% else %}0{% endif %}%;"></div>
       </div>
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 </div>

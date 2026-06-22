@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static karams_formats %}
 
 {% block nav_dashboard %}active{% endblock %}
 
@@ -55,28 +55,23 @@
         <span class="kpi-badge neutral">R$</span>
       </div>
       <div class="kpi-sparkline"><canvas id="sparkVendas"></canvas></div>
-      <div class="kpi-value-lg">{% if meta_mensal %}R$ {{ meta_mensal.meta_vendas|floatformat:0 }}{% else %}R$ 80.000{% endif %}</div>
-      <div class="kpi-value-sub">{% if user_is_admin %}soma das metas dos vendedores{% else %}objetivo mensal individual{% endif %}</div>
+      <div class="kpi-value-lg">{% if meta_mensal %}{{ meta_mensal.meta_vendas|brl_int }}{% else %}R$ 80.000{% endif %}</div>
+      <div class="kpi-value-sub">
+        {% if user_is_admin %}
+        soma das metas dos vendedores
+        {% elif falta_meta_vendas.atingida %}
+        Meta atingida!
+        {% else %}
+        Falta {{ falta_meta_vendas.falta|brl }} para a meta
+        {% endif %}
+      </div>
     </div>
   </div>
 
   {% include 'comissoes/partials/meu_desempenho.html' %}
 
   {% if not user_is_admin and meta_equipe %}
-  <div class="card desempenho-card" style="margin-top:1rem;">
-    <div class="section-title">Meta Equipe — {{ mes_label }}</div>
-    <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:0.75rem;">Soma automática das metas dos vendedores</p>
-    <div class="desempenho-grid">
-      <div class="desempenho-item">
-        <span class="desempenho-label">Giro de Carteira</span>
-        <span>{{ meta_equipe.meta_contatos }}%</span>
-      </div>
-      <div class="desempenho-item">
-        <span class="desempenho-label">Vendas</span>
-        <span>R$ {{ meta_equipe.meta_vendas|floatformat:0 }}</span>
-      </div>
-    </div>
-  </div>
+  {% include 'comissoes/partials/meta_equipe_vendedor.html' %}
   {% endif %}
 
   {% if user_is_admin %}

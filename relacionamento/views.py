@@ -3,6 +3,7 @@ from datetime import date
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -321,13 +322,16 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
         return redirect(url)
 
 
-def _cliente_tab_context(cliente, form=None, tipo_filtro=''):
+def _cliente_tab_context(cliente, form=None, tipo_filtro='', limit=50):
     qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado')
     if tipo_filtro:
         qs = qs.filter(tipo_contato=tipo_filtro)
+    qs = qs.order_by('-data_criacao')
+    if limit:
+        qs = qs[:limit]
     return {
         'cliente_selecionado': cliente,
-        'atividades': qs.order_by('-data_criacao')[:50],
+        'atividades': qs,
         'resumo_comercial': resumo_comercial_cliente(cliente),
         'atividade_form': form or AtividadeClienteForm(cliente=cliente),
         'tipo_filtro': tipo_filtro,
@@ -340,3 +344,20 @@ class ClienteTimelinePartialView(VendedorRequiredMixin, View):
         cliente = get_cliente_or_403(request.user, pk)
         tipo_filtro = request.GET.get('tipo', '')
         return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, tipo_filtro=tipo_filtro))
+
+
+class ClienteHistoricoPdfView(VendedorRequiredMixin, View):
+    def get(self, request, pk):
+        cliente = get_cliente_or_403(request.user, pk)
+        tipo_filtro = request.GET.get('tipo', '')
+        ctx = _cliente_tab_context(cliente, tipo_filtro=tipo_filtro, limit=None)
+        ctx['exportado_em'] = timezone.now()
+        from .services.export_historico import gerar_pdf_historico_cliente
+
+        try:
+            buffer = gerar_pdf_historico_cliente(ctx)
+        except Exception:
+            return HttpResponse('Erro ao gerar PDF.', status=500)
+        safe_name = ''.join(c if c.isalnum() or c in ' -_' else '_' for c in cliente.nome)[:40]
+        filename = f'historico_{safe_name}.pdf'
+        return FileResponse(buffer, as_attachment=True, filename=filename, content_type='application/pdf')

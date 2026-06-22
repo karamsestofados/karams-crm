@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 
 from django.conf import settings
-from django.db.models import Q, Sum
+from django.db.models import Avg, Q, Sum
 from django.utils import timezone
 
 from accounts.models import Papel, Usuario
@@ -21,7 +21,7 @@ TIPOS_CONTATO_META = (
 DIMENSOES = (
     ('giro_carteira', 'Giro de Carteira', 'meta_contatos', int),
     ('clientes_novos', 'Clientes Novos', 'meta_clientes_novos', int),
-    ('propostas', 'Propostas', 'meta_propostas', int),
+    ('propostas', 'Propostas / Orçamentos', 'meta_propostas', int),
     ('visitas', 'Visitas', 'meta_visitas', int),
     ('vendas_valor', 'Vendas', 'meta_vendas', Decimal),
 )
@@ -72,17 +72,19 @@ def somar_metas_vendedores(mes, ano):
     if not qs.exists():
         return None
     agg = qs.aggregate(
-        meta_contatos=Sum('meta_contatos'),
+        meta_contatos_avg=Avg('meta_contatos'),
         meta_clientes_novos=Sum('meta_clientes_novos'),
         meta_propostas=Sum('meta_propostas'),
         meta_visitas=Sum('meta_visitas'),
         meta_vendas=Sum('meta_vendas'),
     )
+    meta_giro = min(100, round(agg.pop('meta_contatos_avg') or 0))
     return MetaMensal(
         vendedor=None,
         mes=mes,
         ano=ano,
         ativo=True,
+        meta_contatos=meta_giro,
         **agg,
     )
 
@@ -119,7 +121,46 @@ def _periodo_mes(mes, ano):
     return date(ano, mes, 1), date(ano, mes, ultimo_dia)
 
 
-def _atividades_base(usuario, mes=None, ano=None, de=None, ate=None, produto_id=None, regiao=None):
+def _filtro_propostas_orcamentos():
+    return (
+        Q(resultado=Resultado.PROPOSTA_ENVIADA)
+        | Q(tipo_contato__in=(TipoContato.PROPOSTA, TipoContato.NEGOCIACAO))
+        | Q(resultado=Resultado.AGUARDANDO_RETORNO)
+    )
+
+
+def _aplicar_filtros_cliente(qs, filtros=None, prefix=''):
+    if not filtros:
+        return qs
+    p = f'{prefix}__' if prefix else ''
+    categoria = filtros.get('categoria')
+    if categoria and categoria != 'todos':
+        qs = qs.filter(**{f'{p}categoria': categoria})
+    for field in (
+        'tipo_cliente', 'modalidade_cliente', 'segmento',
+        'origem_lead', 'status_funil', 'regiao_atuacao',
+    ):
+        val = filtros.get(field)
+        if val and val != 'todos':
+            qs = qs.filter(**{f'{p}{field}': val})
+    if filtros.get('com_pedido_fechado') == '1':
+        if prefix:
+            qs = qs.filter(
+                cliente__atividades__resultado=Resultado.PEDIDO_FECHADO,
+                cliente__atividades__deleted_at__isnull=True,
+            ).distinct()
+        else:
+            qs = qs.filter(
+                atividades__resultado=Resultado.PEDIDO_FECHADO,
+                atividades__deleted_at__isnull=True,
+            ).distinct()
+    return qs
+
+
+def _atividades_base(
+    usuario, mes=None, ano=None, de=None, ate=None,
+    produto_id=None, regiao=None, filtros_cliente=None,
+):
     qs = AtividadeCliente.objects.ativas().select_related('cliente', 'cliente__vendedor')
     if usuario:
         qs = qs.para_usuario(usuario)
@@ -133,10 +174,15 @@ def _atividades_base(usuario, mes=None, ano=None, de=None, ate=None, produto_id=
         qs = qs.filter(produto_relacionado_id=produto_id)
     if regiao:
         qs = qs.filter(cliente__regiao_atuacao=regiao)
+    if filtros_cliente:
+        qs = _aplicar_filtros_cliente(qs, filtros_cliente, prefix='cliente')
     return qs
 
 
-def _clientes_base(usuario, mes=None, ano=None, de=None, ate=None, regiao=None):
+def _clientes_base(
+    usuario, mes=None, ano=None, de=None, ate=None,
+    regiao=None, filtros_cliente=None,
+):
     qs = Cliente.objects.para_usuario(usuario) if usuario else Cliente.objects.all()
     if de:
         qs = qs.filter(created_at__date__gte=de)
@@ -146,16 +192,25 @@ def _clientes_base(usuario, mes=None, ano=None, de=None, ate=None, regiao=None):
         qs = qs.filter(created_at__month=mes, created_at__year=ano)
     if regiao:
         qs = qs.filter(regiao_atuacao=regiao)
+    if filtros_cliente:
+        qs = _aplicar_filtros_cliente(qs, filtros_cliente)
     return qs
 
 
-def calcular_realizado(usuario, mes, ano, de=None, ate=None, produto_id=None, regiao=None):
-    atividades = _atividades_base(usuario, mes, ano, de, ate, produto_id, regiao)
-    clientes = _clientes_base(usuario, mes, ano, de, ate, regiao)
+def calcular_realizado(
+    usuario, mes, ano, de=None, ate=None,
+    produto_id=None, regiao=None, filtros_cliente=None,
+):
+    atividades = _atividades_base(
+        usuario, mes, ano, de, ate, produto_id, regiao, filtros_cliente,
+    )
+    clientes = _clientes_base(
+        usuario, mes, ano, de, ate, regiao, filtros_cliente,
+    )
 
     contatos = atividades.filter(tipo_contato__in=TIPOS_CONTATO_META).count()
     clientes_novos = clientes.count()
-    propostas = atividades.filter(resultado=Resultado.PROPOSTA_ENVIADA).count()
+    propostas = atividades.filter(_filtro_propostas_orcamentos()).count()
     visitas = atividades.filter(tipo_contato=TipoContato.VISITA).count()
 
     vendas_qs = Venda.objects.filter(vendedor=usuario) if usuario else Venda.objects.all()
@@ -246,6 +301,16 @@ def desempenho_usuario(usuario, mes, ano):
     }
 
 
+def falta_para_meta_vendas(meta_vendas, realizado_vendas):
+    meta_val = float(meta_vendas or 0)
+    real_val = float(realizado_vendas or 0)
+    falta = max(0, meta_val - real_val)
+    return {
+        'falta': Decimal(str(round(falta, 2))),
+        'atingida': falta <= 0,
+    }
+
+
 def meta_do_dia(usuario, data=None):
     data = data or timezone.localdate()
     meta = obter_meta(usuario, data.month, data.year)
@@ -284,8 +349,25 @@ def ranking_mensal(mes, ano, limit=None):
     return ranking
 
 
-def taxa_conversao(usuario, de, ate, regiao=None):
-    prospectados_qs = _clientes_base(usuario, de=de, ate=ate, regiao=regiao)
+def conversao_orcamentos(
+    usuario, de, ate, produto_id=None, regiao=None, filtros_cliente=None,
+):
+    atividades = _atividades_base(
+        usuario, de=de, ate=ate,
+        produto_id=produto_id, regiao=regiao, filtros_cliente=filtros_cliente,
+    )
+    enviados = atividades.filter(_filtro_propostas_orcamentos()).count()
+    fechados = atividades.filter(resultado=Resultado.PEDIDO_FECHADO).count()
+    if enviados == 0:
+        return {'enviados': 0, 'fechados': fechados, 'taxa_pct': 0}
+    taxa = min(100, round(fechados / enviados * 100, 1))
+    return {'enviados': enviados, 'fechados': fechados, 'taxa_pct': taxa}
+
+
+def taxa_conversao(usuario, de, ate, regiao=None, filtros_cliente=None):
+    prospectados_qs = _clientes_base(
+        usuario, de=de, ate=ate, regiao=regiao, filtros_cliente=filtros_cliente,
+    )
     prospectados_ids = list(prospectados_qs.values_list('pk', flat=True))
     prospectados = len(prospectados_ids)
     if prospectados == 0:
