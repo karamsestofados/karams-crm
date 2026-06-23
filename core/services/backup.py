@@ -14,6 +14,9 @@ from django.utils import timezone
 BACKUP_FORMAT_VERSION = 1
 BACKUP_EXTENSION = '.karamsbackup.zip'
 
+# Modelos excluídos do dump (dados transitórios ou recriados pelo Django)
+BACKUP_EXCLUDE_APPS = ('sessions',)
+
 
 def _manifest():
     return {
@@ -21,6 +24,11 @@ def _manifest():
         'created_at': timezone.now().isoformat(),
         'django_version': django.get_version(),
         'app': 'karams-crm',
+        'features': [
+            'motivo_perda',
+            'valor_venda_atividade',
+            'powerup',
+        ],
     }
 
 
@@ -39,6 +47,7 @@ def gerar_arquivo_backup():
             'dumpdata',
             natural_foreign=True,
             natural_primary=True,
+            exclude=list(BACKUP_EXCLUDE_APPS),
             indent=2,
             stdout=output,
         )

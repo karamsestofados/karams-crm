@@ -258,7 +258,7 @@ Models legados permanecem read-only no admin.
 Disponível em **Configurações** (somente administradores):
 
 - **Gerar backup** — exporta todo o banco de dados (clientes, produtos, atividades, usuários, etc.) e arquivos de mídia em um arquivo `.karamsbackup.zip` para download
-- **Restaurar backup** — substitui todos os dados atuais pelo conteúdo do arquivo (ação irreversível; exige confirmação)
+- **Restaurar backup** — substitui todos os dados atuais pelo conteúdo do arquivo (ação irreversível; exige confirmação). Após restaurar, o sistema aplica migrations automaticamente — backups antigos (sem `motivo_perda`) permanecem compatíveis.
 
 Guarde os arquivos de backup em local seguro fora do servidor para recuperação em emergências.
 
