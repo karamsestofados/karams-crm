@@ -25,8 +25,12 @@ def tempo_medio_fechamento(de, ate, usuario_viewer):
     for v in vendedores:
         dias_lista = []
 
-        vendas = Venda.objects.filter(vendedor=v, data__gte=de, data__lte=ate).select_related('cliente')
+        vendas = Venda.objects.filter(
+            vendedor=v, data__gte=de, data__lte=ate,
+        ).select_related('cliente')
         for venda in vendas:
+            if not venda.cliente_id or not venda.cliente:
+                continue
             dias_lista.append(_dias_ate_fechamento(venda.cliente, venda.data))
 
         atividades = AtividadeCliente.objects.ativas().filter(

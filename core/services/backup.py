@@ -96,6 +96,7 @@ def restaurar_arquivo_backup(uploaded_file):
 
         call_command('flush', verbosity=0, interactive=False)
         call_command('loaddata', str(data_path), verbosity=0)
+        call_command('migrate', verbosity=0, interactive=False)
 
         extracted_media = tmp / 'media'
         media_root = Path(settings.MEDIA_ROOT)

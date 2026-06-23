@@ -18,8 +18,16 @@ def conversao_por_vendedor(de, ate, usuario_viewer):
         vendedores = Usuario.objects.filter(pk=usuario_viewer.pk)
 
     linhas = []
+    mes_ref = de.month if de else None
+    ano_ref = de.year if de else None
     for v in vendedores:
-        realizado = calcular_realizado(v, de=de, ate=ate)
+        realizado = calcular_realizado(
+            v,
+            mes_ref or 1,
+            ano_ref or 2000,
+            de=de,
+            ate=ate,
+        )
         leads = Cliente.objects.filter(vendedor=v)
         if de and ate:
             leads = leads.filter(created_at__date__gte=de, created_at__date__lte=ate)
