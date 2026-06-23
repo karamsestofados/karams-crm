@@ -159,8 +159,8 @@ git clone https://github.com/karamsestofados/karams-crm.git
 | `DJANGO_SETTINGS_MODULE` | `karams_crm.settings.production` |
 | `SECRET_KEY` | string aleatória com 50+ caracteres |
 | `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `*.railway.app` |
-| `CSRF_TRUSTED_ORIGINS` | `https://*.railway.app` |
+| `ALLOWED_HOSTS` | `.railway.app` (ou deixe vazio — detecta via `RAILWAY_PUBLIC_DOMAIN`) |
+| `CSRF_TRUSTED_ORIGINS` | **Não use wildcard.** Deixe vazio ou use `https://crm-karams.up.railway.app` |
 
 ### 4. Deploy
 
