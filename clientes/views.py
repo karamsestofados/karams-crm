@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView, View
@@ -21,7 +22,12 @@ from .models import (
     StatusFunil,
     TipoCliente,
 )
-from .services.produtos import desvincular_produto, produtos_disponiveis_para, vincular_produto
+from .services.produtos import (
+    desvincular_produto,
+    obter_alerta_vinculo,
+    produtos_disponiveis_para,
+    vincular_produto,
+)
 
 FILTRO_PARAMS = (
     'q', 'categoria', 'vendedor',
@@ -263,6 +269,40 @@ class ClienteReativarView(VendedorRequiredMixin, View):
         if qs:
             url += f'&{qs}'
         return redirect(url)
+
+
+class ClienteBuscaAutocompleteView(VendedorRequiredMixin, View):
+    def get(self, request):
+        q = request.GET.get('q', '').strip()
+        if len(q) < 2:
+            return JsonResponse([], safe=False)
+
+        clientes = (
+            Cliente.objects.para_usuario(request.user)
+            .ativos()
+            .filter(nome__icontains=q)
+            .order_by('nome')[:8]
+        )
+        return JsonResponse(
+            [{'id': c.pk, 'nome': c.nome} for c in clientes],
+            safe=False,
+        )
+
+
+class ClienteProdutoAvisoView(VendedorRequiredMixin, View):
+    def get(self, request, pk):
+        cliente = get_cliente_or_403(request.user, pk)
+        produto_id = request.GET.get('produto_id') or request.GET.get('produto')
+        if not produto_id:
+            if request.GET.get('format') == 'json':
+                return JsonResponse({'alerta': None})
+            return render(request, 'clientes/partials/produto_vinculo_alerta.html', {'alerta': None})
+
+        produto = get_object_or_404(Produto, pk=produto_id)
+        alerta = obter_alerta_vinculo(produto, cliente)
+        if request.GET.get('format') == 'json':
+            return JsonResponse({'alerta': alerta})
+        return render(request, 'clientes/partials/produto_vinculo_alerta.html', {'alerta': alerta})
 
 
 class ClienteProdutoVincularView(VendedorRequiredMixin, View):

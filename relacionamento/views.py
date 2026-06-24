@@ -2,7 +2,7 @@ import json
 from datetime import date
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -15,9 +15,11 @@ from clientes.models import Cliente, Produto
 from clientes.views import get_cliente_or_403
 
 from .constants import TIMELINE_FILTROS
-from .forms import AtividadeClienteForm, ConcluirFollowupForm, InteracaoGlobalForm
+from .forms import AtividadeClienteEditForm, AtividadeClienteForm, ConcluirFollowupForm, InteracaoGlobalForm
 from .models import AtividadeCliente, TipoContato
 from .services.atividades import concluir_followup, registrar_interacao
+from .services.editar_atividade import editar_atividade, pode_editar_atividade
+from .services.timeline import montar_timeline_cliente
 from .services.cockpit import contexto_cockpit_completo
 from .services.external_calendar.dispatcher import resolve_calendar_url
 from .services.relatorio import filtrar_atividades, indicadores_por_tipo, ranking_vendedores
@@ -295,7 +297,7 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                 messages.success(request, _interacao_success_message(calendar_url))
                 redirect_url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
                 if request.headers.get('HX-Request'):
-                    ctx = _cliente_tab_context(cliente)
+                    ctx = _cliente_tab_context(cliente, user=request.user)
                     ctx['google_calendar_url'] = calendar_url
                     return _attach_calendar_trigger(
                         render(
@@ -314,42 +316,90 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     return render(
                         request,
                         'relacionamento/partials/relacionamento_tab.html',
-                        _cliente_tab_context(cliente, form),
+                        _cliente_tab_context(cliente, form, user=request.user),
                     )
         else:
             if request.headers.get('HX-Request'):
                 return render(
                     request,
                     'relacionamento/partials/relacionamento_tab.html',
-                    _cliente_tab_context(cliente, form),
+                    _cliente_tab_context(cliente, form, user=request.user),
                 )
 
         url = reverse('clientes:lista') + f'?id={pk}&tab=historico'
         return redirect(url)
 
 
-def _cliente_tab_context(cliente, form=None, tipo_filtro='', limit=50):
+def _cliente_tab_context(cliente, form=None, tipo_filtro='', limit=50, user=None):
     qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado')
     if tipo_filtro:
         qs = qs.filter(tipo_contato=tipo_filtro)
     qs = qs.order_by('-data_criacao')
     if limit:
-        qs = qs[:limit]
-    return {
+        atividades_list = list(qs[:limit])
+    else:
+        atividades_list = list(qs)
+    ctx = {
         'cliente_selecionado': cliente,
-        'atividades': qs,
+        'atividades': atividades_list,
+        'timeline_eventos': montar_timeline_cliente(cliente, tipo_filtro, limit),
         'resumo_comercial': resumo_comercial_cliente(cliente),
         'atividade_form': form or AtividadeClienteForm(cliente=cliente),
         'tipo_filtro': tipo_filtro,
         'timeline_filtros': TIMELINE_FILTROS,
     }
+    if user is not None:
+        ctx['request_user'] = user
+    return ctx
+
+
+class ClienteAtividadeUpdateView(VendedorRequiredMixin, View):
+    def get(self, request, pk, atividade_pk):
+        cliente = get_cliente_or_403(request.user, pk)
+        atividade = get_object_or_404(AtividadeCliente, pk=atividade_pk, cliente=cliente, deleted_at__isnull=True)
+        if not pode_editar_atividade(atividade, request.user):
+            raise PermissionDenied('Você não pode editar este registro.')
+        form = AtividadeClienteEditForm(instance=atividade, cliente=cliente)
+        return render(request, 'relacionamento/partials/modal_editar_atividade.html', {
+            'cliente_selecionado': cliente,
+            'atividade': atividade,
+            'edit_form': form,
+        })
+
+    def post(self, request, pk, atividade_pk):
+        cliente = get_cliente_or_403(request.user, pk)
+        atividade = get_object_or_404(AtividadeCliente, pk=atividade_pk, cliente=cliente, deleted_at__isnull=True)
+        if not pode_editar_atividade(atividade, request.user):
+            raise PermissionDenied('Você não pode editar este registro.')
+        form = AtividadeClienteEditForm(request.POST, instance=atividade, cliente=cliente)
+        if form.is_valid():
+            try:
+                editar_atividade(atividade, request.user, form.cleaned_data)
+                messages.success(request, 'Registro atualizado.')
+                if request.headers.get('HX-Request'):
+                    return render(
+                        request,
+                        'relacionamento/partials/relacionamento_tab.html',
+                        _cliente_tab_context(cliente, user=request.user),
+                    )
+            except ValidationError as exc:
+                messages.error(request, exc.messages[0] if exc.messages else str(exc))
+            except PermissionDenied as exc:
+                messages.error(request, str(exc))
+        if request.headers.get('HX-Request'):
+            return render(request, 'relacionamento/partials/modal_editar_atividade.html', {
+                'cliente_selecionado': cliente,
+                'atividade': atividade,
+                'edit_form': form,
+            })
+        return redirect(reverse('clientes:lista') + f'?id={pk}&tab=historico')
 
 
 class ClienteTimelinePartialView(VendedorRequiredMixin, View):
     def get(self, request, pk):
         cliente = get_cliente_or_403(request.user, pk)
         tipo_filtro = request.GET.get('tipo', '')
-        return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, tipo_filtro=tipo_filtro))
+        return render(request, 'relacionamento/partials/relacionamento_tab.html', _cliente_tab_context(cliente, tipo_filtro=tipo_filtro, user=request.user))
 
 
 class ClienteHistoricoPdfView(VendedorRequiredMixin, View):

@@ -6,7 +6,7 @@
     <a href="{% url 'clientes:lista' %}?id={{ item.cliente.pk }}&tab=historico" class="cliente-quente-card">
       <div class="cliente-quente-nome">{{ item.cliente.nome }}</div>
       <div class="cliente-quente-meta">Último contato: {{ item.ultimo_contato_label }}</div>
-      <div class="cliente-quente-contexto">{{ item.contexto }}</div>
+      <div class="cliente-quente-contexto">Quantidade de interações: {{ item.total_interacoes }}</div>
     </a>
     {% empty %}
     <p style="color:var(--text-muted);grid-column:1/-1;padding:1rem 0;">Nenhum cliente quente no momento.</p>

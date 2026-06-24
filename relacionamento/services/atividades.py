@@ -20,13 +20,14 @@ RESULTADO_PARA_FUNIL = {
 }
 
 
-def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_relacionado=None):
+def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_relacionado=None, atividade=None):
     venda = Venda.objects.create(
         cliente=cliente,
         vendedor=usuario,
         data=timezone.localdate(),
         valor=valor_venda,
         produtos_texto=(assunto or resumo[:500]),
+        atividade_origem=atividade,
     )
     if produto_relacionado:
         venda.produtos.add(produto_relacionado)
@@ -36,6 +37,7 @@ def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_r
 def finalizar_atendimento(
     cliente, resultado, valor_venda=None, assunto='', resumo='',
     produto_relacionado=None, usuario=None, motivo_perda=None, motivo_perda_detalhe='',
+    atividade=None,
 ):
     """Atualiza funil e dados do cliente quando o atendimento é encerrado."""
     hoje = timezone.localdate()
@@ -64,7 +66,7 @@ def finalizar_atendimento(
         cliente.save(update_fields=update_fields)
 
     if resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0 and usuario:
-        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado)
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado, atividade=atividade)
 
 
 def registrar_interacao(
@@ -133,9 +135,10 @@ def registrar_interacao(
             usuario=usuario,
             motivo_perda=motivo_perda,
             motivo_perda_detalhe=motivo_perda_detalhe,
+            atividade=atividade,
         )
     elif resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0:
-        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado)
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado, atividade=atividade)
 
     from comissoes.services.produtividade import avaliar_conquistas
     avaliar_conquistas(usuario)

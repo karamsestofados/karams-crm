@@ -1,0 +1,5 @@
+<div class="modal-panel-header">
+  <h3>Editar registro — {{ atividade.get_tipo_contato_display }}</h3>
+  <button type="button" class="modal-close" onclick="document.getElementById('modal-editar-atividade').classList.remove('open')">&times;</button>
+</div>
+{% include 'relacionamento/partials/modal_editar_atividade_form.html' %}

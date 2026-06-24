@@ -1,3 +1,4 @@
+{% load static %}
 {% if cliente_selecionado %}
 <div class="client-panel">
   <div class="client-panel-card">
@@ -194,6 +195,8 @@
     <div class="client-panel-section" id="produtos-vinculados">
       {% include 'clientes/partials/produtos_vinculados.html' %}
     </div>
+    {% include 'clientes/partials/modal_vinculo_produto.html' %}
+    <script src="{% static 'js/vincular-produto.js' %}"></script>
 
     {% if cliente_selecionado.feedback_original %}
     <div class="client-panel-section">

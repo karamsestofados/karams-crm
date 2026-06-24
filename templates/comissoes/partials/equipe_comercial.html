@@ -1,8 +1,8 @@
 {% load karams_formats %}
-<div class="card desempenho-card">
+<div class="card desempenho-card equipe-comercial-card">
   <div class="section-title">Equipe Comercial — {{ mes_label }}</div>
-  <div class="table-card">
-    <table class="data-table data-table-compact">
+  <div class="equipe-table-wrap">
+    <table class="data-table data-table-compact equipe-comercial-table">
       <thead>
         <tr>
           <th>Vendedor</th>
@@ -17,20 +17,22 @@
       <tbody>
         {% for item in equipe_comercial %}
         <tr>
-          <td>{{ item.usuario.get_full_name|default:item.usuario.username }}</td>
+          <td class="equipe-vendedor-cell">{{ item.usuario.get_full_name|default:item.usuario.username }}</td>
           {% for p in item.progresso %}
-          <td>
-            {% if p.is_moeda %}
-            {{ p.realizado|brl_int }}/{{ p.meta|brl_int }}
-            {% elif p.key == 'giro_carteira' %}
-            {{ p.realizado }}%/{{ p.meta }}%
-            {% else %}
-            {{ p.realizado }}/{{ p.meta }}
-            {% endif %}
+          <td class="equipe-metric-cell">
+            <span class="equipe-metric-val">
+              {% if p.is_moeda %}
+              {{ p.realizado|brl_int }}/{{ p.meta|brl_int }}
+              {% elif p.key == 'giro_carteira' %}
+              {{ p.realizado }}%/{{ p.meta }}%
+              {% else %}
+              {{ p.realizado }}/{{ p.meta }}
+              {% endif %}
+            </span>
             <span class="desempenho-pct-sm">{{ p.percentual_display }}</span>
           </td>
           {% endfor %}
-          <td><strong>{{ item.pontuacao }}%</strong></td>
+          <td class="equipe-pontuacao-cell"><strong>{{ item.pontuacao }}%</strong></td>
         </tr>
         {% empty %}
         <tr>

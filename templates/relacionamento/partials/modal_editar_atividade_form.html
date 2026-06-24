@@ -1,0 +1,55 @@
+{% load karams_formats %}
+<form method="post"
+      action="{% url 'clientes:atividade_editar' cliente_selecionado.pk atividade.pk %}"
+      hx-post="{% url 'clientes:atividade_editar' cliente_selecionado.pk atividade.pk %}"
+      hx-target="#relacionamento-tab-content"
+      hx-swap="innerHTML"
+      hx-on::after-request="if(event.detail.successful) document.getElementById('modal-editar-atividade')?.classList.remove('open')">
+  {% csrf_token %}
+  <div class="form-grid">
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.tipo_contato.label }}</label>
+      {{ edit_form.tipo_contato }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.assunto.label }}</label>
+      {{ edit_form.assunto }}
+    </div>
+    <div class="form-group form-group-full">
+      <label class="form-label">{{ edit_form.resumo.label }}</label>
+      {{ edit_form.resumo }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.resultado.label }}</label>
+      {{ edit_form.resultado }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.humor_cliente.label }}</label>
+      {{ edit_form.humor_cliente }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.valor_venda.label }}</label>
+      {{ edit_form.valor_venda }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.produto_relacionado.label }}</label>
+      {{ edit_form.produto_relacionado }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.proxima_acao.label }}</label>
+      {{ edit_form.proxima_acao }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.data_proxima_acao.label }}</label>
+      {{ edit_form.data_proxima_acao }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">{{ edit_form.hora_proxima_acao.label }}</label>
+      {{ edit_form.hora_proxima_acao }}
+    </div>
+  </div>
+  <div class="modal-vinculo-acoes">
+    <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-editar-atividade').classList.remove('open')">Cancelar</button>
+    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+  </div>
+</form>

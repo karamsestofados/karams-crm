@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 
 from clientes.models import CategoriaCliente, Cliente, StatusFunil
@@ -21,23 +21,6 @@ def _formatar_ultimo_contato(dias):
     if dias == 1:
         return 'ontem'
     return f'há {dias} dias'
-
-
-def _contexto_ultima_atividade(atividade):
-    if not atividade:
-        return 'Sem interações recentes'
-    resumo = (atividade.resumo or '').lower()
-    if 'foto' in resumo:
-        return 'Esperando fotos'
-    if atividade.resultado == Resultado.PROPOSTA_ENVIADA:
-        return 'Solicitou orçamento'
-    if atividade.resultado == Resultado.AGUARDANDO_RETORNO:
-        return 'Aguardando retorno'
-    if atividade.resultado == Resultado.INTERESSADO:
-        return 'Demonstrou interesse'
-    if atividade.resultado == Resultado.PEDIDO_FECHADO:
-        return 'Pedido fechado recentemente'
-    return atividade.get_resultado_display()
 
 
 def _pontuar_cliente(cliente, ultima_atividade, hoje):
@@ -68,7 +51,12 @@ def listar_clientes_quentes(usuario, limit=6):
         ),
     ).exclude(
         status_funil__in=(StatusFunil.CLIENTE_PERDIDO, StatusFunil.PEDIDO_FECHADO),
-    ).select_related('vendedor').prefetch_related(
+    ).select_related('vendedor').annotate(
+        total_interacoes=Count(
+            'atividades',
+            filter=Q(atividades__deleted_at__isnull=True),
+        ),
+    ).prefetch_related(
         Prefetch(
             'atividades',
             queryset=AtividadeCliente.objects.ativas().order_by('-data_criacao')[:1],
@@ -90,7 +78,7 @@ def listar_clientes_quentes(usuario, limit=6):
             'cliente': cliente,
             'score': score,
             'ultimo_contato_label': _formatar_ultimo_contato(dias),
-            'contexto': _contexto_ultima_atividade(ultima),
+            'total_interacoes': cliente.total_interacoes,
             'ultima_atividade': ultima,
         })
 

@@ -1,0 +1,30 @@
+{% if alerta %}
+<div class="alerta-vinculo alerta-vinculo-{{ alerta.nivel }}">
+  <div class="alerta-vinculo-icon" aria-hidden="true">
+    {% if alerta.bloquear %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    {% else %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {% endif %}
+  </div>
+  <div class="alerta-vinculo-body">
+    <p class="alerta-vinculo-titulo">
+      Produto <span class="badge badge-produto badge-produto-{{ alerta.tipo|lower }}">{{ alerta.tipo_label }}</span>
+    </p>
+    <p class="alerta-vinculo-texto">
+      <strong>{{ alerta.produto_nome }}</strong>
+      {% if alerta.bloquear %}
+      já está vinculado a <strong>{{ alerta.clientes|join:", " }}</strong>. Não é possível vincular a outro cliente.
+      {% else %}
+      já está vinculado a: <strong>{{ alerta.clientes|join:", " }}</strong>.
+      {% endif %}
+    </p>
+  </div>
+</div>
+{% endif %}
+<script>
+(function () {
+  var btn = document.querySelector('#vincular-produto-submit');
+  if (btn) btn.disabled = {% if alerta and alerta.bloquear %}true{% else %}false{% endif %};
+})();
+</script>

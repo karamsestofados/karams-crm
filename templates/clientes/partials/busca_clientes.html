@@ -1,0 +1,77 @@
+<div
+  class="busca-clientes"
+  x-data="{
+    q: '',
+    resultados: [],
+    aberto: false,
+    buscando: false,
+    buscou: false,
+    urlBase: '{% url 'clientes:lista' %}',
+    urlApi: '{% url 'clientes:busca' %}',
+    async buscar() {
+      const termo = this.q.trim();
+      if (termo.length < 2) {
+        this.resultados = [];
+        this.aberto = false;
+        this.buscou = false;
+        return;
+      }
+      this.buscando = true;
+      try {
+        const res = await fetch(this.urlApi + '?q=' + encodeURIComponent(termo));
+        this.resultados = await res.json();
+        this.buscou = true;
+        this.aberto = true;
+      } finally {
+        this.buscando = false;
+      }
+    },
+    selecionar(id) {
+      window.location.href = this.urlBase + '?id=' + id;
+    },
+    fechar() {
+      this.aberto = false;
+    }
+  }"
+  @click.outside="fechar()"
+  @keydown.escape.window="fechar()"
+>
+  <div class="glass-input-wrap busca-clientes-wrap">
+    <svg class="glass-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input
+      type="search"
+      class="glass-input"
+      placeholder="Buscar clientes..."
+      autocomplete="off"
+      role="combobox"
+      :aria-expanded="aberto"
+      aria-autocomplete="list"
+      aria-controls="busca-clientes-lista"
+      x-model="q"
+      @input.debounce.300ms="buscar()"
+      @focus="if (q.trim().length >= 2 && buscou) aberto = true"
+    >
+    <div
+      id="busca-clientes-lista"
+      class="busca-clientes-dropdown"
+      role="listbox"
+      x-show="aberto"
+      x-cloak
+    >
+      <template x-if="resultados.length">
+        <template x-for="cliente in resultados" :key="cliente.id">
+          <button
+            type="button"
+            class="busca-clientes-item"
+            role="option"
+            @click="selecionar(cliente.id)"
+            x-text="cliente.nome"
+          ></button>
+        </template>
+      </template>
+      <template x-if="buscou && !resultados.length && !buscando">
+        <div class="busca-clientes-empty">Cliente não cadastrado</div>
+      </template>
+    </div>
+  </div>
+</div>

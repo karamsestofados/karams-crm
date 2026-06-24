@@ -19,6 +19,13 @@ class Venda(models.Model):
     produtos_texto = models.CharField(max_length=500, blank=True)
     produtos = models.ManyToManyField('clientes.Produto', blank=True)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
+    atividade_origem = models.ForeignKey(
+        'relacionamento.AtividadeCliente',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='vendas_geradas',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

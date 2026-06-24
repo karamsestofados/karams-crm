@@ -6,13 +6,35 @@ from clientes.models import Cliente, ClienteProduto, Produto, TipoProduto
 def produtos_disponiveis_para(cliente):
     """Produtos ativos que podem ser vinculados ao cliente."""
     ja_vinculados = cliente.vinculos_produto.values_list('produto_id', flat=True)
-    qs = Produto.objects.ativos().exclude(pk__in=ja_vinculados)
+    return Produto.objects.ativos().exclude(pk__in=ja_vinculados).order_by('nome')
 
-    unicos_ocupados = ClienteProduto.objects.filter(
-        produto__tipo_produto=TipoProduto.UNICO,
-    ).exclude(cliente=cliente).values_list('produto_id', flat=True)
 
-    return qs.exclude(pk__in=unicos_ocupados).order_by('nome')
+def obter_alerta_vinculo(produto, cliente_destino):
+    """Retorna alerta ao vincular produto EXCLUSIVO/UNICO já ligado a outro(s) cliente(s)."""
+    if produto.tipo_produto == TipoProduto.PADRAO:
+        return None
+
+    outros = list(
+        ClienteProduto.objects.filter(produto=produto)
+        .exclude(cliente=cliente_destino)
+        .select_related('cliente')
+        .order_by('cliente__nome')
+    )
+    if not outros:
+        return None
+
+    clientes = [v.cliente.nome for v in outros]
+    bloquear = produto.tipo_produto == TipoProduto.UNICO
+    nivel = 'alto' if bloquear else 'medio'
+
+    return {
+        'tipo': produto.tipo_produto,
+        'tipo_label': produto.get_tipo_produto_display(),
+        'produto_nome': produto.nome,
+        'nivel': nivel,
+        'clientes': clientes,
+        'bloquear': bloquear,
+    }
 
 
 def vincular_produto(cliente, produto, observacoes=''):

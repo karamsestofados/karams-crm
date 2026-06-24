@@ -162,6 +162,11 @@ class AtividadeCliente(AuditMixin, models.Model):
             self.deleted_by = usuario
         self.save(update_fields=['deleted_at', 'deleted_by', 'data_atualizacao'])
 
+    def pode_editar(self, usuario):
+        if usuario.is_admin:
+            return True
+        return self.usuario_id == usuario.pk
+
     @property
     def tem_followup_pendente(self):
         return (
@@ -169,3 +174,26 @@ class AtividadeCliente(AuditMixin, models.Model):
             and self.proxima_acao != ProximaAcao.SEM_ACAO
             and self.data_proxima_acao is not None
         )
+
+
+class AtividadeClienteEdicao(models.Model):
+    atividade = models.ForeignKey(
+        AtividadeCliente,
+        on_delete=models.CASCADE,
+        related_name='edicoes',
+    )
+    usuario = models.ForeignKey(
+        'accounts.Usuario',
+        on_delete=models.PROTECT,
+        related_name='edicoes_atividade',
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    alteracoes = models.JSONField(default=list)
+
+    class Meta:
+        ordering = ['-criado_em']
+        verbose_name = 'edição de atividade'
+        verbose_name_plural = 'edições de atividade'
+
+    def __str__(self):
+        return f'Edição {self.atividade_id} por {self.usuario}'

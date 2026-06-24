@@ -1,7 +1,7 @@
 {% load karams_formats %}
 <div class="card desempenho-card">
   <div class="section-title">{% if desempenho_equipe %}Desempenho da Equipe{% else %}Meu Desempenho{% endif %} — {{ mes_label }}</div>
-  <div class="desempenho-grid">
+  <div class="desempenho-grid{% if desempenho_equipe %} desempenho-grid--equipe{% endif %}">
     {% for item in meu_desempenho %}
     <div class="desempenho-item">
       <div class="desempenho-item-header">

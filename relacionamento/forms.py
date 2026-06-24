@@ -110,6 +110,32 @@ class AtividadeClienteForm(forms.ModelForm):
         return cleaned
 
 
+class AtividadeClienteEditForm(AtividadeClienteForm):
+    """Formulário de edição — sem motivo_perda (alteração de funil legado)."""
+
+    class Meta(AtividadeClienteForm.Meta):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['valor_venda'].initial = self.instance.valor_venda
+        self.fields.pop('motivo_perda', None)
+        self.fields.pop('motivo_perda_detalhe', None)
+
+    def clean(self):
+        cleaned = super(forms.ModelForm, self).clean()
+        cleaned = _apply_followup_clean(cleaned, self)
+        resumo = cleaned.get('resumo', '')
+        if not resumo or not resumo.strip():
+            self.add_error('resumo', 'O resumo é obrigatório.')
+        resultado = cleaned.get('resultado')
+        valor_venda = cleaned.get('valor_venda')
+        if resultado == Resultado.PEDIDO_FECHADO and (valor_venda is None or valor_venda <= 0):
+            self.add_error('valor_venda', 'Informe o valor da venda para pedido fechado.')
+        return cleaned
+
+
 class ConcluirFollowupForm(forms.Form):
     resumo = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Registre tudo que foi conversado...'}),

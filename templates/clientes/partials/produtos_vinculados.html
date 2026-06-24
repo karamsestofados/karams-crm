@@ -13,15 +13,17 @@
 {% if produtos_disponiveis_count %}
 <div id="vincular-produto-form" class="vincular-produto-form">
   <form method="post"
+        id="vincular-produto-form-el"
         action="{% url 'clientes:produto_vincular' cliente_selecionado.pk %}"
         hx-post="{% url 'clientes:produto_vincular' cliente_selecionado.pk %}"
         hx-target="#produtos-vinculados"
-        hx-swap="innerHTML">
+        hx-swap="innerHTML"
+        data-aviso-url="{% url 'clientes:produto_vinculo_aviso' cliente_selecionado.pk %}">
     {% csrf_token %}
     <div class="vincular-produto-grid">
       <div>{{ vinculo_form.produto }}</div>
       <div>{{ vinculo_form.observacoes }}</div>
-      <button type="submit" class="btn btn-primary btn-sm">Vincular</button>
+      <button type="submit" class="btn btn-primary btn-sm" id="vincular-produto-submit">Vincular</button>
     </div>
   </form>
 </div>
