@@ -26,8 +26,11 @@
   </div>
 </div>
 
-<div id="modal-editar-atividade" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+<div id="modal-editar-atividade" class="modal-overlay{% if modal_editar_aberto %} open{% endif %}" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-panel modal-panel-lg" id="modal-editar-atividade-body">
+    {% if modal_editar_aberto and edit_form and edit_atividade %}
+    {% include 'relacionamento/partials/modal_editar_atividade.html' with atividade=edit_atividade %}
+    {% endif %}
   </div>
 </div>
 

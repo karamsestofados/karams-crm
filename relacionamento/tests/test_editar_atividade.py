@@ -85,6 +85,118 @@ class EditarAtividadeTests(TestCase):
         depois = kpis_relacionamento(self.vendedor_a)['contatos_hoje']
         self.assertEqual(antes, depois)
 
+    def test_edicao_apenas_resumo(self):
+        atividade = registrar_interacao(
+            cliente=self.cliente,
+            usuario=self.vendedor_a,
+            tipo_contato=TipoContato.OUTRO,
+            resumo='Texto original',
+            resultado=Resultado.CONTATO_REALIZADO,
+        )
+        atividade.resumo = 'Texto alterado'
+        edicao = editar_atividade(atividade, self.vendedor_a, {'resumo': 'Texto alterado'})
+        self.assertIsNotNone(edicao)
+        atividade.refresh_from_db()
+        self.assertEqual(atividade.resumo, 'Texto alterado')
+        self.assertEqual(AtividadeClienteEdicao.objects.count(), 1)
+
+    def test_post_editar_apenas_resumo_via_view(self):
+        atividade = registrar_interacao(
+            cliente=self.cliente,
+            usuario=self.vendedor_a,
+            tipo_contato=TipoContato.OUTRO,
+            resumo='Texto original',
+            resultado=Resultado.CONTATO_REALIZADO,
+        )
+        self.client.login(username='fabiana', password='testpass123')
+        response = self.client.post(
+            reverse('clientes:atividade_editar', args=[self.cliente.pk, atividade.pk]),
+            {
+                'tipo_contato': atividade.tipo_contato,
+                'assunto': atividade.assunto,
+                'resumo': 'ESTOU ALTERANDO ESSE RESUMO PARA TESTE',
+                'resultado': atividade.resultado,
+                'humor_cliente': '',
+                'valor_venda': '0',
+                'produto_relacionado': '',
+                'proxima_acao': 'SEM_ACAO',
+                'data_proxima_acao': '',
+                'hora_proxima_acao': '',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        atividade.refresh_from_db()
+        self.assertEqual(atividade.resumo, 'ESTOU ALTERANDO ESSE RESUMO PARA TESTE')
+        self.assertEqual(AtividadeClienteEdicao.objects.count(), 1)
+
+    def test_post_editar_resumo_retorna_card_edicao_na_timeline(self):
+        atividade = registrar_interacao(
+            cliente=self.cliente,
+            usuario=self.vendedor_a,
+            tipo_contato=TipoContato.OUTRO,
+            resumo='Teste de Registro.',
+            resultado=Resultado.CONTATO_REALIZADO,
+        )
+        self.client.login(username='fabiana', password='testpass123')
+        response = self.client.post(
+            reverse('clientes:atividade_editar', args=[self.cliente.pk, atividade.pk]),
+            {
+                'tipo_contato': atividade.tipo_contato,
+                'assunto': atividade.assunto,
+                'resumo': 'ESTOU ALTERANDO ESSE RESUMO PARA TESTE',
+                'resultado': atividade.resultado,
+                'humor_cliente': '',
+                'valor_venda': '0',
+                'produto_relacionado': '',
+                'proxima_acao': 'SEM_ACAO',
+                'data_proxima_acao': '',
+                'hora_proxima_acao': '',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('timeline-card-edicao', content)
+        self.assertIn('Edição de registro', content)
+        self.assertIn('ESTOU ALTERANDO ESSE RESUMO PARA TESTE', content)
+        edicao = AtividadeClienteEdicao.objects.get()
+        self.assertEqual(edicao.alteracoes[0]['label'], 'OBSERVAÇÃO')
+        self.assertEqual(edicao.alteracoes[0]['antes'], 'Teste de Registro.')
+        self.assertEqual(edicao.alteracoes[0]['depois'], 'ESTOU ALTERANDO ESSE RESUMO PARA TESTE')
+
+    def test_post_editar_erro_validacao_reabre_modal(self):
+        atividade = registrar_interacao(
+            cliente=self.cliente,
+            usuario=self.vendedor_a,
+            tipo_contato=TipoContato.OUTRO,
+            resumo='Texto original',
+            resultado=Resultado.CONTATO_REALIZADO,
+        )
+        self.client.login(username='fabiana', password='testpass123')
+        response = self.client.post(
+            reverse('clientes:atividade_editar', args=[self.cliente.pk, atividade.pk]),
+            {
+                'tipo_contato': atividade.tipo_contato,
+                'assunto': atividade.assunto,
+                'resumo': '',
+                'resultado': atividade.resultado,
+                'humor_cliente': '',
+                'valor_venda': '0',
+                'produto_relacionado': '',
+                'proxima_acao': 'SEM_ACAO',
+                'data_proxima_acao': '',
+                'hora_proxima_acao': '',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('modal-overlay open', content)
+        self.assertIn('form-error', content)
+        atividade.refresh_from_db()
+        self.assertEqual(atividade.resumo, 'Texto original')
+
     def test_post_editar_via_view(self):
         atividade = self._criar_venda_atividade(self.vendedor_a, '2000.00')
         self.client.login(username='fabiana', password='testpass123')

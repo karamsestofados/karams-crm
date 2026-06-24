@@ -7,7 +7,7 @@ from clientes.models import CategoriaCliente, Cliente, MotivoPerda, StatusFunil
 from comissoes.services.produtividade import _aplicar_filtros_cliente
 from powerup.services.funil import funil_comercial
 from powerup.services.motivo_perda import relatorio_motivo_perda
-from powerup.services.saude_carteira import saude_carteira
+from powerup.services.saude_carteira import calcular_indice_saude, classificar_indice_saude, saude_carteira
 from relacionamento.services.clientes_quentes import listar_clientes_quentes
 
 
@@ -50,7 +50,22 @@ class PowerUPServicesTest(TestCase):
     def test_saude_carteira_vendedor(self):
         saude = saude_carteira(self.vendedor)
         self.assertEqual(saude['propria']['total'], 2)
-        self.assertIn('pct_saudavel', saude['propria'])
+        self.assertIn('indice', saude['propria'])
+        self.assertIn('status_label', saude['propria'])
+
+    def test_indice_saude_formula(self):
+        indice = calcular_indice_saude(62.9, 12.9, 12.9)
+        self.assertEqual(indice, 28)
+        status = classificar_indice_saude(indice)
+        self.assertEqual(status['label'], 'Risco')
+        self.assertEqual(status['classe'], 'risco')
+
+    def test_classificar_indice_saude_faixas(self):
+        self.assertEqual(classificar_indice_saude(85)['label'], 'Excelente')
+        self.assertEqual(classificar_indice_saude(70)['label'], 'Saudável')
+        self.assertEqual(classificar_indice_saude(50)['label'], 'Atenção')
+        self.assertEqual(classificar_indice_saude(25)['label'], 'Risco')
+        self.assertEqual(classificar_indice_saude(10)['label'], 'Crítica')
 
     def test_clientes_quentes_escopo(self):
         quentes = listar_clientes_quentes(self.vendedor, limit=6)

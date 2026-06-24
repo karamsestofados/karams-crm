@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 
 from comissoes.models import Venda
 from relacionamento.models import (
+    AtividadeCliente,
     AtividadeClienteEdicao,
     HumorCliente,
     ProximaAcao,
@@ -86,6 +87,10 @@ def _sincronizar_venda(atividade, valor_anterior):
 def editar_atividade(atividade, usuario, dados):
     if not pode_editar_atividade(atividade, usuario):
         raise PermissionDenied('Você não pode editar este registro.')
+
+    # ModelForm atualiza a instância em memória durante is_valid(); recarregar do banco
+    # garante comparação correta entre valores antigos e novos.
+    atividade = AtividadeCliente.objects.select_related('produto_relacionado').get(pk=atividade.pk)
 
     alteracoes = []
     valor_anterior_venda = atividade.valor_venda

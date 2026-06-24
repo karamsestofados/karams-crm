@@ -164,13 +164,16 @@
     {% with m=saude.propria %}
     <div class="saude-resumo">
       <div class="saude-gauge">
-        <div class="saude-gauge-valor">🟢 {{ m.pct_saudavel }}%</div>
-        <div class="saude-gauge-label">saudável</div>
+        <div class="saude-gauge-valor">
+          <span class="saude-indicador-dot saude-indicador-{{ m.status_classe }}" aria-hidden="true"></span>
+          {{ m.indice }}/100
+        </div>
+        <div class="saude-gauge-status">Status: <strong>{{ m.status_label }}</strong></div>
       </div>
       <div class="saude-breakdown">
-        <div><span>{{ m.pct_sem_contato }}%</span> sem contato</div>
-        <div><span>{{ m.pct_perdidos }}%</span> perdidos</div>
+        <div><span>{{ m.pct_sem_contato }}%</span> clientes sem contato</div>
         <div><span>{{ m.pct_negociacao_atrasada }}%</span> negociações atrasadas</div>
+        <div><span>{{ m.pct_perdidos }}%</span> oportunidades perdidas</div>
       </div>
     </div>
     {% endwith %}
@@ -180,20 +183,25 @@
         <thead>
           <tr>
             <th>Vendedor</th>
-            <th>Saudável</th>
+            <th>Índice</th>
+            <th>Status</th>
             <th>Sem contato</th>
-            <th>Perdidos</th>
             <th>Atrasadas</th>
+            <th>Perdidos</th>
           </tr>
         </thead>
         <tbody>
           {% for v in saude.por_vendedor %}
           <tr>
             <td>{{ v.nome }}</td>
-            <td>{{ v.pct_saudavel }}%</td>
+            <td>
+              <span class="saude-indicador-dot saude-indicador-{{ v.status_classe }}" aria-hidden="true"></span>
+              {{ v.indice }}/100
+            </td>
+            <td>{{ v.status_label }}</td>
             <td>{{ v.pct_sem_contato }}%</td>
-            <td>{{ v.pct_perdidos }}%</td>
             <td>{{ v.pct_negociacao_atrasada }}%</td>
+            <td>{{ v.pct_perdidos }}%</td>
           </tr>
           {% endfor %}
         </tbody>

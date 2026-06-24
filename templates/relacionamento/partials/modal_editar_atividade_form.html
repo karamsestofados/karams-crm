@@ -3,49 +3,58 @@
       action="{% url 'clientes:atividade_editar' cliente_selecionado.pk atividade.pk %}"
       hx-post="{% url 'clientes:atividade_editar' cliente_selecionado.pk atividade.pk %}"
       hx-target="#relacionamento-tab-content"
-      hx-swap="innerHTML"
-      hx-on::after-request="if(event.detail.successful) document.getElementById('modal-editar-atividade')?.classList.remove('open')">
+      hx-swap="innerHTML">
   {% csrf_token %}
   <div class="form-grid">
     <div class="form-group">
       <label class="form-label">{{ edit_form.tipo_contato.label }}</label>
       {{ edit_form.tipo_contato }}
+      {% if edit_form.tipo_contato.errors %}<span class="form-error">{{ edit_form.tipo_contato.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.assunto.label }}</label>
       {{ edit_form.assunto }}
+      {% if edit_form.assunto.errors %}<span class="form-error">{{ edit_form.assunto.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group form-group-full">
       <label class="form-label">{{ edit_form.resumo.label }}</label>
       {{ edit_form.resumo }}
+      {% if edit_form.resumo.errors %}<span class="form-error">{{ edit_form.resumo.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.resultado.label }}</label>
       {{ edit_form.resultado }}
+      {% if edit_form.resultado.errors %}<span class="form-error">{{ edit_form.resultado.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.humor_cliente.label }}</label>
       {{ edit_form.humor_cliente }}
+      {% if edit_form.humor_cliente.errors %}<span class="form-error">{{ edit_form.humor_cliente.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.valor_venda.label }}</label>
       {{ edit_form.valor_venda }}
+      {% if edit_form.valor_venda.errors %}<span class="form-error">{{ edit_form.valor_venda.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.produto_relacionado.label }}</label>
       {{ edit_form.produto_relacionado }}
+      {% if edit_form.produto_relacionado.errors %}<span class="form-error">{{ edit_form.produto_relacionado.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.proxima_acao.label }}</label>
       {{ edit_form.proxima_acao }}
+      {% if edit_form.proxima_acao.errors %}<span class="form-error">{{ edit_form.proxima_acao.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.data_proxima_acao.label }}</label>
       {{ edit_form.data_proxima_acao }}
+      {% if edit_form.data_proxima_acao.errors %}<span class="form-error">{{ edit_form.data_proxima_acao.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.hora_proxima_acao.label }}</label>
       {{ edit_form.hora_proxima_acao }}
+      {% if edit_form.hora_proxima_acao.errors %}<span class="form-error">{{ edit_form.hora_proxima_acao.errors.0 }}</span>{% endif %}
     </div>
   </div>
   <div class="modal-vinculo-acoes">

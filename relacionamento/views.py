@@ -330,7 +330,16 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
         return redirect(url)
 
 
-def _cliente_tab_context(cliente, form=None, tipo_filtro='', limit=50, user=None):
+def _cliente_tab_context(
+    cliente,
+    form=None,
+    tipo_filtro='',
+    limit=50,
+    user=None,
+    edit_form=None,
+    edit_atividade=None,
+    modal_editar_aberto=False,
+):
     qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado')
     if tipo_filtro:
         qs = qs.filter(tipo_contato=tipo_filtro)
@@ -347,6 +356,9 @@ def _cliente_tab_context(cliente, form=None, tipo_filtro='', limit=50, user=None
         'atividade_form': form or AtividadeClienteForm(cliente=cliente),
         'tipo_filtro': tipo_filtro,
         'timeline_filtros': TIMELINE_FILTROS,
+        'edit_form': edit_form,
+        'edit_atividade': edit_atividade,
+        'modal_editar_aberto': modal_editar_aberto,
     }
     if user is not None:
         ctx['request_user'] = user
@@ -372,10 +384,14 @@ class ClienteAtividadeUpdateView(VendedorRequiredMixin, View):
         if not pode_editar_atividade(atividade, request.user):
             raise PermissionDenied('Você não pode editar este registro.')
         form = AtividadeClienteEditForm(request.POST, instance=atividade, cliente=cliente)
+        modal_erro = False
         if form.is_valid():
             try:
-                editar_atividade(atividade, request.user, form.cleaned_data)
-                messages.success(request, 'Registro atualizado.')
+                edicao = editar_atividade(atividade, request.user, form.cleaned_data)
+                if edicao is None:
+                    messages.info(request, 'Nenhuma alteração foi detectada.')
+                else:
+                    messages.success(request, 'Registro atualizado.')
                 if request.headers.get('HX-Request'):
                     return render(
                         request,
@@ -383,15 +399,28 @@ class ClienteAtividadeUpdateView(VendedorRequiredMixin, View):
                         _cliente_tab_context(cliente, user=request.user),
                     )
             except ValidationError as exc:
-                messages.error(request, exc.messages[0] if exc.messages else str(exc))
+                msg = exc.messages[0] if exc.messages else str(exc)
+                messages.error(request, msg)
+                form.add_error(None, msg)
+                modal_erro = True
             except PermissionDenied as exc:
                 messages.error(request, str(exc))
+                form.add_error(None, str(exc))
+                modal_erro = True
+        else:
+            modal_erro = True
         if request.headers.get('HX-Request'):
-            return render(request, 'relacionamento/partials/modal_editar_atividade.html', {
-                'cliente_selecionado': cliente,
-                'atividade': atividade,
-                'edit_form': form,
-            })
+            return render(
+                request,
+                'relacionamento/partials/relacionamento_tab.html',
+                _cliente_tab_context(
+                    cliente,
+                    user=request.user,
+                    edit_form=form,
+                    edit_atividade=atividade,
+                    modal_editar_aberto=modal_erro,
+                ),
+            )
         return redirect(reverse('clientes:lista') + f'?id={pk}&tab=historico')
 
 

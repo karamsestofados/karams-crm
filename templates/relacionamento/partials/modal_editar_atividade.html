@@ -2,4 +2,11 @@
   <h3>Editar registro — {{ atividade.get_tipo_contato_display }}</h3>
   <button type="button" class="modal-close" onclick="document.getElementById('modal-editar-atividade').classList.remove('open')">&times;</button>
 </div>
+{% if edit_form.non_field_errors %}
+<ul class="messages" style="margin-bottom:1rem;">
+  {% for error in edit_form.non_field_errors %}
+  <li class="message message-error">{{ error }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
 {% include 'relacionamento/partials/modal_editar_atividade_form.html' %}

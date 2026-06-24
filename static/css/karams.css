@@ -843,17 +843,47 @@ h2, h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
-  align-items: center;
+  align-items: flex-start;
   margin-top: 1rem;
 }
 
 .saude-gauge-valor {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   font-size: 2rem;
   font-weight: 700;
 }
 
-.saude-gauge-label {
+.saude-indicador-dot {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.saude-indicador-excelente,
+.saude-indicador-saudavel {
+  background: #22c55e;
+}
+
+.saude-indicador-atencao {
+  background: #eab308;
+}
+
+.saude-indicador-risco {
+  background: #f97316;
+}
+
+.saude-indicador-critica {
+  background: #ef4444;
+}
+
+.saude-gauge-status {
+  margin-top: 0.35rem;
   color: var(--text-muted);
+  font-size: 0.9375rem;
 }
 
 .saude-breakdown {
