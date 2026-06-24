@@ -157,23 +157,15 @@ class ClienteListView(VendedorRequiredMixin, ListView):
 
         cliente = context.get('cliente_selecionado')
         if cliente:
-            from relacionamento.forms import AtividadeClienteForm
-            from relacionamento.models import AtividadeCliente
-            from relacionamento.services.resumo_cliente import resumo_comercial_cliente
-            from relacionamento.constants import TIMELINE_FILTROS
+            from relacionamento.views import _cliente_tab_context
 
-            context['resumo_comercial'] = resumo_comercial_cliente(cliente)
-            context['timeline_filtros'] = TIMELINE_FILTROS
-            context['tipo_filtro'] = request.GET.get('tipo', '')
-            qs = (
-                AtividadeCliente.objects.ativas()
-                .filter(cliente=cliente)
-                .select_related('usuario', 'produto_relacionado')
+            tab_ctx = _cliente_tab_context(
+                cliente,
+                tipo_filtro=request.GET.get('tipo', ''),
+                limit=50,
+                user=user,
             )
-            if context['tipo_filtro']:
-                qs = qs.filter(tipo_contato=context['tipo_filtro'])
-            context['atividades'] = qs.order_by('-data_criacao')[:50]
-            context['atividade_form'] = AtividadeClienteForm(cliente=cliente)
+            context.update(tab_ctx)
 
         return context
 

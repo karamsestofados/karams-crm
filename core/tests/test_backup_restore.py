@@ -4,7 +4,8 @@ from io import BytesIO
 from pathlib import Path
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TransactionTestCase
+from django.test import Client, TransactionTestCase
+from django.urls import reverse
 
 from accounts.models import Papel, Usuario
 from clientes.models import Cliente
@@ -14,11 +15,18 @@ from core.services.backup import (
     restaurar_arquivo_backup,
 )
 from powerup.services.context import build_powerup_context
+from relacionamento.models import AtividadeCliente
 
 
 def _user_backup_path():
     return Path(
         r'c:\Users\T.I E MANUTENÇÃO\Downloads\karams-backup-2026-06-23-102508.karamsbackup.zip',
+    )
+
+
+def _backup_path_2026_06_24():
+    return Path(
+        r'c:\Users\T.I E MANUTENÇÃO\Downloads\karams-backup-2026-06-24-122147.karamsbackup.zip',
     )
 
 
@@ -45,6 +53,7 @@ class BackupRestoreIntegrationTest(TransactionTestCase):
         self.assertEqual(Usuario.objects.filter(papel=Papel.VENDEDOR).count(), 2)
 
         admin = Usuario.objects.get(username='admin')
+        from django.test import RequestFactory
         req = RequestFactory().get('/powerup/')
         req.user = admin
         ctx = build_powerup_context(req)
@@ -52,6 +61,38 @@ class BackupRestoreIntegrationTest(TransactionTestCase):
         self.assertEqual(len(ctx['funil']), 4)
         self.assertEqual(len(ctx['conversao_vendedores']), 2)
         self.assertIn('motivo_perda', ctx)
+
+    def test_restore_backup_24_06_historico_visivel_admin(self):
+        path = _backup_path_2026_06_24()
+        if not path.is_file():
+            self.skipTest('Backup 2026-06-24 não disponível neste ambiente.')
+
+        uploaded = SimpleUploadedFile(
+            path.name,
+            path.read_bytes(),
+            content_type='application/zip',
+        )
+        restaurar_arquivo_backup(uploaded)
+
+        self.assertEqual(AtividadeCliente.objects.ativas().count(), 64)
+
+        admin = Usuario.objects.get(username='admin')
+        cliente = Cliente.objects.filter(
+            atividades__isnull=False,
+        ).distinct().first()
+        self.assertIsNotNone(cliente)
+
+        client = Client()
+        client.force_login(admin)
+        response = client.get(
+            reverse('clientes:lista') + f'?id={cliente.pk}&tab=historico',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'timeline-card')
+        self.assertNotContains(
+            response,
+            'Nenhuma interação registrada ainda.',
+        )
 
     def test_restore_backup_antigo_sem_motivo_perda_no_json(self):
         """Backups anteriores ao campo motivo_perda devem carregar e abrir PowerUP."""
@@ -143,6 +184,7 @@ class BackupRestoreIntegrationTest(TransactionTestCase):
         self.assertEqual(cliente.estado, 'PR')
 
         admin = Usuario.objects.get(username='admin')
+        from django.test import RequestFactory
         req = RequestFactory().get('/powerup/')
         req.user = admin
         build_powerup_context(req)
