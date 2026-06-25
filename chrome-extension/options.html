@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Karams CRM — Configuração</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-heading: 'Sora', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --primary: #FF9220;
+      --primary-glow: #FFB366;
+      --gradient-active: linear-gradient(90deg, #FF9220 0%, #FFB366 100%);
+      --gradient-header: linear-gradient(135deg, #FF9220 0%, #FFB366 55%, #FFD080 100%);
+      --bg-app: #0D0D0F;
+      --bg-card: #1A1A1E;
+      --bg-input: #252529;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --text: #F3F4F6;
+      --text-muted: #9CA3AF;
+      --on-primary: #1E2D3D;
+      --success: #4ADE80;
+      --danger: #F87171;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-glow: 0 0 40px rgba(255, 146, 32, 0.15);
+    }
+
+    body {
+      font-family: var(--font-body);
+      max-width: 520px;
+      margin: 2rem auto;
+      padding: 0 1rem 2rem;
+      background: var(--bg-app);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: var(--gradient-header);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      margin: 0;
+      color: var(--on-primary);
+      letter-spacing: -0.02em;
+    }
+
+    p.sub {
+      color: rgba(30, 45, 61, 0.8);
+      font-size: 0.85rem;
+      margin: 0.25rem 0 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 0.35rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .actions {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.6rem 1.1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .primary {
+      background: var(--gradient-active);
+      color: var(--on-primary);
+    }
+
+    .primary:hover {
+      box-shadow: var(--shadow-glow);
+    }
+
+    .secondary {
+      background: var(--bg-input);
+      color: var(--text);
+      border: 1px solid var(--border-subtle);
+    }
+
+    #status {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      min-height: 1.25rem;
+    }
+
+    #status.ok { color: var(--success); }
+    #status.err { color: var(--danger); }
+
+    ol {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      padding-left: 1.2rem;
+    }
+
+    ol a { color: var(--primary-glow); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Karams CRM — WhatsApp</h1>
+    <p class="sub">Integração interna (piloto)</p>
+  </div>
+
+  <div class="card">
+    <ol>
+      <li>No CRM, acesse <strong>Perfil → Integração WhatsApp</strong> e gere um token.</li>
+      <li>Cole o token abaixo e salve.</li>
+      <li>Abra <a href="https://web.whatsapp.com" target="_blank" rel="noopener">web.whatsapp.com</a> no Chrome.</li>
+    </ol>
+
+    <label for="crmUrl">URL do CRM</label>
+    <input type="url" id="crmUrl" placeholder="https://crm-karams.up.railway.app">
+
+    <label for="apiToken">Token API (Bearer)</label>
+    <input type="password" id="apiToken" placeholder="karams_…" autocomplete="off">
+
+    <div class="actions">
+      <button type="button" class="primary" id="save">Salvar</button>
+      <button type="button" class="secondary" id="test">Testar conexão</button>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

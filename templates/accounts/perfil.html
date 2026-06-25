@@ -36,6 +36,42 @@
   </div>
 
   <div class="card">
+    <div class="section-title">Integração WhatsApp</div>
+    <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:1rem;">
+      Gere um token pessoal para conectar a extensão Chrome do Karams ao WhatsApp Web.
+      O token dá acesso somente leitura aos clientes da sua carteira.
+    </p>
+
+    {% if extension_token_plain %}
+    <div class="form-group" style="margin-bottom:1rem;">
+      <label class="form-label">Token gerado — copie agora</label>
+      <input type="text" class="form-input" readonly value="{{ extension_token_plain }}" id="extension-token-plain" onclick="this.select();">
+      <span class="form-help">Este valor não será exibido novamente após sair desta página.</span>
+    </div>
+    {% endif %}
+
+    {% if extension_token_ativo %}
+    <p style="font-size:0.875rem;margin-bottom:0.75rem;">
+      Token ativo: <code>{{ extension_token_ativo.prefixo }}…</code>
+      {% if extension_token_ativo.ultimo_uso %}
+      · último uso {{ extension_token_ativo.ultimo_uso|date:"d/m/Y H:i" }}
+      {% endif %}
+    </p>
+    <form method="post" action="{% url 'accounts:extension_token_revogar' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Revogar o token? A extensão deixará de funcionar até gerar um novo.');">Revogar token</button>
+    </form>
+    {% endif %}
+
+    <form method="post" action="{% url 'accounts:extension_token_gerar' %}" style="display:inline;margin-left:0.5rem;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary" onclick="return confirm('{% if extension_token_ativo %}Isso invalidará o token atual. {% endif %}Gerar novo token?');">
+        {% if extension_token_ativo %}Gerar novo token{% else %}Gerar token{% endif %}
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
     <div class="section-title">Alterar senha</div>
     <form method="post" action="{% url 'accounts:alterar_senha' %}">
       {% csrf_token %}

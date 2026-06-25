@@ -26,6 +26,8 @@ class ConfiguracaoInicialMiddleware:
         setup_path = reverse('accounts:configuracao_inicial')
         if path == setup_path or path.startswith(settings.STATIC_URL):
             return True
+        if path.startswith('/api/v1/extension/'):
+            return True
         return False
 
 

@@ -26,6 +26,7 @@ urlpatterns = [
     path('comissoes/', include('comissoes.urls')),
     path('relatorios/', include('relatorios.urls')),
     path('powerup/', include('powerup.urls')),
+    path('api/v1/extension/', include('extension.urls')),
     path('', include('core.urls')),
 ]
 

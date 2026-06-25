@@ -22,6 +22,7 @@ from .setup import definir_senha_admin, precisa_configuracao_inicial
 
 from core.forms import RestaurarBackupForm
 from core.models import BackupLog, TipoBackup
+from extension.models import ExtensionApiToken
 
 
 class LoginView(AuthLoginView):
@@ -58,6 +59,7 @@ class PerfilView(VendedorRequiredMixin, UpdateView):
         if self.request.user.is_admin:
             context['backup_form'] = RestaurarBackupForm()
             context['ultimo_backup'] = BackupLog.objects.filter(tipo=TipoBackup.BACKUP).first()
+        context.update(_contexto_extension_perfil(self.request))
         return context
 
     def form_valid(self, form):
@@ -95,7 +97,21 @@ def alterar_senha(request):
     if request.user.is_admin:
         ctx['backup_form'] = RestaurarBackupForm()
         ctx['ultimo_backup'] = BackupLog.objects.filter(tipo=TipoBackup.BACKUP).first()
+    ctx.update(_contexto_extension_perfil(request))
     return render(request, 'accounts/perfil.html', ctx)
+
+
+def _contexto_extension_perfil(request):
+    token_ativo = (
+        ExtensionApiToken.objects.filter(usuario=request.user, ativo=True)
+        .order_by('-criado_em')
+        .first()
+    )
+    return {
+        'extension_token_ativo': token_ativo,
+        'extension_token_plain': request.session.pop('extension_token_plain', None),
+        'extension_token_prefix': request.session.get('extension_token_prefix'),
+    }
 
 
 class UsuarioListView(AdminRequiredMixin, ListView):
