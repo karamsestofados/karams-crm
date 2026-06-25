@@ -39,7 +39,7 @@
     <div class="kpi-card-modern">
       <div class="kpi-card-header">
         <span class="kpi-card-title">Giro de Carteira</span>
-        <span class="kpi-badge neutral">últimos {{ giro_carteira.periodo_dias }} dias</span>
+        <span class="kpi-badge neutral">{{ giro_carteira.periodo_label }}</span>
       </div>
       <div class="kpi-sparkline"><canvas id="sparkContatos"></canvas></div>
       <div class="kpi-value-lg">{{ giro_carteira.percentual }}%</div>

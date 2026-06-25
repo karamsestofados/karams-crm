@@ -1,18 +1,20 @@
-from datetime import timedelta
+import calendar
+from datetime import date
 
-from django.conf import settings
+from django.utils import timezone
 
 from clientes.models import Cliente
 from relacionamento.models import AtividadeCliente
 
 
-def calcular_giro_carteira(usuario, dias=None):
-    """Percentual de clientes ativos com interação encerrada no período."""
-    dias = dias or getattr(settings, 'GIRO_CARTEIRA_DIAS', 7)
-    from django.utils import timezone
-
+def calcular_giro_carteira(usuario, mes=None, ano=None):
+    """Percentual de clientes da carteira com interação encerrada no mês calendário."""
     hoje = timezone.localdate()
-    inicio = hoje - timedelta(days=dias - 1)
+    mes = mes or hoje.month
+    ano = ano or hoje.year
+    ultimo_dia_mes = calendar.monthrange(ano, mes)[1]
+    inicio = date(ano, mes, 1)
+    fim = min(hoje, date(ano, mes, ultimo_dia_mes)) if (ano, mes) == (hoje.year, hoje.month) else date(ano, mes, ultimo_dia_mes)
 
     carteira = Cliente.objects.para_usuario(usuario).ativos() if usuario else Cliente.objects.ativos()
     total_clientes = carteira.count()
@@ -20,7 +22,7 @@ def calcular_giro_carteira(usuario, dias=None):
     atividades = AtividadeCliente.objects.ativas().filter(
         concluida=True,
         data_criacao__date__gte=inicio,
-        data_criacao__date__lte=hoje,
+        data_criacao__date__lte=fim,
     )
     if usuario:
         atividades = atividades.para_usuario(usuario)
@@ -36,5 +38,7 @@ def calcular_giro_carteira(usuario, dias=None):
         'total_clientes': total_clientes,
         'clientes_contatados': clientes_contatados,
         'percentual': percentual,
-        'periodo_dias': dias,
+        'mes': mes,
+        'ano': ano,
+        'periodo_label': f'{mes:02d}/{ano}',
     }

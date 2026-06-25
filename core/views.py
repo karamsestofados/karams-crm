@@ -51,7 +51,7 @@ class DashboardView(VendedorRequiredMixin, TemplateView):
         context['papel'] = user.get_papel_display()
         context['mes_label'] = f'{hoje.month:02d}/{hoje.year}'
 
-        giro = calcular_giro_carteira(user)
+        giro = calcular_giro_carteira(user, mes=hoje.month, ano=hoje.year)
         context['giro_carteira'] = giro
 
         if user.is_admin:

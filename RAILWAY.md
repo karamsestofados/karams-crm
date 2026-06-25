@@ -65,7 +65,28 @@ python manage.py import_legacy_html
 
 > **Produção:** não use `seed_usuarios --com-admin`. O admin deve ser criado apenas pela configuração inicial no navegador.
 
-## 8. Domínio customizado (opcional)
+## 8. Cron — categorias de clientes (Adormecido automático)
+
+Clientes **Ativos** sem qualquer interação há 30 dias corridos passam para **Adormecido** via job diário.
+
+No Railway, crie um serviço **Cron** no mesmo projeto (ou use [Railway Cron](https://docs.railway.com/guides/cron-jobs)):
+
+| Campo | Valor |
+|-------|-------|
+| Schedule | `0 9 * * *` (09:00 UTC ≈ 06:00 Brasília) |
+| Command | `python manage.py atualizar_categorias_clientes` |
+
+Variável opcional: `ADORMECIMENTO_DIAS` (padrão `30`).
+
+Execução manual (Shell Railway):
+
+```bash
+python manage.py atualizar_categorias_clientes
+```
+
+> **Giro de Carteira:** calculado pelo **mês calendário** (ex.: `06/2026`), zerando naturalmente no dia 1º de cada mês.
+
+## 9. Domínio customizado (opcional)
 
 Settings → Networking → Generate Domain ou Custom Domain.
 O `RAILWAY_PUBLIC_DOMAIN` é detectado automaticamente em `production.py`.

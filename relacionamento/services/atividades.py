@@ -140,7 +140,10 @@ def registrar_interacao(
     elif resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0:
         _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado, atividade=atividade)
 
+    from clientes.services.categoria_automatica import reativar_cliente_apos_interacao
     from comissoes.services.produtividade import avaliar_conquistas
+
+    reativar_cliente_apos_interacao(cliente)
     avaliar_conquistas(usuario)
 
     return atividade

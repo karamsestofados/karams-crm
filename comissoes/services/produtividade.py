@@ -104,7 +104,7 @@ def desempenho_equipe(mes, ano):
 
     meta = obter_meta_equipe(mes, ano)
     realizado = calcular_realizado(None, mes, ano)
-    giro = calcular_giro_carteira(None)
+    giro = calcular_giro_carteira(None, mes=mes, ano=ano)
     realizado['giro_carteira'] = giro['percentual']
     progresso = calcular_progresso(meta, realizado)
     return {
@@ -291,7 +291,7 @@ def desempenho_usuario(usuario, mes, ano):
 
     meta = obter_meta(usuario, mes, ano)
     realizado = calcular_realizado(usuario, mes, ano)
-    giro = calcular_giro_carteira(usuario)
+    giro = calcular_giro_carteira(usuario, mes=mes, ano=ano)
     realizado['giro_carteira'] = giro['percentual']
     progresso = calcular_progresso(meta, realizado)
     return {

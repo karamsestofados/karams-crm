@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import timedelta
 from decimal import Decimal
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import Papel, Usuario
 from clientes.models import CategoriaCliente, Cliente, StatusFunil
@@ -50,7 +51,8 @@ class GiroCarteiraTests(TestCase):
         cls.c1 = Cliente.objects.create(vendedor=cls.vendedor, nome='Cliente 1', categoria=CategoriaCliente.ATIVO)
         cls.c2 = Cliente.objects.create(vendedor=cls.vendedor, nome='Cliente 2', categoria=CategoriaCliente.ATIVO)
 
-    def test_giro_percentual(self):
+    def test_giro_percentual_mes_atual(self):
+        hoje = timezone.localdate()
         registrar_interacao(
             cliente=self.c1,
             usuario=self.vendedor,
@@ -59,10 +61,29 @@ class GiroCarteiraTests(TestCase):
             resultado=Resultado.CONTATO_REALIZADO,
             proxima_acao=ProximaAcao.SEM_ACAO,
         )
-        giro = calcular_giro_carteira(self.vendedor, dias=7)
+        giro = calcular_giro_carteira(self.vendedor, mes=hoje.month, ano=hoje.year)
         self.assertEqual(giro['total_clientes'], 2)
         self.assertEqual(giro['clientes_contatados'], 1)
         self.assertEqual(giro['percentual'], 50.0)
+        self.assertEqual(giro['periodo_label'], f'{hoje.month:02d}/{hoje.year}')
+
+    def test_giro_nao_conta_mes_anterior(self):
+        hoje = timezone.localdate()
+        atividade = registrar_interacao(
+            cliente=self.c1,
+            usuario=self.vendedor,
+            tipo_contato=TipoContato.LIGACAO,
+            resumo='Contato antigo',
+            resultado=Resultado.CONTATO_REALIZADO,
+            proxima_acao=ProximaAcao.SEM_ACAO,
+        )
+        from relacionamento.models import AtividadeCliente
+        AtividadeCliente.objects.filter(pk=atividade.pk).update(
+            data_criacao=timezone.now() - timedelta(days=40),
+        )
+        giro = calcular_giro_carteira(self.vendedor, mes=hoje.month, ano=hoje.year)
+        self.assertEqual(giro['clientes_contatados'], 0)
+        self.assertEqual(giro['percentual'], 0.0)
 
 
 class InteracaoTests(TestCase):

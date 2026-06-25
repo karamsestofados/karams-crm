@@ -105,8 +105,8 @@ LOGOUT_REDIRECT_URL = 'accounts:login'
 METAS_PADRAO_CONTATOS = 60
 METAS_PADRAO_VENDAS = 80000
 
-# Giro de carteira — janela em dias (configurável via env GIRO_CARTEIRA_DIAS)
-GIRO_CARTEIRA_DIAS = env.int('GIRO_CARTEIRA_DIAS', default=7)
+# Dias sem contato para mover cliente de Ativo → Adormecido automaticamente
+ADORMECIMENTO_DIAS = env.int('ADORMECIMENTO_DIAS', default=30)
 
 # Taxas de comissão disponíveis
 TAXAS_COMISSAO = [0.5, 0.8, 1.0]
