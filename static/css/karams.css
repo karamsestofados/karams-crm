@@ -1459,6 +1459,10 @@ h2, h3 {
   opacity: 1;
 }
 
+.produtos-relacionados-field {
+  position: relative;
+}
+
 .produtos-chips-input {
   align-items: center;
   min-height: 2.5rem;
@@ -1467,6 +1471,15 @@ h2, h3 {
   border-radius: var(--radius);
   background: var(--surface);
   cursor: text;
+  position: relative;
+}
+
+.produtos-chips-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  margin-left: 0.15rem;
 }
 
 .produtos-chips-busca {
@@ -1481,12 +1494,12 @@ h2, h3 {
 }
 
 .produtos-chips-dropdown {
-  margin-top: 0.35rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-elevated);
-  max-height: 12rem;
-  overflow-y: auto;
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  margin-top: 0;
 }
 
 .produtos-chips-option {

@@ -89,16 +89,11 @@ class AtividadeClienteForm(forms.ModelForm):
         self.fields['produtos_relacionados'].required = False
         self.fields['produtos_relacionados'].queryset = Produto.objects.ativos().order_by('nome')
         self.fields['produtos_relacionados'].label = 'Produtos relacionados'
-        self.produtos_catalogo = list(
-            Produto.objects.ativos().order_by('nome').values('id', 'nome', 'tipo_produto')
-        )
-        self._produtos_selecionados_iniciais()
-        self.produtos_catalogo_json = json.dumps(self.produtos_catalogo, ensure_ascii=False)
-        self.produtos_selecionados_json = json.dumps(self.produtos_selecionados)
+        self._produtos_iniciais()
         self.fields['data_proxima_acao'].required = False
         self.fields['hora_proxima_acao'].required = False
 
-    def _produtos_selecionados_iniciais(self):
+    def _produtos_iniciais(self):
         if self.is_bound:
             if hasattr(self.data, 'getlist'):
                 raw = self.data.getlist('produtos_relacionados')
@@ -106,13 +101,17 @@ class AtividadeClienteForm(forms.ModelForm):
                 raw = self.data.get('produtos_relacionados', [])
                 if not isinstance(raw, list):
                     raw = [raw] if raw else []
-            self.produtos_selecionados = [int(pk) for pk in raw if pk]
+            ids = [int(pk) for pk in raw if pk]
+            self.produtos_iniciais = list(
+                Produto.objects.filter(pk__in=ids).values('id', 'nome', 'tipo_produto')
+            )
         elif self.instance.pk:
-            self.produtos_selecionados = list(
-                self.instance.produtos_relacionados.values_list('pk', flat=True)
+            self.produtos_iniciais = list(
+                self.instance.produtos_relacionados.values('id', 'nome', 'tipo_produto')
             )
         else:
-            self.produtos_selecionados = []
+            self.produtos_iniciais = []
+        self.produtos_iniciais_json = json.dumps(self.produtos_iniciais, ensure_ascii=False)
 
     def clean(self):
         cleaned = super().clean()

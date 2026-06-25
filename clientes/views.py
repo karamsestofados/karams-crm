@@ -281,6 +281,26 @@ class ClienteBuscaAutocompleteView(VendedorRequiredMixin, View):
         )
 
 
+class ProdutoBuscaAutocompleteView(VendedorRequiredMixin, View):
+    def get(self, request):
+        q = request.GET.get('q', '').strip()
+        if len(q) < 2:
+            return JsonResponse([], safe=False)
+
+        produtos = (
+            Produto.objects.ativos()
+            .filter(nome__icontains=q)
+            .order_by('nome')[:8]
+        )
+        return JsonResponse(
+            [
+                {'id': p.pk, 'nome': p.nome, 'tipo_produto': p.tipo_produto}
+                for p in produtos
+            ],
+            safe=False,
+        )
+
+
 class ClienteProdutoAvisoView(VendedorRequiredMixin, View):
     def get(self, request, pk):
         cliente = get_cliente_or_403(request.user, pk)
