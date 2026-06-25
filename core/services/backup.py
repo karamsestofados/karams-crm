@@ -28,6 +28,7 @@ def _manifest():
             'motivo_perda',
             'valor_venda_atividade',
             'powerup',
+            'produtos_relacionados_m2m',
         ],
     }
 
@@ -84,6 +85,23 @@ def _validar_backup_zip(archive):
     return data_raw
 
 
+def _normalizar_fixture_backup(records):
+    """Compatibiliza backups antigos com o schema atual."""
+    for record in records:
+        if record.get('model') != 'relacionamento.atividadecliente':
+            continue
+        fields = record.get('fields', {})
+        if 'produto_relacionado' not in fields:
+            continue
+        legado = fields.pop('produto_relacionado')
+        if legado is not None:
+            existentes = fields.get('produtos_relacionados') or []
+            fields['produtos_relacionados'] = sorted({*existentes, legado})
+        elif 'produtos_relacionados' not in fields:
+            fields['produtos_relacionados'] = []
+    return records
+
+
 def restaurar_arquivo_backup(uploaded_file):
     """Substitui todos os dados do sistema pelo conteúdo do backup."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -96,8 +114,15 @@ def restaurar_arquivo_backup(uploaded_file):
 
         with zipfile.ZipFile(zip_path, 'r') as archive:
             data_raw = _validar_backup_zip(archive)
+            records = json.loads(
+                data_raw.decode('utf-8') if isinstance(data_raw, bytes) else data_raw
+            )
+            records = _normalizar_fixture_backup(records)
             data_path = tmp / 'data.json'
-            data_path.write_bytes(data_raw.encode('utf-8') if isinstance(data_raw, str) else data_raw)
+            data_path.write_text(
+                json.dumps(records, ensure_ascii=False),
+                encoding='utf-8',
+            )
 
             media_files = [n for n in archive.namelist() if n.startswith('media/') and not n.endswith('/')]
             if media_files:

@@ -12,6 +12,7 @@ from clientes.models import Cliente
 from core.services.backup import (
     BACKUP_FORMAT_VERSION,
     _manifest,
+    _normalizar_fixture_backup,
     restaurar_arquivo_backup,
 )
 from powerup.services.context import build_powerup_context
@@ -27,6 +28,12 @@ def _user_backup_path():
 def _backup_path_2026_06_24():
     return Path(
         r'c:\Users\T.I E MANUTENÇÃO\Downloads\karams-backup-2026-06-24-122147.karamsbackup.zip',
+    )
+
+
+def _backup_path_2026_06_25():
+    return Path(
+        r'c:\Users\T.I E MANUTENÇÃO\Downloads\karams-backup-2026-06-25-123247.karamsbackup.zip',
     )
 
 
@@ -93,6 +100,41 @@ class BackupRestoreIntegrationTest(TransactionTestCase):
             response,
             'Nenhuma interação registrada ainda.',
         )
+
+    def test_normalizar_produto_relacionado_legado(self):
+        payload = [{
+            'model': 'relacionamento.atividadecliente',
+            'pk': 1,
+            'fields': {
+                'cliente': 1,
+                'usuario': ['admin'],
+                'tipo_contato': 'OUTRO',
+                'resumo': 'Teste',
+                'produto_relacionado': 3,
+            },
+        }]
+        normalizado = _normalizar_fixture_backup(payload)
+        fields = normalizado[0]['fields']
+        self.assertNotIn('produto_relacionado', fields)
+        self.assertEqual(fields['produtos_relacionados'], [3])
+
+    def test_restore_backup_25_06_com_produto_legado(self):
+        path = _backup_path_2026_06_25()
+        if not path.is_file():
+            self.skipTest('Backup 2026-06-25 não disponível neste ambiente.')
+
+        uploaded = SimpleUploadedFile(
+            path.name,
+            path.read_bytes(),
+            content_type='application/zip',
+        )
+        restaurar_arquivo_backup(uploaded)
+
+        self.assertGreater(AtividadeCliente.objects.ativas().count(), 0)
+        com_produto = AtividadeCliente.objects.filter(
+            produtos_relacionados__isnull=False,
+        ).distinct().count()
+        self.assertGreater(com_produto, 0)
 
     def test_restore_backup_antigo_sem_motivo_perda_no_json(self):
         """Backups anteriores ao campo motivo_perda devem carregar e abrir PowerUP."""
