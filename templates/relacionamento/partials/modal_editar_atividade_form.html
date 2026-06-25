@@ -37,9 +37,7 @@
       {% if edit_form.valor_venda.errors %}<span class="form-error">{{ edit_form.valor_venda.errors.0 }}</span>{% endif %}
     </div>
     <div class="form-group">
-      <label class="form-label">{{ edit_form.produto_relacionado.label }}</label>
-      {{ edit_form.produto_relacionado }}
-      {% if edit_form.produto_relacionado.errors %}<span class="form-error">{{ edit_form.produto_relacionado.errors.0 }}</span>{% endif %}
+      {% include 'relacionamento/partials/produtos_relacionados_field.html' with field=edit_form.produtos_relacionados %}
     </div>
     <div class="form-group">
       <label class="form-label">{{ edit_form.proxima_acao.label }}</label>

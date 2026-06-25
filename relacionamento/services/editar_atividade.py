@@ -19,7 +19,6 @@ CAMPOS_EDITAVEIS = (
     ('resultado', 'RESULTADO'),
     ('humor_cliente', 'HUMOR'),
     ('valor_venda', 'VENDA'),
-    ('produto_relacionado', 'PRODUTO'),
     ('proxima_acao', 'PRÓXIMA AÇÃO'),
     ('data_proxima_acao', 'DATA PRÓXIMA AÇÃO'),
     ('hora_proxima_acao', 'HORA PRÓXIMA AÇÃO'),
@@ -35,8 +34,6 @@ def _formatar_valor(campo, valor):
         return dict(Resultado.choices).get(valor, str(valor))
     if campo == 'humor_cliente':
         return dict(HumorCliente.choices).get(valor, str(valor))
-    if campo == 'produto_relacionado':
-        return valor.nome if hasattr(valor, 'nome') else str(valor)
     if campo == 'proxima_acao':
         return dict(ProximaAcao.choices).get(valor, str(valor))
     if campo == 'valor_venda':
@@ -46,6 +43,13 @@ def _formatar_valor(campo, valor):
     if campo == 'hora_proxima_acao':
         return valor.strftime('%H:%M')
     return str(valor)
+
+
+def _formatar_produtos(produtos):
+    if not produtos:
+        return '—'
+    nomes = sorted(p.nome for p in produtos)
+    return ', '.join(nomes) if nomes else '—'
 
 
 def _valor_campo(atividade, campo):
@@ -90,10 +94,29 @@ def editar_atividade(atividade, usuario, dados):
 
     # ModelForm atualiza a instância em memória durante is_valid(); recarregar do banco
     # garante comparação correta entre valores antigos e novos.
-    atividade = AtividadeCliente.objects.select_related('produto_relacionado').get(pk=atividade.pk)
+    atividade = (
+        AtividadeCliente.objects
+        .prefetch_related('produtos_relacionados')
+        .get(pk=atividade.pk)
+    )
 
     alteracoes = []
     valor_anterior_venda = atividade.valor_venda
+    dados = dict(dados)
+
+    novos_produtos = dados.pop('produtos_relacionados', None)
+    if novos_produtos is not None:
+        novos_produtos = list(novos_produtos)
+        antigos_produtos = list(atividade.produtos_relacionados.all())
+        antigos_ids = {p.pk for p in antigos_produtos}
+        novos_ids = {p.pk for p in novos_produtos}
+        if antigos_ids != novos_ids:
+            alteracoes.append({
+                'campo': 'produtos_relacionados',
+                'label': 'PRODUTO',
+                'antes': _formatar_produtos(antigos_produtos),
+                'depois': _formatar_produtos(novos_produtos),
+            })
 
     for campo, label in CAMPOS_EDITAVEIS:
         if campo not in dados:
@@ -134,6 +157,9 @@ def editar_atividade(atividade, usuario, dados):
 
     atividade.full_clean()
     atividade.save()
+
+    if novos_produtos is not None:
+        atividade.produtos_relacionados.set(novos_produtos)
 
     if any(a['campo'] == 'valor_venda' for a in alteracoes):
         _sincronizar_venda(atividade, valor_anterior_venda)

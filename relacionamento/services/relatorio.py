@@ -6,8 +6,8 @@ from relacionamento.models import AtividadeCliente, Resultado, TipoContato
 
 def filtrar_atividades(request):
     qs = AtividadeCliente.objects.ativas().select_related(
-        'cliente', 'usuario', 'produto_relacionado', 'cliente__vendedor',
-    )
+        'cliente', 'usuario', 'cliente__vendedor',
+    ).prefetch_related('produtos_relacionados')
 
     if not request.user.is_admin:
         qs = qs.filter(cliente__vendedor=request.user)
@@ -29,7 +29,7 @@ def filtrar_atividades(request):
 
     produto_id = request.GET.get('produto')
     if produto_id:
-        qs = qs.filter(produto_relacionado_id=produto_id)
+        qs = qs.filter(produtos_relacionados__id=produto_id).distinct()
 
     tipo = request.GET.get('tipo_contato')
     if tipo and tipo != 'todos':

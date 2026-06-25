@@ -73,10 +73,14 @@
       <span><strong>Atendimento encerrado</strong></span>
       {% endif %}
     </div>
-    {% if atividade.produto_relacionado %}
-    <span class="badge badge-produto badge-produto-{{ atividade.produto_relacionado.tipo_produto|lower }}">
-      Produto {{ atividade.produto_relacionado.get_tipo_produto_display }} · {{ atividade.produto_relacionado.nome }}
-    </span>
+    {% if atividade.produtos_relacionados.all %}
+    <div class="produtos-chips" style="margin-top:0.5rem;">
+      {% for produto in atividade.produtos_relacionados.all %}
+      <span class="badge badge-produto badge-produto-{{ produto.tipo_produto|lower }}">
+        Produto {{ produto.get_tipo_produto_display }} · {{ produto.nome }}
+      </span>
+      {% endfor %}
+    </div>
     {% endif %}
     <p class="timeline-card-user">Registrado por: {{ atividade.usuario.get_full_name|default:atividade.usuario.username }}</p>
   </article>

@@ -20,7 +20,8 @@ def _atividades_qs(usuario):
     return (
         AtividadeCliente.objects
         .para_usuario(usuario)
-        .select_related('cliente', 'cliente__vendedor', 'produto_relacionado', 'usuario')
+        .select_related('cliente', 'cliente__vendedor', 'usuario')
+        .prefetch_related('produtos_relacionados')
     )
 
 

@@ -22,8 +22,13 @@ def _build_location(cliente):
 
 
 def _build_description(cliente, usuario, cleaned_data):
-    produto = cleaned_data.get('produto_relacionado')
-    produto_nome = produto.nome if produto else (cleaned_data.get('assunto') or '—')
+    produtos = cleaned_data.get('produtos_relacionados')
+    if produtos:
+        if hasattr(produtos, 'all'):
+            produtos = list(produtos.all())
+        produto_nome = ', '.join(p.nome for p in produtos) if produtos else '—'
+    else:
+        produto_nome = cleaned_data.get('assunto') or '—'
     responsavel = usuario.get_full_name() or usuario.username
     lines = [
         'CRM Karams',

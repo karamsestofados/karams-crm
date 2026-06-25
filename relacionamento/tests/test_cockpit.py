@@ -39,6 +39,21 @@ class CockpitHtmxTests(TestCase):
         self.assertNotContains(response, 'sidebar-nav')
         self.assertContains(response, 'cockpit-calendario')
 
+    def test_calendario_marca_dia_selecionado_no_carregamento(self):
+        self.client.login(username='vendedor_cockpit', password='testpass123')
+        response = self.client.get(reverse('atividade:atividade_diaria'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'cockpit-cal-day is-selected')
+
+    def test_calendario_dia_partial_retorna_agenda(self):
+        self.client.login(username='vendedor_cockpit', password='testpass123')
+        response = self.client.get(
+            reverse('atividade:calendario_dia', args=['2026-06-26']),
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '26/06/2026')
+
 
 class GiroCarteiraTests(TestCase):
     @classmethod

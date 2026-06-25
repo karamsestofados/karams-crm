@@ -13,7 +13,8 @@ class AtividadeClienteAdmin(admin.ModelAdmin):
     list_filter = ('tipo_contato', 'resultado', 'concluida', 'proxima_acao')
     search_fields = ('cliente__nome', 'assunto', 'resumo')
     readonly_fields = ('data_criacao', 'data_atualizacao', 'deleted_at', 'deleted_by')
-    autocomplete_fields = ['cliente', 'usuario', 'produto_relacionado']
+    autocomplete_fields = ['cliente', 'usuario']
+    filter_horizontal = ['produtos_relacionados']
     date_hierarchy = 'data_criacao'
 
     actions = ['soft_delete_selecionados']

@@ -3,8 +3,8 @@ from relacionamento.models import AtividadeCliente, AtividadeClienteEdicao
 
 def montar_timeline_cliente(cliente, tipo_filtro='', limit=50):
     atividades = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related(
-        'usuario', 'produto_relacionado',
-    ).order_by('-data_criacao')
+        'usuario',
+    ).prefetch_related('produtos_relacionados').order_by('-data_criacao')
     if tipo_filtro:
         atividades = atividades.filter(tipo_contato=tipo_filtro)
 

@@ -1437,6 +1437,75 @@ h2, h3 {
   font-weight: 500;
 }
 
+.produto-chip.is-removable {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-right: 0.45rem;
+}
+
+.produto-chip-remove {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.75;
+  padding: 0;
+}
+
+.produto-chip-remove:hover {
+  opacity: 1;
+}
+
+.produtos-chips-input {
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: text;
+}
+
+.produtos-chips-busca {
+  flex: 1;
+  min-width: 8rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  outline: none;
+  padding: 0.25rem 0.35rem;
+}
+
+.produtos-chips-dropdown {
+  margin-top: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-elevated);
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.produtos-chips-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.produtos-chips-option:hover {
+  background: var(--primary-subtle);
+  color: var(--primary-glow);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -2327,7 +2396,11 @@ h2, h3 {
   transition: border-color 0.15s, background 0.15s;
 }
 .cockpit-cal-day:hover { border-color: var(--primary); }
-.cockpit-cal-day.is-selected { border-color: var(--primary); background: var(--primary-subtle); }
+.cockpit-cal-day.is-selected {
+  border-color: var(--primary);
+  border-width: 2px;
+  background: var(--primary-subtle);
+}
 .cockpit-cal-day.is-today .cockpit-cal-num { color: var(--primary); font-weight: 700; }
 .cockpit-cal-day--empty { background: transparent; border: none; cursor: default; }
 .cockpit-dot {

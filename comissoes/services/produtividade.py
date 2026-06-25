@@ -174,7 +174,7 @@ def _atividades_base(
     if mes and ano and not de and not ate:
         qs = qs.filter(data_criacao__month=mes, data_criacao__year=ano)
     if produto_id:
-        qs = qs.filter(produto_relacionado_id=produto_id)
+        qs = qs.filter(produtos_relacionados__id=produto_id).distinct()
     if regiao:
         qs = qs.filter(cliente__regiao_atuacao=regiao)
     if filtros_cliente:

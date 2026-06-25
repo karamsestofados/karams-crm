@@ -49,8 +49,7 @@
           {{ form.humor_cliente }}
         </div>
         <div class="form-group">
-          <label class="form-label">{{ form.produto_relacionado.label }}</label>
-          {{ form.produto_relacionado }}
+          {% include 'relacionamento/partials/produtos_relacionados_field.html' with field=form.produtos_relacionados %}
         </div>
         <div class="form-group">
           <label class="form-label">{{ form.proxima_acao.label }}</label>

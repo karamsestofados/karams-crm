@@ -20,7 +20,15 @@ RESULTADO_PARA_FUNIL = {
 }
 
 
-def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_relacionado=None, atividade=None):
+def _normalizar_produtos(produtos_relacionados):
+    if not produtos_relacionados:
+        return []
+    if hasattr(produtos_relacionados, 'all'):
+        return list(produtos_relacionados.all())
+    return list(produtos_relacionados)
+
+
+def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produtos_relacionados=None, atividade=None):
     venda = Venda.objects.create(
         cliente=cliente,
         vendedor=usuario,
@@ -29,14 +37,15 @@ def _criar_venda(cliente, usuario, valor_venda, assunto='', resumo='', produto_r
         produtos_texto=(assunto or resumo[:500]),
         atividade_origem=atividade,
     )
-    if produto_relacionado:
-        venda.produtos.add(produto_relacionado)
+    produtos = _normalizar_produtos(produtos_relacionados)
+    if produtos:
+        venda.produtos.add(*produtos)
     return venda
 
 
 def finalizar_atendimento(
     cliente, resultado, valor_venda=None, assunto='', resumo='',
-    produto_relacionado=None, usuario=None, motivo_perda=None, motivo_perda_detalhe='',
+    produtos_relacionados=None, usuario=None, motivo_perda=None, motivo_perda_detalhe='',
     atividade=None,
 ):
     """Atualiza funil e dados do cliente quando o atendimento é encerrado."""
@@ -66,7 +75,7 @@ def finalizar_atendimento(
         cliente.save(update_fields=update_fields)
 
     if resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0 and usuario:
-        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado, atividade=atividade)
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produtos_relacionados, atividade=atividade)
 
 
 def registrar_interacao(
@@ -77,7 +86,7 @@ def registrar_interacao(
     assunto='',
     resultado=Resultado.PENDENTE,
     humor_cliente=None,
-    produto_relacionado=None,
+    produtos_relacionados=None,
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
     hora_proxima_acao=None,
@@ -106,6 +115,8 @@ def registrar_interacao(
     if valor_venda and valor_venda > 0:
         valor_atividade = valor_venda
 
+    produtos = _normalizar_produtos(produtos_relacionados)
+
     atividade = AtividadeCliente(
         cliente=cliente,
         usuario=usuario,
@@ -114,7 +125,6 @@ def registrar_interacao(
         resumo=resumo.strip(),
         resultado=resultado,
         humor_cliente=humor_cliente or None,
-        produto_relacionado=produto_relacionado,
         proxima_acao=proxima_acao,
         data_proxima_acao=data_proxima_acao,
         hora_proxima_acao=hora_proxima_acao,
@@ -123,6 +133,8 @@ def registrar_interacao(
     )
     atividade.full_clean()
     atividade.save()
+    if produtos:
+        atividade.produtos_relacionados.set(produtos)
 
     if proxima_acao == ProximaAcao.SEM_ACAO:
         finalizar_atendimento(
@@ -131,14 +143,14 @@ def registrar_interacao(
             valor_venda=valor_venda,
             assunto=assunto,
             resumo=resumo,
-            produto_relacionado=produto_relacionado,
+            produtos_relacionados=produtos,
             usuario=usuario,
             motivo_perda=motivo_perda,
             motivo_perda_detalhe=motivo_perda_detalhe,
             atividade=atividade,
         )
     elif resultado == Resultado.PEDIDO_FECHADO and valor_venda and valor_venda > 0:
-        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produto_relacionado, atividade=atividade)
+        _criar_venda(cliente, usuario, valor_venda, assunto, resumo, produtos, atividade=atividade)
 
     from clientes.services.categoria_automatica import reativar_cliente_apos_interacao
     from comissoes.services.produtividade import avaliar_conquistas
@@ -157,7 +169,7 @@ def concluir_followup(
     resultado=Resultado.PENDENTE,
     assunto='',
     humor_cliente=None,
-    produto_relacionado=None,
+    produtos_relacionados=None,
     proxima_acao=ProximaAcao.SEM_ACAO,
     data_proxima_acao=None,
     hora_proxima_acao=None,
@@ -174,6 +186,9 @@ def concluir_followup(
     atividade_pendente.concluida = True
     atividade_pendente.save(update_fields=['concluida', 'data_atualizacao'])
 
+    if produtos_relacionados is None:
+        produtos_relacionados = list(atividade_pendente.produtos_relacionados.all())
+
     return registrar_interacao(
         cliente=atividade_pendente.cliente,
         usuario=usuario,
@@ -182,7 +197,7 @@ def concluir_followup(
         assunto=assunto or atividade_pendente.assunto,
         resultado=resultado,
         humor_cliente=humor_cliente,
-        produto_relacionado=produto_relacionado or atividade_pendente.produto_relacionado,
+        produtos_relacionados=produtos_relacionados,
         proxima_acao=proxima_acao,
         data_proxima_acao=data_proxima_acao,
         hora_proxima_acao=hora_proxima_acao,

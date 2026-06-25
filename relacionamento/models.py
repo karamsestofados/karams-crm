@@ -113,12 +113,11 @@ class AtividadeCliente(AuditMixin, models.Model):
         null=True,
         blank=True,
     )
-    produto_relacionado = models.ForeignKey(
+    produtos_relacionados = models.ManyToManyField(
         'clientes.Produto',
-        on_delete=models.SET_NULL,
-        null=True,
         blank=True,
-        related_name='atividades',
+        related_name='atividades_relacionadas',
+        verbose_name='produtos relacionados',
     )
     proxima_acao = models.CharField(
         max_length=30,

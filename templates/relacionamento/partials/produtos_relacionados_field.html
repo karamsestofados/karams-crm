@@ -1,0 +1,93 @@
+<div class="produtos-relacionados-field"
+     x-data="produtosRelacionadosField({
+       catalogo: {{ field.form.produtos_catalogo_json|safe }},
+       selecionados: {{ field.form.produtos_selecionados_json|safe }}
+     })"
+     x-init="init()">
+  <label class="form-label" for="{{ field.id_for_label }}-busca">{{ field.label }}</label>
+
+  <div class="produtos-chips produtos-chips-input" @click="$refs.busca.focus()">
+    <template x-for="id in selecionados" :key="id">
+      <span class="produto-chip is-removable">
+        <span x-text="nomePorId(id)"></span>
+        <button type="button" class="produto-chip-remove" @click.stop="remover(id)" aria-label="Remover produto">&times;</button>
+      </span>
+    </template>
+    <input type="text"
+           id="{{ field.id_for_label }}-busca"
+           class="produtos-chips-busca"
+           x-ref="busca"
+           x-model="busca"
+           @keydown.backspace="removerUltimoSeNecessario()"
+           @keydown.escape="fecharLista()"
+           placeholder="Buscar e adicionar produtos..."
+           autocomplete="off"
+           @focus="aberto = true"
+           @blur="setTimeout(() => aberto = false, 150)">
+  </div>
+
+  <div class="produtos-chips-dropdown" x-show="aberto && filtrados.length" x-cloak>
+    <template x-for="item in filtrados" :key="item.id">
+      <button type="button"
+              class="produtos-chips-option"
+              @mousedown.prevent="adicionar(item.id)">
+        <span x-text="item.nome"></span>
+      </button>
+    </template>
+  </div>
+
+  <template x-for="id in selecionados" :key="'hidden-' + id">
+    <input type="hidden" name="{{ field.html_name }}" :value="id">
+  </template>
+
+  {% if field.errors %}
+  <span class="form-error">{{ field.errors.0 }}</span>
+  {% endif %}
+</div>
+
+<script>
+function produtosRelacionadosField(config) {
+  return {
+    catalogo: config.catalogo || [],
+    selecionados: (config.selecionados || []).map(String),
+    busca: '',
+    aberto: false,
+    init() {
+      this.selecionados = [...new Set(this.selecionados.map(String))];
+    },
+    get filtrados() {
+      const termo = this.busca.trim().toLowerCase();
+      return this.catalogo.filter((item) => {
+        if (this.selecionados.includes(String(item.id))) return false;
+        if (!termo) return true;
+        return item.nome.toLowerCase().includes(termo);
+      }).slice(0, 12);
+    },
+    nomePorId(id) {
+      const item = this.catalogo.find((p) => String(p.id) === String(id));
+      return item ? item.nome : id;
+    },
+    adicionar(id) {
+      const sid = String(id);
+      if (!this.selecionados.includes(sid)) {
+        this.selecionados.push(sid);
+      }
+      this.busca = '';
+      this.aberto = true;
+      this.$nextTick(() => this.$refs.busca && this.$refs.busca.focus());
+    },
+    remover(id) {
+      const sid = String(id);
+      this.selecionados = this.selecionados.filter((item) => item !== sid);
+    },
+    removerUltimoSeNecessario() {
+      if (this.busca === '' && this.selecionados.length) {
+        this.selecionados.pop();
+      }
+    },
+    fecharLista() {
+      this.aberto = false;
+    },
+  };
+}
+</script>

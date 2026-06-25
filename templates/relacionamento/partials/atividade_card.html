@@ -11,8 +11,8 @@
   {% if atividade.assunto %}
   <p class="atividade-card-assunto"><strong>Assunto:</strong> {{ atividade.assunto }}</p>
   {% endif %}
-  {% if atividade.produto_relacionado %}
-  <p class="atividade-card-produto"><strong>Produto:</strong> {{ atividade.produto_relacionado.nome }}</p>
+  {% if atividade.produtos_relacionados.all %}
+  <p class="atividade-card-produto"><strong>Produtos:</strong> {% for produto in atividade.produtos_relacionados.all %}{{ produto.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
   {% endif %}
   <p class="atividade-card-vencimento">
     <strong>Vencimento:</strong>

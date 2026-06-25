@@ -9,7 +9,7 @@
       <span class="atividade-card-compact-meta">
         {{ atividade.data_proxima_acao|date:"d/m/Y" }}
         {% if atividade.hora_proxima_acao %} · {{ atividade.hora_proxima_acao|time:"H:i" }}{% endif %}
-        {% if atividade.produto_relacionado %} · {{ atividade.produto_relacionado.nome }}{% endif %}
+        {% if atividade.produtos_relacionados.all %} · {% for produto in atividade.produtos_relacionados.all %}{{ produto.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
       </span>
     </div>
   </div>

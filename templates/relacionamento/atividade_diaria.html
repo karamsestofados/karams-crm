@@ -18,6 +18,15 @@
 
 {% block extra_head %}
 <script>
+  document.body.addEventListener('htmx:beforeRequest', function(evt) {
+    var el = evt.detail.elt;
+    if (!el || !el.classList || !el.classList.contains('cockpit-cal-day')) return;
+    document.querySelectorAll('.cockpit-cal-day.is-selected').forEach(function(day) {
+      day.classList.remove('is-selected');
+    });
+    el.classList.add('is-selected');
+  });
+
   document.body.addEventListener('htmx:afterSwap', function(evt) {
     if (evt.detail.target.id === 'modal-concluir-container') {
       var modal = document.getElementById('modal-concluir');

@@ -1,4 +1,5 @@
 from django import forms
+import json
 
 from clientes.models import MotivoPerda, Produto
 
@@ -67,7 +68,7 @@ class AtividadeClienteForm(forms.ModelForm):
         model = AtividadeCliente
         fields = [
             'tipo_contato', 'assunto', 'resumo', 'resultado', 'humor_cliente',
-            'produto_relacionado', 'proxima_acao', 'data_proxima_acao', 'hora_proxima_acao',
+            'produtos_relacionados', 'proxima_acao', 'data_proxima_acao', 'hora_proxima_acao',
         ]
         widgets = {
             'tipo_contato': forms.Select(attrs={'class': 'form-input'}),
@@ -75,7 +76,7 @@ class AtividadeClienteForm(forms.ModelForm):
             'resumo': forms.Textarea(attrs={'class': 'form-input', 'rows': 4, 'placeholder': 'Descreva a interação...'}),
             'resultado': forms.Select(attrs={'class': 'form-input'}),
             'humor_cliente': forms.Select(attrs={'class': 'form-input'}),
-            'produto_relacionado': forms.Select(attrs={'class': 'form-input'}),
+            'produtos_relacionados': forms.MultipleHiddenInput(),
             'proxima_acao': forms.Select(attrs={'class': 'form-input'}),
             'data_proxima_acao': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
             'hora_proxima_acao': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
@@ -85,11 +86,33 @@ class AtividadeClienteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['humor_cliente'].required = False
         self.fields['humor_cliente'].empty_label = '— Selecione —'
-        self.fields['produto_relacionado'].required = False
-        self.fields['produto_relacionado'].empty_label = '— Nenhum —'
-        self.fields['produto_relacionado'].queryset = Produto.objects.ativos().order_by('nome')
+        self.fields['produtos_relacionados'].required = False
+        self.fields['produtos_relacionados'].queryset = Produto.objects.ativos().order_by('nome')
+        self.fields['produtos_relacionados'].label = 'Produtos relacionados'
+        self.produtos_catalogo = list(
+            Produto.objects.ativos().order_by('nome').values('id', 'nome', 'tipo_produto')
+        )
+        self._produtos_selecionados_iniciais()
+        self.produtos_catalogo_json = json.dumps(self.produtos_catalogo, ensure_ascii=False)
+        self.produtos_selecionados_json = json.dumps(self.produtos_selecionados)
         self.fields['data_proxima_acao'].required = False
         self.fields['hora_proxima_acao'].required = False
+
+    def _produtos_selecionados_iniciais(self):
+        if self.is_bound:
+            if hasattr(self.data, 'getlist'):
+                raw = self.data.getlist('produtos_relacionados')
+            else:
+                raw = self.data.get('produtos_relacionados', [])
+                if not isinstance(raw, list):
+                    raw = [raw] if raw else []
+            self.produtos_selecionados = [int(pk) for pk in raw if pk]
+        elif self.instance.pk:
+            self.produtos_selecionados = list(
+                self.instance.produtos_relacionados.values_list('pk', flat=True)
+            )
+        else:
+            self.produtos_selecionados = []
 
     def clean(self):
         cleaned = super().clean()

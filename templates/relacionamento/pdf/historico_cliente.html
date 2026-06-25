@@ -43,7 +43,7 @@
     <div class="meta">
       <strong>Resultado:</strong> {{ atividade.get_resultado_display }}
       {% if atividade.humor_cliente %} · <strong>Humor:</strong> {{ atividade.get_humor_cliente_display }}{% endif %}
-      {% if atividade.produto_relacionado %} · <strong>Produto:</strong> {{ atividade.produto_relacionado.nome }}{% endif %}
+      {% if atividade.produtos_relacionados.all %} · <strong>Produtos:</strong> {% for produto in atividade.produtos_relacionados.all %}{{ produto.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
       {% if atividade.proxima_acao != 'SEM_ACAO' and atividade.data_proxima_acao %}
       · <strong>Próxima ação:</strong> {{ atividade.get_proxima_acao_display }} {{ atividade.data_proxima_acao|date:"d/m/Y" }}
       {% endif %}

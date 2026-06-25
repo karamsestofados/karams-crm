@@ -196,7 +196,7 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                     assunto=form.cleaned_data.get('assunto', ''),
                     resultado=form.cleaned_data['resultado'],
                     humor_cliente=form.cleaned_data.get('humor_cliente'),
-                    produto_relacionado=form.cleaned_data.get('produto_relacionado'),
+                    produtos_relacionados=form.cleaned_data.get('produtos_relacionados'),
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
@@ -285,7 +285,7 @@ class ClienteAtividadeCreateView(VendedorRequiredMixin, View):
                     assunto=form.cleaned_data.get('assunto', ''),
                     resultado=form.cleaned_data['resultado'],
                     humor_cliente=form.cleaned_data.get('humor_cliente'),
-                    produto_relacionado=form.cleaned_data.get('produto_relacionado'),
+                    produtos_relacionados=form.cleaned_data.get('produtos_relacionados'),
                     proxima_acao=form.cleaned_data['proxima_acao'],
                     data_proxima_acao=form.cleaned_data.get('data_proxima_acao'),
                     hora_proxima_acao=form.cleaned_data.get('hora_proxima_acao'),
@@ -340,7 +340,7 @@ def _cliente_tab_context(
     edit_atividade=None,
     modal_editar_aberto=False,
 ):
-    qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario', 'produto_relacionado')
+    qs = AtividadeCliente.objects.ativas().filter(cliente=cliente).select_related('usuario').prefetch_related('produtos_relacionados')
     if tipo_filtro:
         qs = qs.filter(tipo_contato=tipo_filtro)
     qs = qs.order_by('-data_criacao')

@@ -45,7 +45,7 @@ class GoogleCalendarUrlTests(TestCase):
             'tipo_contato': TipoContato.WHATSAPP,
             'resumo': 'Teste',
             'assunto': '',
-            'produto_relacionado': None,
+            'produtos_relacionados': None,
         }
         url = resolve_calendar_url(cliente, usuario, cleaned)
         self.assertIn('T090000', url)
@@ -82,7 +82,7 @@ class FollowupValidationTests(TestCase):
             'resumo': 'Negociação em andamento',
             'resultado': Resultado.AGUARDANDO_RETORNO,
             'humor_cliente': '',
-            'produto_relacionado': '',
+            'produtos_relacionados': [],
             'proxima_acao': ProximaAcao.SEM_ACAO,
             'data_proxima_acao': '',
             'hora_proxima_acao': '',
@@ -99,7 +99,7 @@ class FollowupValidationTests(TestCase):
             'proxima_acao': ProximaAcao.ENVIAR_PROPOSTA,
             'data_proxima_acao': date(2026, 6, 17),
             'hora_proxima_acao': time(9, 30),
-            'produto_relacionado': None,
+            'produtos_relacionados': None,
         }
         atividade = registrar_interacao(
             cliente=self.cliente,
@@ -146,7 +146,7 @@ class CalendarHtmxTests(TestCase):
                 'resumo': 'Cliente solicitou proposta',
                 'resultado': Resultado.PROPOSTA_ENVIADA,
                 'humor_cliente': '',
-                'produto_relacionado': '',
+                'produtos_relacionados': [],
                 'proxima_acao': ProximaAcao.ENVIAR_PROPOSTA,
                 'data_proxima_acao': '2026-06-17',
                 'hora_proxima_acao': '09:30',
@@ -173,7 +173,7 @@ class CalendarHtmxTests(TestCase):
                 'resumo': 'Contato rápido',
                 'resultado': Resultado.CONTATO_REALIZADO,
                 'humor_cliente': '',
-                'produto_relacionado': '',
+                'produtos_relacionados': [],
                 'proxima_acao': ProximaAcao.SEM_ACAO,
                 'data_proxima_acao': '',
                 'hora_proxima_acao': '',
