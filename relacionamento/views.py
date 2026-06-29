@@ -64,6 +64,16 @@ def _render_cockpit_main(request, calendar_url=None):
     return render(request, 'relacionamento/partials/cockpit_main.html', context)
 
 
+def _render_cockpit_success_oob(request, calendar_url=None, success_message=''):
+    context = _cockpit_context(request)
+    if calendar_url:
+        context['google_calendar_url'] = calendar_url
+    context['success_message'] = success_message
+    response = render(request, 'relacionamento/partials/cockpit_save_success_oob.html', context)
+    response['HX-Reswap'] = 'none'
+    return response
+
+
 def _interacao_success_message(calendar_url=None):
     if calendar_url:
         return 'Interação registrada com sucesso. Abrindo Google Agenda em nova guia.'
@@ -79,12 +89,6 @@ def _concluir_success_message(calendar_url=None):
 def _attach_calendar_trigger(response, calendar_url):
     if calendar_url:
         response['HX-Trigger'] = json.dumps({'openGoogleCalendar': calendar_url})
-    return response
-
-
-def _modal_error_response(response, retarget_selector):
-    response['HX-Retarget'] = retarget_selector
-    response['HX-Reswap'] = 'innerHTML'
     return response
 
 
@@ -151,22 +155,26 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
                 return _finalize_interacao_response(
                     request,
                     calendar_url,
-                    _render_cockpit_main(request, calendar_url),
+                    _render_cockpit_success_oob(
+                        request,
+                        calendar_url,
+                        _concluir_success_message(calendar_url),
+                    ),
                     'atividade:atividade_diaria',
                 )
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return _modal_error_response(render(request, 'relacionamento/partials/modal_concluir.html', {
+                    return render(request, 'relacionamento/partials/modal_concluir.html', {
                         'atividade': atividade,
                         'form': form,
-                    }, status=422), '#modal-concluir-container')
+                    })
         else:
             if request.headers.get('HX-Request'):
-                return _modal_error_response(render(request, 'relacionamento/partials/modal_concluir.html', {
+                return render(request, 'relacionamento/partials/modal_concluir.html', {
                     'atividade': atividade,
                     'form': form,
-                }, status=422), '#modal-concluir-container')
+                })
 
         return redirect('atividade:atividade_diaria')
 
@@ -215,20 +223,24 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
                 return _finalize_interacao_response(
                     request,
                     calendar_url,
-                    _render_cockpit_main(request, calendar_url),
+                    _render_cockpit_success_oob(
+                        request,
+                        calendar_url,
+                        _interacao_success_message(calendar_url),
+                    ),
                     'atividade:atividade_diaria',
                 )
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return _modal_error_response(render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                    return render(request, 'relacionamento/partials/modal_interacao_global.html', {
                         'form': form,
-                    }, status=422), '#modal-interacao-global-container')
+                    })
         else:
             if request.headers.get('HX-Request'):
-                return _modal_error_response(render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                return render(request, 'relacionamento/partials/modal_interacao_global.html', {
                     'form': form,
-                }, status=422), '#modal-interacao-global-container')
+                })
 
         return redirect('atividade:atividade_diaria')
 

@@ -118,4 +118,15 @@
   window.KaramsCalendarOnSave = {
     formShouldOpenCalendar: formShouldOpenCalendar,
   };
+
+  document.body.addEventListener('htmx:oobAfterSwap', function (evt) {
+    if (evt.detail.target.id !== 'calendar-toast') return;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      var el = document.getElementById('calendar-toast');
+      if (!el) return;
+      el.classList.remove('calendar-toast--visible');
+      el.hidden = true;
+    }, 4000);
+  });
 })();

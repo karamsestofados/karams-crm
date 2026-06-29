@@ -10,10 +10,9 @@
     <form method="post"
           action="{% url 'atividade:concluir_followup' atividade.pk %}"
           hx-post="{% url 'atividade:concluir_followup' atividade.pk %}"
-          hx-target="#cockpit-main"
+          hx-target="#modal-concluir-container"
           hx-swap="innerHTML"
-          data-google-calendar-on-save
-          hx-on::after-request="if(event.detail.successful) document.getElementById('modal-concluir-container').innerHTML=''">
+          data-google-calendar-on-save>
       {% csrf_token %}
       {% if form.non_field_errors %}
       <ul class="messages" style="margin-bottom:1rem;">
@@ -33,6 +32,7 @@
       <div class="form-group full-width">
         <label class="form-label">{{ form.resumo.label }}</label>
         {{ form.resumo }}
+        {% if form.resumo.errors %}<span class="form-error">{{ form.resumo.errors.0 }}</span>{% endif %}
       </div>
       <div class="form-grid" style="grid-template-columns:1fr 1fr;">
         <div class="form-group">

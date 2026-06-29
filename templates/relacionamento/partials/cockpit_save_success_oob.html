@@ -1,0 +1,8 @@
+<div id="cockpit-main" hx-swap-oob="innerHTML">
+  {% include 'relacionamento/partials/cockpit_main.html' %}
+</div>
+<div id="modal-interacao-global-container" hx-swap-oob="innerHTML"></div>
+<div id="modal-concluir-container" hx-swap-oob="innerHTML"></div>
+{% if success_message %}
+<div id="calendar-toast" hx-swap-oob="innerHTML" class="calendar-toast calendar-toast--visible" role="status" aria-live="polite">{{ success_message }}</div>
+{% endif %}

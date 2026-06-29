@@ -46,7 +46,7 @@ class AtividadeDiariaSaveTests(TestCase):
     def setUp(self):
         self.client.login(username='vendedor_save', password='testpass123')
 
-    def test_interacao_sem_interesse_sem_motivo_retorna_422_com_retarget(self):
+    def test_interacao_sem_interesse_sem_motivo_retorna_erro_no_modal(self):
         response = self.client.post(
             reverse('atividade:interacao_nova'),
             {
@@ -63,9 +63,10 @@ class AtividadeDiariaSaveTests(TestCase):
             },
             HTTP_HX_REQUEST='true',
         )
-        self.assertEqual(response.status_code, 422)
-        self.assertEqual(response['HX-Retarget'], '#modal-interacao-global-container')
-        self.assertIn('motivo', response.content.decode().lower())
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('modal-interacao-global', content)
+        self.assertIn('motivo', content.lower())
         self.assertEqual(AtividadeCliente.objects.filter(resumo='Cliente sem interesse no momento').count(), 0)
 
     def test_interacao_sem_interesse_com_motivo_salva_sem_calendario(self):
@@ -89,6 +90,10 @@ class AtividadeDiariaSaveTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('HX-Trigger', response)
+        content = response.content.decode()
+        self.assertIn('hx-swap-oob', content)
+        self.assertIn('cockpit-main', content)
+        self.assertIn('Interação registrada com sucesso', content)
         self.assertTrue(
             AtividadeCliente.objects.filter(resumo='Sem interesse confirmado').exists()
         )
@@ -111,11 +116,12 @@ class AtividadeDiariaSaveTests(TestCase):
             HTTP_HX_REQUEST='true',
         )
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['HX-Reswap'], 'none')
         trigger = json.loads(response['HX-Trigger'])
         self.assertIn('openGoogleCalendar', trigger)
         self.assertIn('calendar.google.com', trigger['openGoogleCalendar'])
 
-    def test_concluir_followup_erro_retorna_422_com_retarget(self):
+    def test_concluir_followup_erro_retorna_modal(self):
         response = self.client.post(
             reverse('atividade:concluir_followup', args=[self.atividade_pendente.pk]),
             {
@@ -128,7 +134,26 @@ class AtividadeDiariaSaveTests(TestCase):
             },
             HTTP_HX_REQUEST='true',
         )
-        self.assertEqual(response.status_code, 422)
-        self.assertEqual(response['HX-Retarget'], '#modal-concluir-container')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('modal-concluir', response.content.decode())
         self.atividade_pendente.refresh_from_db()
         self.assertFalse(self.atividade_pendente.concluida)
+
+    def test_concluir_followup_sucesso_usa_oob(self):
+        response = self.client.post(
+            reverse('atividade:concluir_followup', args=[self.atividade_pendente.pk]),
+            {
+                'resumo': 'Contato realizado com sucesso',
+                'tipo_contato': TipoContato.WHATSAPP,
+                'resultado': Resultado.CONTATO_REALIZADO,
+                'proxima_acao': ProximaAcao.SEM_ACAO,
+                'data_proxima_acao': '',
+                'hora_proxima_acao': '',
+            },
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['HX-Reswap'], 'none')
+        self.assertIn('hx-swap-oob', response.content.decode())
+        self.atividade_pendente.refresh_from_db()
+        self.assertTrue(self.atividade_pendente.concluida)
