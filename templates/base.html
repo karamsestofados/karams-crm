@@ -117,6 +117,10 @@
 
       {% block content %}{% endblock %}
     </div>
+
+    {% if mostrar_novidades %}
+    {% include 'core/partials/modal_novidades.html' %}
+    {% endif %}
   </div>
   {% endblock %}
   {% if pending_calendar_url %}
@@ -225,5 +229,29 @@
     });
   })();
   </script>
+  {% if mostrar_novidades %}
+  <script>
+  (function () {
+    var modal = document.getElementById('modal-novidades');
+    var form = document.getElementById('novidades-dismiss-form');
+    if (!modal || !form) return;
+
+    function fecharNovidades() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      var data = new FormData(form);
+      fetch(form.action, { method: 'POST', body: data, credentials: 'same-origin' });
+    }
+
+    document.getElementById('novidades-close-btn').addEventListener('click', fecharNovidades);
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) fecharNovidades();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) fecharNovidades();
+    });
+  })();
+  </script>
+  {% endif %}
 </body>
 </html>

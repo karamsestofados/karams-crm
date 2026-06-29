@@ -2231,6 +2231,255 @@ h2, h3 {
 }
 .modal-panel-lg { max-width: 640px; }
 
+/* Modal Novidades (login) */
+.novidades-modal-overlay {
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}
+.novidades-modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 146, 32, 0.2);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.55), var(--shadow-glow);
+  background: var(--bg-card);
+}
+.novidades-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 146, 32, 0.15);
+  color: var(--primary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.novidades-modal-close:hover {
+  background: rgba(255, 146, 32, 0.28);
+}
+.novidades-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 34%) 1fr;
+  max-height: 90vh;
+}
+.novidades-modal-brand {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.75rem;
+  background: linear-gradient(160deg, rgba(255, 146, 32, 0.22) 0%, rgba(13, 13, 15, 0.95) 55%, #0D0D0F 100%);
+  border-right: 1px solid rgba(255, 146, 32, 0.12);
+  overflow-y: auto;
+}
+.novidades-modal-logo {
+  height: 2rem;
+  width: auto;
+  margin-bottom: 1.5rem;
+}
+.novidades-modal-brand-title {
+  font-family: var(--font-heading);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+.novidades-modal-brand-title span {
+  color: var(--primary);
+}
+.novidades-modal-brand-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+.novidades-modal-visual {
+  position: relative;
+  flex: 1;
+  min-height: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem 0 1.5rem;
+}
+.novidades-modal-visual-glow {
+  position: absolute;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 146, 32, 0.35) 0%, transparent 70%);
+}
+.novidades-modal-visual-logo {
+  position: relative;
+  height: 4.5rem;
+  width: auto;
+  opacity: 0.9;
+  filter: drop-shadow(0 8px 24px rgba(255, 146, 32, 0.3));
+}
+.novidades-modal-brand-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+.novidades-modal-brand-footer svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.novidades-modal-content {
+  padding: 2rem 2rem 1.75rem;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+.novidades-section {
+  margin-bottom: 1.5rem;
+}
+.novidades-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+.novidades-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.novidades-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+.novidades-check {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+.novidades-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.novidades-action-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 146, 32, 0.35);
+  background: rgba(255, 146, 32, 0.06);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.novidades-action-card:hover {
+  background: rgba(255, 146, 32, 0.12);
+  border-color: rgba(255, 146, 32, 0.55);
+}
+.novidades-action-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+.novidades-action-icon svg {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+.novidades-action-icon--whatsapp {
+  color: #25D366;
+}
+.novidades-action-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.novidades-action-text strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.novidades-action-text span {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.novidades-action-arrow {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  color: var(--primary);
+  line-height: 1;
+}
+.novidades-thanks {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+.novidades-thanks span {
+  color: var(--primary);
+}
+@media (max-width: 768px) {
+  .novidades-modal-grid {
+    grid-template-columns: 1fr;
+  }
+  .novidades-modal-brand {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 146, 32, 0.12);
+    padding: 1.5rem 1.25rem;
+  }
+  .novidades-modal-visual {
+    min-height: 5rem;
+    margin-bottom: 1rem;
+  }
+  .novidades-modal-content {
+    padding: 1.25rem;
+  }
+  .novidades-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Cockpit Comercial */
 .cockpit-resumo-grid {
   display: grid;

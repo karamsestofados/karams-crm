@@ -22,6 +22,7 @@ from .setup import definir_senha_admin, precisa_configuracao_inicial
 
 from core.forms import RestaurarBackupForm
 from core.models import BackupLog, TipoBackup
+from core.novidades import dispensar_novidades_popup, marcar_novidades_popup
 from extension.models import ExtensionApiToken
 
 
@@ -37,6 +38,10 @@ class LoginView(AuthLoginView):
 
     def get_success_url(self):
         return reverse_lazy('core:dashboard')
+
+    def form_valid(self, form):
+        marcar_novidades_popup(self.request.session)
+        return super().form_valid(form)
 
 
 class LogoutView(AuthLogoutView):
@@ -75,6 +80,7 @@ def configuracao_inicial(request):
     if request.method == 'POST' and form.is_valid():
         admin = definir_senha_admin(password=form.cleaned_data['password1'])
         login(request, admin)
+        marcar_novidades_popup(request.session)
         messages.success(request, 'Senha definida. Bem-vindo ao Karams CRM.')
         return redirect('core:dashboard')
 
@@ -112,6 +118,12 @@ def _contexto_extension_perfil(request):
         'extension_token_plain': request.session.pop('extension_token_plain', None),
         'extension_token_prefix': request.session.get('extension_token_prefix'),
     }
+
+
+class NovidadesDispensarView(VendedorRequiredMixin, View):
+    def post(self, request):
+        dispensar_novidades_popup(request.session)
+        return redirect(request.META.get('HTTP_REFERER') or reverse('core:dashboard'))
 
 
 class UsuarioListView(AdminRequiredMixin, ListView):
