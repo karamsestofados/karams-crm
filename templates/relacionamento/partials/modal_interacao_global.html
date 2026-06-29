@@ -63,6 +63,16 @@
           <label class="form-label">{{ form.hora_proxima_acao.label }}</label>
           {{ form.hora_proxima_acao }}
         </div>
+        <div class="form-group" id="motivo-perda-group" style="display:none;grid-column:1/-1;">
+          <label class="form-label">{{ form.motivo_perda.label }} *</label>
+          {{ form.motivo_perda }}
+          {% if form.motivo_perda.errors %}<span class="form-error">{{ form.motivo_perda.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group" id="motivo-perda-detalhe-group" style="display:none;grid-column:1/-1;">
+          <label class="form-label">{{ form.motivo_perda_detalhe.label }}</label>
+          {{ form.motivo_perda_detalhe }}
+          {% if form.motivo_perda_detalhe.errors %}<span class="form-error">{{ form.motivo_perda_detalhe.errors.0 }}</span>{% endif %}
+        </div>
       </div>
       <div style="margin-top:1rem;display:flex;gap:0.75rem;justify-content:flex-end;">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-interacao-global-container').innerHTML=''">Cancelar</button>
@@ -72,9 +82,15 @@
     <script>
     (function() {
       var sel = document.getElementById('id_resultado');
-      var grp = document.getElementById('valor-venda-group');
-      if (!sel || !grp) return;
-      function toggle() { grp.style.display = sel.value === 'PEDIDO_FECHADO' ? '' : 'none'; }
+      var grpVenda = document.getElementById('valor-venda-group');
+      var grpMotivo = document.getElementById('motivo-perda-group');
+      var grpDetalhe = document.getElementById('motivo-perda-detalhe-group');
+      if (!sel) return;
+      function toggle() {
+        if (grpVenda) grpVenda.style.display = sel.value === 'PEDIDO_FECHADO' ? '' : 'none';
+        if (grpMotivo) grpMotivo.style.display = sel.value === 'SEM_INTERESSE' ? '' : 'none';
+        if (grpDetalhe) grpDetalhe.style.display = sel.value === 'SEM_INTERESSE' ? '' : 'none';
+      }
       sel.addEventListener('change', toggle);
       toggle();
     })();

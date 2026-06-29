@@ -82,6 +82,12 @@ def _attach_calendar_trigger(response, calendar_url):
     return response
 
 
+def _modal_error_response(response, retarget_selector):
+    response['HX-Retarget'] = retarget_selector
+    response['HX-Reswap'] = 'innerHTML'
+    return response
+
+
 def _finalize_interacao_response(request, calendar_url, render_response, redirect_url):
     if request.headers.get('HX-Request'):
         return _attach_calendar_trigger(render_response, calendar_url)
@@ -151,16 +157,16 @@ class ConcluirFollowupView(VendedorRequiredMixin, View):
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return render(request, 'relacionamento/partials/modal_concluir.html', {
+                    return _modal_error_response(render(request, 'relacionamento/partials/modal_concluir.html', {
                         'atividade': atividade,
                         'form': form,
-                    }, status=422)
+                    }, status=422), '#modal-concluir-container')
         else:
             if request.headers.get('HX-Request'):
-                return render(request, 'relacionamento/partials/modal_concluir.html', {
+                return _modal_error_response(render(request, 'relacionamento/partials/modal_concluir.html', {
                     'atividade': atividade,
                     'form': form,
-                }, status=422)
+                }, status=422), '#modal-concluir-container')
 
         return redirect('atividade:atividade_diaria')
 
@@ -215,14 +221,14 @@ class InteracaoGlobalCreateView(VendedorRequiredMixin, View):
             except ValidationError as exc:
                 messages.error(request, exc.messages[0] if exc.messages else str(exc))
                 if request.headers.get('HX-Request'):
-                    return render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                    return _modal_error_response(render(request, 'relacionamento/partials/modal_interacao_global.html', {
                         'form': form,
-                    }, status=422)
+                    }, status=422), '#modal-interacao-global-container')
         else:
             if request.headers.get('HX-Request'):
-                return render(request, 'relacionamento/partials/modal_interacao_global.html', {
+                return _modal_error_response(render(request, 'relacionamento/partials/modal_interacao_global.html', {
                     'form': form,
-                }, status=422)
+                }, status=422), '#modal-interacao-global-container')
 
         return redirect('atividade:atividade_diaria')
 

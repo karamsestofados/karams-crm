@@ -10,7 +10,11 @@
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
   <link rel="stylesheet" href="{% static 'css/karams.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    htmx.config.responseHandling.unshift({ code: '422', swap: true });
+  </script>
   <script src="{% static 'js/produtos-relacionados.js' %}"></script>
+  <script src="{% static 'js/calendar-on-save.js' %}"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
   {% block extra_head %}{% endblock %}
 </head>
@@ -138,97 +142,6 @@
   </div>
   {% endif %}
   <div id="calendar-toast" class="calendar-toast" role="status" aria-live="polite" hidden></div>
-  <script>
-  (function () {
-    var pendingCalendarTab = null;
-    var toastEl = document.getElementById('calendar-toast');
-    var toastTimer = null;
-
-    function formHasScheduledFollowup(form) {
-      var proxima = form.querySelector('[name="proxima_acao"]');
-      var data = form.querySelector('[name="data_proxima_acao"]');
-      if (!proxima || !data) return false;
-      var acao = (proxima.value || '').trim();
-      if (!acao || acao === 'SEM_ACAO') return false;
-      return Boolean((data.value || '').trim());
-    }
-
-    function parseCalendarUrl(triggerHeader) {
-      if (!triggerHeader) return null;
-      try {
-        var payload = JSON.parse(triggerHeader);
-        return payload.openGoogleCalendar || null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function showCalendarToast(message) {
-      if (!toastEl) return;
-      toastEl.textContent = message;
-      toastEl.hidden = false;
-      toastEl.classList.add('calendar-toast--visible');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () {
-        toastEl.classList.remove('calendar-toast--visible');
-        toastEl.hidden = true;
-      }, 4000);
-    }
-
-    function scrollToCalendarFallback() {
-      var banner = document.querySelector('.calendar-cta-banner');
-      if (banner) {
-        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        return;
-      }
-      var resumo = document.getElementById('cockpit-resumo');
-      if (resumo) {
-        resumo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    function openCalendarUrl(url) {
-      if (pendingCalendarTab && !pendingCalendarTab.closed) {
-        pendingCalendarTab.location.href = url;
-        showCalendarToast('Abrindo Google Agenda em nova guia…');
-        return true;
-      }
-      var fallbackTab = window.open(url, '_blank');
-      if (fallbackTab) {
-        showCalendarToast('Abrindo Google Agenda em nova guia…');
-        return true;
-      }
-      showCalendarToast('Use o botão "Salvar no Google Agenda" abaixo.');
-      scrollToCalendarFallback();
-      return false;
-    }
-
-    function closePendingTab() {
-      if (pendingCalendarTab && !pendingCalendarTab.closed) {
-        pendingCalendarTab.close();
-      }
-      pendingCalendarTab = null;
-    }
-
-    document.body.addEventListener('submit', function (evt) {
-      var form = evt.target.closest('form[data-google-calendar-on-save]');
-      if (!form || !formHasScheduledFollowup(form)) return;
-      pendingCalendarTab = window.open('about:blank', '_blank');
-    }, true);
-
-    document.body.addEventListener('htmx:afterRequest', function (evt) {
-      var xhr = evt.detail.xhr;
-      var url = parseCalendarUrl(xhr.getResponseHeader('HX-Trigger'));
-
-      if (url && evt.detail.successful) {
-        openCalendarUrl(url);
-      } else {
-        closePendingTab();
-      }
-      pendingCalendarTab = null;
-    });
-  })();
-  </script>
   {% if mostrar_novidades %}
   <script>
   (function () {
