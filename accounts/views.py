@@ -5,6 +5,7 @@ from django.contrib.auth.views import LogoutView as AuthLogoutView
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import CreateView, ListView, UpdateView, View
 
 from .forms import (
@@ -72,6 +73,7 @@ class PerfilView(VendedorRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
+@ensure_csrf_cookie
 def configuracao_inicial(request):
     if not precisa_configuracao_inicial():
         return redirect('accounts:login')

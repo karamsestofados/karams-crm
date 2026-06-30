@@ -20,6 +20,16 @@ class ProductionSettingsTest(SimpleTestCase):
         self.assertIn('https://crm-karams.up.railway.app', origins)
         self.assertTrue(all('*' not in o for o in origins))
 
+    def test_csrf_only_wildcard_host_needs_explicit_domain(self):
+        """Com só .railway.app o Django aceita o host, mas CSRF exige origem explícita."""
+        origins = _build_csrf_trusted_origins(
+            ['.railway.app'],
+            '',
+            extra_csrf_hosts=['crm-karams.up.railway.app'],
+        )
+        self.assertIn('https://crm-karams.up.railway.app', origins)
+        self.assertNotIn('https://.railway.app', origins)
+
     def test_csrf_includes_explicit_allowed_hosts(self):
         origins = _build_csrf_trusted_origins(
             ['crm-karams.up.railway.app'],

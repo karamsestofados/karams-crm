@@ -28,7 +28,17 @@ def _normalize_allowed_hosts(hosts):
     return list(dict.fromkeys(normalized))
 
 
-def _build_csrf_trusted_origins(allowed_hosts, railway_domain):
+def _host_allowed_by_list(host, allowed_hosts):
+    if host in allowed_hosts:
+        return True
+    return any(
+        pattern.startswith('.') and host.endswith(pattern)
+        for pattern in allowed_hosts
+        if pattern.startswith('.')
+    )
+
+
+def _build_csrf_trusted_origins(allowed_hosts, railway_domain, extra_csrf_hosts=()):
     """
     Django NÃO aceita wildcard em CSRF_TRUSTED_ORIGINS (ex: https://*.railway.app).
     Monta a lista com domínios explícitos.
@@ -53,11 +63,21 @@ def _build_csrf_trusted_origins(allowed_hosts, railway_domain):
         else:
             origins.append(f'https://{host}')
 
+    for host in extra_csrf_hosts:
+        host = (host or '').strip()
+        if not host or host.startswith('.'):
+            continue
+        if _host_allowed_by_list(host, allowed_hosts):
+            origins.append(f'https://{host}')
+
     return list(dict.fromkeys(origins))
 
 
 ALLOWED_HOSTS = _normalize_allowed_hosts(
-    env.list('ALLOWED_HOSTS', default=['.railway.app', 'localhost', '127.0.0.1']),
+    env.list(
+        'ALLOWED_HOSTS',
+        default=['.railway.app', 'crm-karams.up.railway.app', 'localhost', '127.0.0.1'],
+    ),
 )
 
 RAILWAY_DOMAIN = (os.environ.get('RAILWAY_PUBLIC_DOMAIN') or '').strip()
@@ -68,7 +88,16 @@ for extra in _normalize_allowed_hosts(env.list('EXTRA_ALLOWED_HOSTS', default=[]
     if extra not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(extra)
 
-CSRF_TRUSTED_ORIGINS = _build_csrf_trusted_origins(ALLOWED_HOSTS, RAILWAY_DOMAIN)
+# Domínio público do CRM — incluído no CSRF quando ALLOWED_HOSTS usa só wildcard (.railway.app).
+PRODUCTION_PUBLIC_HOSTS = _normalize_allowed_hosts(
+    env.list('PRODUCTION_PUBLIC_HOSTS', default=['crm-karams.up.railway.app']),
+)
+
+CSRF_TRUSTED_ORIGINS = _build_csrf_trusted_origins(
+    ALLOWED_HOSTS,
+    RAILWAY_DOMAIN,
+    extra_csrf_hosts=PRODUCTION_PUBLIC_HOSTS,
+)
 
 DATABASES = {
     'default': dj_database_url.config(
