@@ -120,6 +120,9 @@ class AtividadeDiariaSaveTests(TestCase):
         trigger = json.loads(response['HX-Trigger'])
         self.assertIn('openGoogleCalendar', trigger)
         self.assertIn('calendar.google.com', trigger['openGoogleCalendar'])
+        content = response.content.decode()
+        self.assertIn('data-calendar-url', content)
+        self.assertIn('calendar.google.com', content)
 
     def test_concluir_followup_erro_retorna_modal(self):
         response = self.client.post(

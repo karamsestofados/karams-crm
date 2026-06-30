@@ -76,6 +76,26 @@ def variantes_telefones_crm(campo) -> set[str]:
     return chaves
 
 
+def sufixos8_comparacao(valor) -> set[str]:
+    """Últimos 8 dígitos de cada variante (inclui regra do nono dígito)."""
+    sufixos: set[str] = set()
+    for chave in variantes_chave_telefone(valor):
+        if len(chave) >= 8:
+            sufixos.add(chave[-8:])
+    digitos = extrair_digitos(valor)
+    local = _remover_ddi(digitos)
+    if len(local) >= 8:
+        sufixos.add(local[-8:])
+    return sufixos
+
+
+def sufixos8_telefones_crm(campo) -> set[str]:
+    sufixos: set[str] = set()
+    for parte in extrair_partes_telefone_crm(campo):
+        sufixos |= sufixos8_comparacao(parte)
+    return sufixos
+
+
 def normalizar_chave_telefone(valor) -> str:
     """Retorna sufixo comparável (10 ou 11 dígitos locais, sem DDI 55)."""
     variantes = variantes_chave_telefone(valor)
@@ -85,6 +105,10 @@ def normalizar_chave_telefone(valor) -> str:
 
 
 def telefones_equivalentes(a, b) -> bool:
+    sa = sufixos8_comparacao(a)
+    sb = sufixos8_comparacao(b)
+    if sa and sb and sa & sb:
+        return True
     ka = variantes_chave_telefone(a)
     kb = variantes_chave_telefone(b)
     if not ka or not kb:

@@ -21,7 +21,7 @@
   let chatObserver = null;
   let drawerObserver = null;
 
-  const PHONE_TEXT_RE = /(?:\+55[\s-]?)?(?:\(\d{2}\)[\s-]?|\d{2}[\s-])\d{4,5}[\s-]?\d{4}|\+[\d\s()-]{12,18}/g;
+  const PHONE_TEXT_RE = /(?:\+55[\s-]?)?(?:\(\d{2}\)[\s-]?|\d{2}[\s-])\d{4,5}[\s-]?\d{4}|\+[\d\s()-]{12,18}|\b\d{2}[\s-]?\d{4,5}[\s-]?\d{4}\b/g;
 
   function runtimeAlive() {
     try {
@@ -277,6 +277,9 @@
 
   function phonesEquivalent(a, b) {
     if (!a || !b) return false;
+    if (typeof KaramsTelefone !== 'undefined' && KaramsTelefone.telefonesEquivalentes) {
+      return KaramsTelefone.telefonesEquivalentes(a, b);
+    }
     const va = new Set(variantes(a).map(onlyDigits));
     for (const v of variantes(b)) {
       if (va.has(onlyDigits(v))) return true;
@@ -484,7 +487,7 @@
       if (el.children.length > 3) continue;
       const text = (el.textContent || '').trim();
       if (text.length < 8 || text.length > 32) continue;
-      if (!text.startsWith('+') && !/^\(\d{2}\)/.test(text) && !/^\+?\d[\d\s()-]{9,}$/.test(text)) {
+      if (!text.startsWith('+') && !/^\(\d{2}\)/.test(text) && !/^\d{2}[\s-]?\d/.test(text) && !/^\+?\d[\d\s()-]{9,}$/.test(text)) {
         continue;
       }
       const digits = acceptPhoneCandidate(text);

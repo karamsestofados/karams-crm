@@ -5,28 +5,21 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
 
 const dir = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
 
 global.window = global;
 eval(readFileSync(join(dir, 'telefone-utils.js'), 'utf8'));
 
-const { variantesTelefone, canonicalizarTelefone } = global.KaramsTelefone;
+const {
+  variantesTelefone,
+  canonicalizarTelefone,
+  sufixos8Comparacao,
+  telefonesEquivalentes,
+} = global.KaramsTelefone;
 
 function equivalentes(a, b) {
-  const va = new Set(variantesTelefone(a));
-  const vb = new Set(variantesTelefone(b));
-  for (const x of va) {
-    if (vb.has(x)) return true;
-  }
-  for (const x of va) {
-    for (const y of vb) {
-      if (x.length >= 10 && y.length >= 10 && x.slice(-10) === y.slice(-10)) return true;
-    }
-  }
-  return canonicalizarTelefone(a) === canonicalizarTelefone(b);
+  return telefonesEquivalentes(a, b);
 }
 
 const casosVerdadeiros = [
@@ -36,6 +29,9 @@ const casosVerdadeiros = [
   ['557199712271', '71999712271'],
   ['(44) 3434-5678', '+55 44 3434-5678'],
   ['44 9 9988-7766', '(44) 99988-7766'],
+  ['+554499000-0000', '4499000-0000'],
+  ['+55 44 99000-0000', '(44) 99000-0000'],
+  ['554499000000', '4499000000'],
 ];
 
 const casosFalsos = [
@@ -66,9 +62,17 @@ if (canon !== '5571999712271') {
   falhas += 1;
 }
 
+const s8a = new Set(sufixos8Comparacao('+554499000-0000'));
+const s8b = new Set(sufixos8Comparacao('4499000-0000'));
+const inter = [...s8a].filter((s) => s8b.has(s));
+if (!inter.length) {
+  console.error('FALHA sufixos8: +554499000-0000 e 4499000-0000 deveriam compartilhar sufixo');
+  falhas += 1;
+}
+
 if (falhas) {
   console.error(`\n${falhas} falha(s).`);
   process.exit(1);
 }
 
-console.log(`OK — ${casosVerdadeiros.length + casosFalsos.length + 1} asserções de telefone.`);
+console.log(`OK — ${casosVerdadeiros.length + casosFalsos.length + 2} asserções de telefone.`);

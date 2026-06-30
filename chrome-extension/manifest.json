@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Karams CRM — WhatsApp",
   "description": "Painel lateral com contexto comercial do cliente no WhatsApp Web.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "permissions": ["storage"],
   "host_permissions": [
     "https://web.whatsapp.com/*",

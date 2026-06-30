@@ -43,16 +43,47 @@
     const comNono = inserirNonoDigito(local);
     if (comNono) {
       out.add(comNono);
+      out.add(comNono.slice(-10));
       out.add('55' + comNono);
     }
 
     const semNono = removerNonoDigito(local);
     if (semNono) {
       out.add(semNono);
+      out.add(semNono.slice(-10));
       out.add('55' + semNono);
     }
 
     return [...out].filter((v) => v.length >= 10);
+  }
+
+  function sufixos8Comparacao(valor) {
+    const sufixos = new Set();
+    for (const chave of variantesTelefone(valor)) {
+      if (chave.length >= 8) sufixos.add(chave.slice(-8));
+    }
+    const digitos = onlyDigits(valor);
+    const local = removerDdi(digitos);
+    if (local.length >= 8) sufixos.add(local.slice(-8));
+    return [...sufixos];
+  }
+
+  function telefonesEquivalentes(a, b) {
+    const sa = new Set(sufixos8Comparacao(a));
+    const sb = new Set(sufixos8Comparacao(b));
+    for (const s of sa) {
+      if (sb.has(s)) return true;
+    }
+    const va = new Set(variantesTelefone(a));
+    for (const v of variantesTelefone(b)) {
+      if (va.has(v)) return true;
+    }
+    for (const x of va) {
+      for (const y of variantesTelefone(b)) {
+        if (x.length >= 10 && y.length >= 10 && x.slice(-10) === y.slice(-10)) return true;
+      }
+    }
+    return canonicalizarTelefone(a) === canonicalizarTelefone(b);
   }
 
   /** Formato preferido para enviar à API (DDI + 11 dígitos locais quando possível). */
@@ -80,6 +111,8 @@
   global.KaramsTelefone = {
     onlyDigits,
     variantesTelefone,
+    sufixos8Comparacao,
+    telefonesEquivalentes,
     canonicalizarTelefone,
   };
 })(typeof window !== 'undefined' ? window : self);

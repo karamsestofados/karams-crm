@@ -34,6 +34,10 @@
     return elt && elt.closest && elt.closest('form[data-google-calendar-on-save]');
   }
 
+  function isCalendarRequest(elt) {
+    return pendingCalendarTab !== null || isCalendarForm(elt);
+  }
+
   var pendingCalendarTab = null;
   var toastEl = document.getElementById('calendar-toast');
   var toastTimer = null;
@@ -73,6 +77,7 @@
   }
 
   function openCalendarUrl(url) {
+    if (!url) return false;
     if (pendingCalendarTab && !pendingCalendarTab.closed) {
       pendingCalendarTab.location.href = url;
       showCalendarToast('Abrindo Google Agenda em nova guia…');
@@ -95,6 +100,14 @@
     pendingCalendarTab = null;
   }
 
+  function openCalendarFromCockpit(target) {
+    if (!target) return;
+    var marker = target.querySelector('#karams-open-calendar-url');
+    if (marker && marker.dataset.calendarUrl) {
+      openCalendarUrl(marker.dataset.calendarUrl);
+    }
+  }
+
   document.body.addEventListener('submit', function (evt) {
     var form = evt.target.closest('form[data-google-calendar-on-save]');
     if (!form || !formShouldOpenCalendar(form)) return;
@@ -102,7 +115,7 @@
   }, true);
 
   document.body.addEventListener('htmx:afterRequest', function (evt) {
-    if (!isCalendarForm(evt.detail.elt)) return;
+    if (!isCalendarRequest(evt.detail.elt)) return;
 
     var xhr = evt.detail.xhr;
     var url = parseCalendarUrl(xhr.getResponseHeader('HX-Trigger'));
@@ -115,12 +128,19 @@
     pendingCalendarTab = null;
   });
 
-  window.KaramsCalendarOnSave = {
-    formShouldOpenCalendar: formShouldOpenCalendar,
-  };
+  document.body.addEventListener('openGoogleCalendar', function (evt) {
+    if (evt.detail && evt.detail.value) {
+      openCalendarUrl(evt.detail.value);
+    }
+  });
 
   document.body.addEventListener('htmx:oobAfterSwap', function (evt) {
-    if (evt.detail.target.id !== 'calendar-toast') return;
+    var target = evt.detail.target;
+    if (target.id === 'cockpit-main') {
+      openCalendarFromCockpit(target);
+      return;
+    }
+    if (target.id !== 'calendar-toast') return;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () {
       var el = document.getElementById('calendar-toast');
@@ -129,4 +149,8 @@
       el.hidden = true;
     }, 4000);
   });
+
+  window.KaramsCalendarOnSave = {
+    formShouldOpenCalendar: formShouldOpenCalendar,
+  };
 })();

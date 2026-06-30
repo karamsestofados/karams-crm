@@ -1,4 +1,7 @@
 <div id="cockpit-main" hx-swap-oob="innerHTML">
+  {% if google_calendar_url %}
+  <span id="karams-open-calendar-url" data-calendar-url="{{ google_calendar_url }}" hidden aria-hidden="true"></span>
+  {% endif %}
   {% include 'relacionamento/partials/cockpit_main.html' %}
 </div>
 <div id="modal-interacao-global-container" hx-swap-oob="innerHTML"></div>

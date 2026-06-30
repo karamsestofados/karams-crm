@@ -28,6 +28,7 @@ from extension.models import ExtensionApiToken
 from extension.services.contexto_whatsapp import buscar_cliente_por_telefone
 from extension.services.telefone import (
     extrair_partes_telefone_crm,
+    sufixos8_comparacao,
     telefones_equivalentes,
     variantes_chave_telefone,
     variantes_telefones_crm,
@@ -93,6 +94,26 @@ class TelefoneIdentificacaoMatrizTests(TestCase):
         self.assertFalse(telefones_equivalentes('7199712271', '7199712272'))
         self.assertFalse(telefones_equivalentes('44999887766', '44999887755'))
 
+    def test_sufixo8_formato_crm_sem_nono_explicito(self):
+        """WhatsApp +554499000-0000 ↔ CRM 4499000-0000 (8 dígitos após DDD)."""
+        casos = [
+            ('+554499000-0000', '4499000-0000'),
+            ('+55 44 99000-0000', '(44) 99000-0000'),
+            ('554499000000', '4499000000'),
+        ]
+        for whatsapp, crm in casos:
+            with self.subTest(whatsapp=whatsapp, crm=crm):
+                self.assertTrue(telefones_equivalentes(whatsapp, crm))
+                sa = sufixos8_comparacao(whatsapp)
+                sb = sufixos8_comparacao(crm)
+                self.assertTrue(sa & sb, f'sufixos8 deveriam intersectar: {sa!r} & {sb!r}')
+
+    def test_sufixo8_nono_digito_whatsapp_vs_crm(self):
+        """9971-2271 (sem 9) ↔ 99971-2271 no CRM via variante + sufixo8."""
+        self.assertTrue(telefones_equivalentes('+55 71 9971-2271', '(71) 99971-2271'))
+        self.assertIn('99712271', sufixos8_comparacao('7199712271'))
+        self.assertIn('99712271', sufixos8_comparacao('71999712271'))
+
     def test_campo_crm_multiplos_telefones(self):
         campo = '(71) 99971-2271 / (71) 3333-4444'
         partes = extrair_partes_telefone_crm(campo)
@@ -145,6 +166,11 @@ class BuscarClientePorTelefoneTests(TestCase):
             vendedor=cls.vendedor,
             telefone='(11) 97777-6666',
         )
+        cls.semNonoExplicito = Cliente.objects.create(
+            nome='Loja Sem Nono',
+            vendedor=cls.vendedor,
+            telefone='4499000-0000',
+        )
         _, cls.token_raw = ExtensionApiToken.gerar_para_usuario(cls.vendedor)
 
     def _buscar(self, telefone):
@@ -159,6 +185,10 @@ class BuscarClientePorTelefoneTests(TestCase):
     def test_busca_formato_whatsapp(self):
         self.assertEqual(self._buscar('+55 71 9971-2271'), self.multi)
         self.assertEqual(self._buscar('557199712271'), self.multi)
+
+    def test_busca_sufixo8_crm_sem_nono_explicito(self):
+        self.assertEqual(self._buscar('+554499000-0000'), self.semNonoExplicito)
+        self.assertEqual(self._buscar('+55 44 99000-0000'), self.semNonoExplicito)
 
     def test_busca_segundo_telefone_campo_multiplo(self):
         self.assertEqual(self._buscar('7133334444'), self.multi)

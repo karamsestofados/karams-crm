@@ -53,10 +53,10 @@ def _referencia_compra(registro) -> str | None:
 
 
 def buscar_cliente_por_telefone(usuario, telefone_raw):
-    from extension.services.telefone import variantes_chave_telefone, variantes_telefones_crm
+    from extension.services.telefone import sufixos8_comparacao, sufixos8_telefones_crm
 
-    chaves_busca = variantes_chave_telefone(telefone_raw)
-    if not chaves_busca:
+    sufixos_busca = sufixos8_comparacao(telefone_raw)
+    if not sufixos_busca:
         return None
 
     candidatos = (
@@ -67,7 +67,7 @@ def buscar_cliente_por_telefone(usuario, telefone_raw):
         .order_by('pk')
     )
     for cliente in candidatos:
-        if chaves_busca & variantes_telefones_crm(cliente.telefone):
+        if sufixos_busca & sufixos8_telefones_crm(cliente.telefone):
             return cliente
     return None
 
