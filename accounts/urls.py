@@ -1,6 +1,6 @@
 from django.urls import path
 
-from core.views import BackupGerarView, BackupRestaurarView
+from core.views import AtualizarCategoriasView, BackupGerarView, BackupRestaurarView
 from extension.views import ExtensionTokenGerarView, ExtensionTokenRevogarView
 
 from . import views
@@ -17,6 +17,7 @@ urlpatterns = [
     path('perfil/extension-token/revogar/', ExtensionTokenRevogarView.as_view(), name='extension_token_revogar'),
     path('perfil/backup/gerar/', BackupGerarView.as_view(), name='backup_gerar'),
     path('perfil/backup/restaurar/', BackupRestaurarView.as_view(), name='backup_restaurar'),
+    path('perfil/atualizar-categorias/', AtualizarCategoriasView.as_view(), name='atualizar_categorias'),
     path('novidades/dispensar/', views.NovidadesDispensarView.as_view(), name='novidades_dispensar'),
     path('usuarios/', views.UsuarioListView.as_view(), name='usuarios_lista'),
     path('usuarios/novo/', views.UsuarioCreateView.as_view(), name='usuarios_novo'),

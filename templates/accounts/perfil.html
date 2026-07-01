@@ -136,6 +136,21 @@
       <button type="submit" class="btn btn-danger">Restaurar backup</button>
     </form>
   </div>
+
+  <div class="card">
+    <div class="section-title">Atualização de categorias</div>
+    <p class="backup-help">
+      Verifica clientes <strong>Ativos</strong> sem interação há 30 dias ou mais e move para
+      <strong>Adormecido</strong>. Use após virada de mês ou quando quiser forçar a mesma checagem
+      do agendamento automático do sistema.
+    </p>
+    <form method="post"
+          action="{% url 'accounts:atualizar_categorias' %}"
+          onsubmit="return confirm('Executar a checagem de categorias agora? Clientes ativos sem contato há 30+ dias serão movidos para Adormecido.');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Atualizar agora</button>
+    </form>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

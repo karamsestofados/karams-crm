@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 
 from accounts.mixins import AdminRequiredMixin, VendedorRequiredMixin
 from clientes.models import Cliente
+from clientes.services.categoria_automatica import processar_clientes_adormecidos
 from comissoes.services.produtividade import (
     avaliar_conquistas,
     avaliar_conquistas_equipe,
@@ -175,4 +176,14 @@ class BackupRestaurarView(AdminRequiredMixin, View):
         except Exception as exc:
             messages.error(request, f'Erro ao restaurar backup: {exc}')
 
+        return redirect('accounts:perfil')
+
+
+class AtualizarCategoriasView(AdminRequiredMixin, View):
+    def post(self, request):
+        total = processar_clientes_adormecidos()
+        if total:
+            messages.success(request, f'{total} cliente(s) movido(s) para Adormecido.')
+        else:
+            messages.success(request, 'Nenhum cliente precisou ser atualizado.')
         return redirect('accounts:perfil')
