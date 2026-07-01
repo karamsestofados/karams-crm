@@ -143,6 +143,8 @@
       Verifica clientes <strong>Ativos</strong> sem interação há 30 dias ou mais e move para
       <strong>Adormecido</strong>. Use após virada de mês ou quando quiser forçar a mesma checagem
       do agendamento automático do sistema.
+      Altera apenas o campo <strong>Categoria</strong>; o <strong>Status do Funil</strong> permanece
+      como está até a próxima interação.
     </p>
     <form method="post"
           action="{% url 'accounts:atualizar_categorias' %}"

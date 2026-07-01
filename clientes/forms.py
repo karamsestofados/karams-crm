@@ -82,6 +82,16 @@ class ClienteForm(forms.ModelForm):
         self.user = user
         self.fields['estado'].widget.attrs['placeholder'] = 'UF'
         self.fields['categoria'].choices = CATEGORIAS_FORM
+        self.fields['categoria'].help_text = (
+            'Classificação da carteira (Ativo, Adormecido ou Prospecção). '
+            'Clientes Ativos sem interação há 30 dias passam a Adormecido automaticamente '
+            'ou pelo botão em Meu Perfil (admin). Nova interação reativa para Ativo.'
+        )
+        self.fields['status_funil'].help_text = (
+            'Etapa comercial do funil de vendas. '
+            '“Cliente Ativo” aqui não é o mesmo que a categoria “Ativo” — '
+            'o funil é atualizado pelas interações registradas no CRM.'
+        )
 
         optional_selects = (
             'tipo_cliente', 'segmento', 'modalidade_cliente', 'origem_lead', 'regiao_atuacao',

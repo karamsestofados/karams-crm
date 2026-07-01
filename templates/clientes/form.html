@@ -63,11 +63,15 @@
         <div class="form-group">
           <label class="form-label" for="{{ form.categoria.id_for_label }}">Categoria</label>
           {{ form.categoria }}
+          {% if form.categoria.help_text %}<span class="form-help">{{ form.categoria.help_text }}</span>{% endif %}
+          {% if form.categoria.errors %}<p class="field-error">{{ form.categoria.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group">
           <label class="form-label" for="{{ form.status_funil.id_for_label }}">Status do Funil</label>
           {{ form.status_funil }}
+          {% if form.status_funil.help_text %}<span class="form-help">{{ form.status_funil.help_text }}</span>{% endif %}
+          {% if form.status_funil.errors %}<p class="field-error">{{ form.status_funil.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="form-group" id="motivo-perda-cliente-group" style="display:none;">
