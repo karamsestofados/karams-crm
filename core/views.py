@@ -185,5 +185,10 @@ class AtualizarCategoriasView(AdminRequiredMixin, View):
         if total:
             messages.success(request, f'{total} cliente(s) movido(s) para Adormecido.')
         else:
-            messages.success(request, 'Nenhum cliente precisou ser atualizado.')
+            messages.info(
+                request,
+                'Nenhum cliente Ativo precisou ser atualizado. '
+                'A checagem usa Atividade Diária e histórico legado; '
+                'Prospecção, Adormecido e Inativo não entram nesta regra.',
+            )
         return redirect('accounts:perfil')

@@ -64,7 +64,7 @@ class AtualizarCategoriasViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         msgs = [str(m) for m in get_messages(response.wsgi_request)]
-        self.assertTrue(any('Nenhum cliente precisou ser atualizado' in m for m in msgs))
+        self.assertTrue(any('Nenhum cliente Ativo precisou' in m for m in msgs))
 
     def test_vendedor_recebe_403(self):
         self.client.login(username='vendedor_cat', password='testpass123')
